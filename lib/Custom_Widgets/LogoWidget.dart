@@ -1,20 +1,21 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class LogoWidget extends StatelessWidget {
+  // Constructor for LogoWidget
+  const LogoWidget({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    // Assuming that you want a larger logo, the width is set to a greater value.
-    // The aspect ratio of the logo will be preserved.
-    double logoWidth = MediaQuery.of(context).size.width * 0.5; // 50% of screen width
-    double logoHeight = MediaQuery.of(context).size.height * 0.5; // 50% of screen width
+    // Calculate the width and height as a percentage of the screen size
+    final double logoWidth = MediaQuery.of(context).size.width * 0.5;
+    final double logoHeight = MediaQuery.of(context).size.height * 0.25; // Adjust to 25% for a balanced appearance
 
+    // Center the logo and use an AssetImage for better performance and asset management
     return Center(
       child: Image.asset(
-        'assets/images/Init Logo.png',
-
+        'assets/images/Init Logo.png', // Ensure the asset path is correct
+        width: logoWidth,
         height: logoHeight,
-        // If you have specified your image in different sizes in the assets folder,
-        // the best fitting size will be used.
       ),
     );
   }

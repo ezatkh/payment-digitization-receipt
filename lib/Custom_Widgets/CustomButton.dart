@@ -1,42 +1,47 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
+  final bool isLoading;
 
-  const CustomButton({required this.text, required this.onPressed});
+  const CustomButton({
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFE6B8B), Color(0xFFFF8E53)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              offset: Offset(0, 2),
-              blurRadius: 4.0,
+    final theme = Theme.of(context);
+
+    // Wrap the ElevatedButton with a Container or SizedBox to limit its width
+    return Center(
+      child: SizedBox(
+        width: 255, // Specify the desired width here
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onPressed, // Disable button if loading
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white, backgroundColor: theme.primaryColor,
+            padding: const EdgeInsets.symmetric(vertical: 12.0), // Adjust padding
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20), // Rounded corners
             ),
-          ],
-          borderRadius: BorderRadius.circular(30.0),
-        ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white,
+            elevation: 4, // Elevation for depth
+            textStyle: theme.textTheme.button?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 18,
+              fontSize: 16,
             ),
           ),
+          child: isLoading
+              ? const SizedBox(
+            height: 24, width: 24,
+            child: CircularProgressIndicator(
+              strokeWidth: 2, color: Colors.white,
+            ),
+          )
+              : Text(text),
         ),
       ),
     );
