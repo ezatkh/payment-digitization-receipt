@@ -1,30 +1,39 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import '../Custom_Widgets/CustomButton.dart';
 import '../Custom_Widgets/CustomTextField.dart';
 import '../Custom_Widgets/LogoWidget.dart';
 import '../Models/LoginState.dart';
 import 'DashboardScreen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // Make sure to add flutter_screenutil to your pubspec.yaml
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   Widget build(BuildContext context) {
+    ScreenUtil.init(context, designSize: Size(360, 690), minTextAdapt: true);
+
     final theme = Theme.of(context);
-    final screenSize = MediaQuery.of(context).size;
+    double maxWidth = ScreenUtil().screenWidth > 600 ? 600.w : ScreenUtil().screenWidth * 0.9;
+
+     final screenSize = MediaQuery.of(context).size;
     final isLandscape = screenSize.width > screenSize.height;
-    double maxWidth = isLandscape ? 500 : 600;
+// Ensure the maxWidth is not larger than the design width
+
     final baseColor = theme.primaryColor.withOpacity(0.05);
     return ChangeNotifierProvider<LoginState>(
       create: (_) => LoginState(),
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: baseColor,
-          actions: [
-            _buildLanguageSwitchButton(
-                context), // Moved language switch to AppBar
-          ],
-        ),
+        // appBar: AppBar(
+        //   backgroundColor: Color(0xFFF7F7F7),elevation: 0,
+        //   actions: [
+        //     _buildLanguageSwitchButton(
+        //         context), // Moved language switch to AppBar
+        //   ],
+        // ),
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -74,7 +83,7 @@ class LoginScreen extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.face),
                                 onPressed: () {
-                                  /* Add Face ID login logic here */
+                                  _showLoginFailedDialog(context);
                                 },
                                 tooltip: 'Face ID',
                               ),
@@ -92,13 +101,15 @@ class LoginScreen extends StatelessWidget {
                             child: TextButton(
                               onPressed: () {/* Forgot Password Logic */},
                               child: Text('Forgot Password / Username?',
-                                  style: TextStyle(
-                                      color: theme.primaryColor,
-                                      fontWeight: FontWeight.bold)),
+                                  style: TextStyle(fontSize: 14.sp,
+                                    color: Color(0xFFC62828),
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'NotoSansUI',
+                                  )),
                             ),
                           ),
                           SizedBox(
-                            height: 120,
+                            height: screenSize.height * 0.25,
                           ),
                           _buildTrademarkNotice(), // Trademark notice
                         ],
@@ -114,69 +125,158 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLanguageSwitchButton(BuildContext context) {
-    // Placeholder function for language switching logic.
-    void _switchLanguage() {
-      // Implement language switching functionality here.
-    }
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 10.0),
-      child: Align(
-        alignment: Alignment.topRight,
-        child: IconButton(
-          icon: const Icon(Icons.language, color: Colors.white),
-          onPressed: _switchLanguage,
-          tooltip: 'Switch Language', // Tooltip for accessibility.
-        ),
-      ),
-    );
+
+  void _switchLanguage() {
+    // Implement language switching functionality here.
   }
-
   // Builds a trademark notice at the bottom or any preferred location of the screen.
   Widget _buildTrademarkNotice() {
-    return const Align(
-      alignment: Alignment.center,
-      child: Text(
-        '© 2024 OoPay. All rights reserved.',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+    return Text(
+      '© Ooredoo 2024',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        color: Colors.grey,fontSize: 14.sp,
+        fontFamily: 'NotoSansUI',fontWeight: FontWeight.bold
       ),
     );
   }
 
-  // Builds a button for biometric authentication, currently set to a placeholder action.
-  Widget _buildBiometricLoginButton(
-      BuildContext context, LoginState loginState) {
-    return Column(
-      children: [
-        TextButton(
-          onPressed: () =>
-              null, // Placeholder for actual biometric login logic.
-          child: const Icon(Icons.fingerprint, size: 24),
-          style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).primaryColor),
-        ),
-        const Text("Quick Login",
-            style: TextStyle(fontWeight: FontWeight.w500)),
-      ],
+  void _showLoginFailedDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Allow dismissing the dialog by tapping outside of it
+      builder: (BuildContext dialogContext) {
+        return Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+              child: Container(
+                width: 300.w,
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2), // Semi-transparent white for glass effect
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Use the minimum space necessary
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Login Failed',
+                      style: TextStyle(decoration: TextDecoration.none,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'NotoSansUI',
+                        color: Color(0xFFC62828),
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      'Incorrect username or password. Please try again.',
+                      style: TextStyle(decoration: TextDecoration.none,
+                        fontSize: 14.sp,
+                        fontFamily: 'NotoSansUI',
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(dialogContext).pop(); // Dismiss the dialog
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFC62828), // Button color
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: Text(
+                          'OK',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16.sp,decoration: TextDecoration.none,
+                            fontFamily: 'NotoSansUI',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-// Handles the login process with visual feedback and error handling.
   void _handleLogin(BuildContext context, LoginState loginState) async {
-    // loginState.setLoading(true);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10.r),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                width: 130.w,
+                height: 100.h,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2), // Semi-transparent white for glass effect
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SpinKitFadingCircle(
+                      itemBuilder: (BuildContext context, int index) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index.isEven ? Colors.white : Colors.grey[300], // Adjust color for effect
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10.h), // Reduced space between spinner and text
+                    Text(
+                      'Please Wait',
+                      style: TextStyle(decoration: TextDecoration.none,
+                        color: Colors.white,
+                        fontFamily: 'NotoSansUI',
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
     await Future.delayed(const Duration(seconds: 2));
+    Navigator.of(context).pop(); // Dismiss the progress indicator dialog
 
-    // loginState.setLoading(false);
-
-    // if (loginState.isLoginSuccessful) {
-    //   ScaffoldMessenger.of(context)
-    //       .showSnackBar(const SnackBar(content: Text('Login Failed')));
-    // } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardScreen()),
-      );
-    // }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => DashboardScreen()),
+    );
   }
 }

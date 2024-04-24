@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; // Ensure you have this import
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -16,22 +17,25 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Wrap the ElevatedButton with a Container or SizedBox to limit its width
+    // Use ScreenUtil to make the button width responsive to screen size
+    double buttonWidth = ScreenUtil().screenWidth * 0.7; // The button takes 70% of the screen width
+
     return Center(
       child: SizedBox(
-        width: 255, // Specify the desired width here
+        width: buttonWidth, // Use the responsive width here
         child: ElevatedButton(
           onPressed: isLoading ? null : onPressed, // Disable button if loading
           style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.white, backgroundColor: theme.primaryColor,
-            padding: const EdgeInsets.symmetric(vertical: 12.0), // Adjust padding
+            foregroundColor: Colors.white, backgroundColor: Color(0xFFC62828),
+            padding: EdgeInsets.symmetric(vertical: 12.0.h), // Use ScreenUtil for responsive padding
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20), // Rounded corners
+              borderRadius: BorderRadius.circular(20.r), // Use ScreenUtil for responsive border radius
             ),
             elevation: 4, // Elevation for depth
-            textStyle: theme.textTheme.button?.copyWith(
+            textStyle: theme.textTheme.labelLarge?.copyWith(
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 16.sp,  // Use ScreenUtil for responsive font size
+              fontFamily: 'NotoSansUI',
             ),
           ),
           child: isLoading

@@ -32,6 +32,9 @@ dependencies:
     sdk: flutter
   provider: ^6.1.2 # Use the latest version available
   curved_navigation_bar: ^1.0.3
+  flutter_screenutil: ^5.9.0
+
+  flutter_spinkit: ^5.2.1
   flutter_localizations:
     sdk: flutter
   intl: ^0.18.1
@@ -73,7 +76,13 @@ flutter:
 
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
+  fonts:
+    - family: NotoSansUI
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+    - family: CourierPrime
+      fonts:
+        - asset: assets/fonts/CourierPrime-Regular.ttf
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

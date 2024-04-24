@@ -11,56 +11,50 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A lighter base color for the background
-    const backgroundColor = Color(0xE4F2F2F2);
-
-    // Define a complementary color for the theme that matches well with a lighter background
-    const complementaryColor = Colors.red; // A vibrant blue that complements the red logo
+    const Color primaryRed = Color(0xFFD32F2F); // Adjust this hex to match exact color from image
+    const Color backgroundGrey = Color(0xFFF7F7F7); // Adjust this hex to match exact color from image
+    const Color inputFieldGrey = Color(0xFFE0E0E0); // Adjust this hex to match exact color from image
 
     final ThemeData theme = ThemeData(
       brightness: Brightness.light,
-      primaryColor: complementaryColor,
-      hintColor: Colors.redAccent,
-      scaffoldBackgroundColor: backgroundColor, // Light background for screens
+      primaryColor: primaryRed,
+      scaffoldBackgroundColor: backgroundGrey,
       colorScheme: const ColorScheme.light().copyWith(
-        primary: complementaryColor,
-        secondary: Colors.redAccent,
-        background: backgroundColor,
+        primary: primaryRed,
+        onPrimary: Colors.white,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white, // White background for input fields
+        fillColor: inputFieldGrey,
         contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 25.0),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8), // Modern border radius
+          borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: complementaryColor.withOpacity(0.5), width: 1),
+          borderSide: BorderSide(color: primaryRed.withOpacity(0.5), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: complementaryColor, width: 2),
+          borderSide: BorderSide(color: primaryRed, width: 2),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: complementaryColor, // Text button color
+          foregroundColor: primaryRed,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white, backgroundColor: Colors.red, // Button background color
+          foregroundColor: Colors.white, backgroundColor: primaryRed,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          minimumSize: const Size(double.infinity, 50),
-          elevation: 2, // Slight elevation for a subtle shadow
+          elevation: 2,
         ),
       ),
-      textTheme: const TextTheme(
-        displayLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, color: complementaryColor),
-        bodyLarge: TextStyle(fontSize: 16.0, color: Colors.black87),
-        labelLarge: TextStyle(color: Colors.white),
+      textTheme: TextTheme(
+        subtitle1: TextStyle(color: primaryRed, fontWeight: FontWeight.bold),
+        bodyText2: TextStyle(color: Colors.black),
       ),
     );
 

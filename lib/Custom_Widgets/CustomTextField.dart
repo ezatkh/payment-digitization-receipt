@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final String hint;
   final IconData icon;
   final bool obscureText;
   final ValueChanged<String> onChanged;
 
-  // Constructor for CustomTextField
-  // hint: Placeholder text shown in the TextField
-  // icon: Icon displayed inside the TextField
-  // obscureText: Whether the text is obscured (useful for passwords)
-  // onChanged: Callback for when the text changes
   const CustomTextField({
     required this.hint,
     required this.icon,
@@ -20,8 +15,27 @@ class CustomTextField extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _CustomTextFieldState createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _isObscured;
+
+  @override
+  void initState() {
+    super.initState();
+    _isObscured = widget.obscureText;  // Initially uses the value from widget
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isObscured = !_isObscured;  // Toggle the obscured state
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(fontSize: 16, color: Colors.black87);
+    const textStyle = TextStyle(fontSize: 16, color: Colors.black87, fontFamily: 'NotoSansUI');
     const hintStyle = TextStyle(color: Colors.black45);
     final borderRadius = BorderRadius.circular(8);
 
@@ -37,13 +51,18 @@ class CustomTextField extends StatelessWidget {
         ],
       ),
       child: TextField(
-        obscureText: obscureText,
-        onChanged: onChanged,
+        obscureText: _isObscured,
+        onChanged: widget.onChanged,
         style: textStyle,
         decoration: InputDecoration(
-          hintText: hint,
+          hintText: widget.hint,
           hintStyle: hintStyle,
-          prefixIcon: Icon(icon, color: Theme.of(context).primaryColor),
+          prefixIcon: Icon(widget.icon, color: Color(0xFFC62828)),
+          suffixIcon: widget.obscureText ? IconButton(
+            icon: Icon(_isObscured ? Icons.visibility_off : Icons.visibility),
+            color: Color(0xFFC62828),
+            onPressed: _togglePasswordVisibility,
+          ) : null,  // Only add the toggle icon if obscureText is initially true
           filled: true,
           fillColor: Colors.white,
           contentPadding: const EdgeInsets.all(18.0),
