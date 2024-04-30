@@ -1,14 +1,20 @@
 import 'dart:ui';
 
+import 'package:digital_payment_app/Screens/PrintSettingsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
- import 'LoginScreen.dart';
+ import 'ConnectivityStatusScreen.dart';
+import 'LoginScreen.dart';
 import 'MoreScreen.dart';
 import 'NotificationsScreen.dart';
+import 'PaymentCancellationScreen.dart';
 import 'PaymentHistoryScreen.dart';
 import 'PrintReceiptScreen.dart';
+import 'ProfileScreen.dart';
 import 'RecordPaymentScreen.dart';
+import 'SettingsScreen.dart';
+import 'UserManagementScreen.dart';
 
 class DashboardScreen extends StatefulWidget {
   DashboardScreen({Key? key}) : super(key: key);
@@ -25,10 +31,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       _selectedIndex2 = index;
     });
-    if (index == 3) {
+    if (index == 2) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => MoreScreen()),
+      );
+    }
+    else if (index ==1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) =>ProfileScreen()  ),
       );
     }
     else if(index==0){
@@ -66,14 +78,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       DashboardItemModel(iconData: Icons.payment, title: 'Record Payment', onTap: () => _navigateTo(RecordPaymentScreen())),
       DashboardItemModel(iconData: Icons.history, title: 'Payment History', onTap: () => _navigateTo(PaymentHistoryScreen())),
       DashboardItemModel(iconData: Icons.print, title: 'Print Receipt', onTap: () => _navigateTo(PrintReceiptScreen())),
-      DashboardItemModel(iconData: Icons.search, title: 'Quick Search', onTap: () {}), // Assuming SearchScreen exists
+      // DashboardItemModel(iconData: Icons.search, title: 'Quick Search', onTap: () {}), // Assuming SearchScreen exists
 
-      DashboardItemModel(iconData: Icons.bar_chart, title: 'Reports', onTap: () {}),
-      DashboardItemModel(iconData: Icons.people, title: 'User Management', onTap: () {}),
-      DashboardItemModel(iconData: Icons.help_outline, title: 'Support', onTap: () {}),
+      DashboardItemModel(iconData: Icons.cancel_presentation_outlined, title: 'Payment Cancellation', onTap: ()=> _navigateTo(PaymentCancellationScreen())),
+      // DashboardItemModel(iconData: Icons.people, title: 'User Management',  onTap: () => _navigateTo(UserManagementScreen())),
+      // DashboardItemModel(iconData: Icons.help_outline, title: 'Support', onTap: () {}),
 
-      DashboardItemModel(iconData: Icons.signal_cellular_alt, title: 'Connectivity Status', onTap: () {} ), // Assuming a method to show status
-      DashboardItemModel(iconData: Icons.settings, title: 'Settings', onTap: () {}),
+      DashboardItemModel(iconData: Icons.signal_cellular_alt, title: 'Connectivity Status',onTap: () => _navigateTo(ConnectivityStatusScreen())), // Assuming a method to show status
+      DashboardItemModel(iconData: Icons.settings, title: 'Settings', onTap: () => _navigateTo(SettingsScreen())),
     ];
   }
 
@@ -161,6 +173,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 else if (dashboardItems[index].title == 'Print Receipt') {
                   _navigateTo(PrintReceiptScreen());
                 }
+                else if (dashboardItems[index].title == 'Connectivity Status') {
+                  _navigateTo(ConnectivityStatusScreen());
+                }
+                // else if (dashboardItems[index].title == 'User Management') {
+                //   _navigateTo(UserManagementScreen());
+                // }
+                else if (dashboardItems[index].title == 'Settings') {
+                  _navigateTo(SettingsScreen());
+                }
+
+                else if (dashboardItems[index].title == 'Payment Cancellation') {
+                  _navigateTo(PaymentCancellationScreen());
+                }
               },
 
             );
@@ -173,12 +198,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: 'Home', // Home
           ),
 
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.work_outline),
+            //   label: 'Services', // Services
+            // ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.work_outline),
-              label: 'Services', // Services
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.show_chart),
+              icon: Icon(Icons.person_outline_sharp),
               label: 'My Account', // My Account
             ),
             BottomNavigationBarItem(

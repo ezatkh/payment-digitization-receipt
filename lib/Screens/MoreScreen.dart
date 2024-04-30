@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
+import 'package:digital_payment_app/Screens/ProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'DashboardScreen.dart';
@@ -25,7 +27,7 @@ class MoreScreen extends StatelessWidget {
             height: 1.0,
           ),
         ),
-        title: _buildAppBarTitle(),
+        title: _buildAppBarTitle(context),
         centerTitle: true,
       ),
       body: _buildMenuList(context),
@@ -33,7 +35,7 @@ class MoreScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAppBarTitle() {
+  Widget _buildAppBarTitle(BuildContext context) {
     return Column(
       children: [
         CircleAvatar(
@@ -51,23 +53,31 @@ class MoreScreen extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        SizedBox(height: 6,),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.arrow_back_ios_sharp, color: Colors.white, size: 16.sp),
-            SizedBox(width: 8,),
-            Text(
-              'My Profile',
-              style: TextStyle(
-                fontSize: 13.sp,
-                letterSpacing: 0.5,
-                fontFamily: "NotoSansUI",
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+        SizedBox(height: 6.h),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ProfileScreen()),
+            );
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.arrow_back_ios_sharp, color: Colors.white, size: 16.sp),
+              SizedBox(width: 8.w),
+              Text(
+                'My Profile',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  letterSpacing: 0.5,
+                  fontFamily: "NotoSansUI",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -77,8 +87,8 @@ class MoreScreen extends StatelessWidget {
     final labels = [
       'Notifications',
       'Payment History',
-      'Reports',
-      'Help & Support',
+      'Payment Cancellation',
+      // 'Help & Support',
       'About',
       'Log Out'
     ];
@@ -118,6 +128,9 @@ class MoreScreen extends StatelessWidget {
         break;
       case 'About':
         _showAboutDialog(context);
+        break;
+        case 'Payment Cancellation':
+          _navigateTo(context, PaymentCancellationScreen()); // Fixed to pass context
         break;
     }
   }
@@ -316,15 +329,18 @@ class MoreScreen extends StatelessWidget {
       type: BottomNavigationBarType.fixed,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.work_outline), label: 'Services'),
-        BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'My Account'),
+        // BottomNavigationBarItem(icon: Icon(Icons.work_outline), label: 'Services'),
+        BottomNavigationBarItem(icon: Icon(Icons.person_outline_sharp), label: 'My Account'),
         BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'More'),
       ],
-      currentIndex: 3,
+      currentIndex: 2,
       selectedItemColor: const Color(0xFFC62828),
       onTap: (index) {
         if (index == 0) {
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen()));
+        }
+        else if (index == 1) {
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
         }
       },
     );

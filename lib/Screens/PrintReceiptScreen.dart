@@ -1,7 +1,14 @@
+import 'package:intl/intl.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'PrintSettingsScreen.dart';
+import 'SendReceiptScreen.dart';
 
 class PrintReceiptScreen extends StatefulWidget {
   @override
@@ -75,7 +82,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
           )),
       backgroundColor: Color(0xFFC62828),
       leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: Colors.white),
+        icon: Icon(Icons.arrow_back, color: Colors.black),
         onPressed: () => Navigator.pop(context),
       ),
     );
@@ -121,22 +128,29 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
         title: Text('Voucher: ${receipt['voucherNumber']}'),
         subtitle: Text('Amount: ${receipt['amount']} - Date: ${receipt['transactionDate'].toString().split(' ')[0]}'),
         trailing: Wrap(
-          spacing: 12,
+          spacing: 12, // space between two icons
           children: <Widget>[
             Icon(receipt['synced'] ? Icons.check_circle : Icons.error, color: receipt['synced'] ? Colors.green : Colors.red),
             IconButton(
               icon: Icon(Icons.print),
-              onPressed: receipt['synced'] ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => PrintSettingsScreen())) : null,
+              onPressed: receipt['synced'] ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PrintSettingsScreen()),
+                );
+              } : null,
             ),
+
             IconButton(
               icon: Icon(Icons.send),
-              onPressed: receipt['synced'] ? () => _sendReceipt(receipt) : null,
+              onPressed: _sendReceipt
             ),
           ],
         ),
       ),
     );
   }
+
   Widget _buildActionButtons() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -164,7 +178,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 4.w),  // Add padding to ensure some space between buttons
               child: ElevatedButton(
-                onPressed: _sendSelectedReceipts,
+                onPressed: _sendReceipt,
                 child: Text('Send Selected', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
@@ -182,43 +196,114 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-  Widget _styledElevatedButton({
-    required VoidCallback onPressed,
-    required String text,
-    required Color color,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          letterSpacing: 1.2,
+
+  void _sendReceipt() async {
+    try {
+      final pdf = pw.Document();
+
+      // Add fake PDF content here
+      pdf.addPage(
+        pw.Page(
+          build: (pw.Context context) {
+            return pw.Container(
+              padding: pw.EdgeInsets.all(16),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'RECEIPT',
+                    style: pw.TextStyle(
+                      font: pw.Font.courierBold(),
+                      fontSize: 24,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.SizedBox(height: 12),
+                  _printLine(pdf, 'Date:', DateFormat('yyyy-MM-dd').format(DateTime.now()), 14),
+                  _printLine(pdf, 'Time:', DateFormat('HH:mm:ss').format(DateTime.now()), 14),
+                  pw.Divider(color: PdfColors.grey800),
+                  _printLine(pdf, 'Customer Name', 'John Doe', 14),
+                  _printLine(pdf, 'MSISDN', '1234567890', 14),
+                  _printLine(pdf, 'PR#', 'PR20231015', 14),
+                  _printLine(pdf, 'Amount', '\$250.00', 14),
+                  _printLine(pdf, 'Currency', 'USD', 14),
+                  _printLine(pdf, 'Method', 'Credit Card', 14),
+                  pw.Divider(color: PdfColors.grey800),
+                  pw.Text(
+                    'Notes:',
+                    style: pw.TextStyle(
+                      font: pw.Font.courierBold(),
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'Payment for services rendered.',
+                    style: pw.TextStyle(
+                      font: pw.Font.courier(),
+                      fontSize: 14,
+                    ),
+                  ),
+                  pw.Divider(color: PdfColors.grey800),
+                  pw.Center(
+                    child: pw.Text(
+                      '--- Thank You! ---',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        font: pw.Font.courierBold(),
+                        fontSize: 18,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
-      ),
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all(color),
-        padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 14.h, horizontal: 30.w)),
-        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.r),
-              side: BorderSide(color: Colors.white24), // subtle border color
-            )
+      );
+
+      // Save the PDF file
+      final output = await getTemporaryDirectory();
+      final file = File("${output.path}/receipt.pdf");
+      await file.writeAsBytes(await pdf.save());
+
+      Share.shareFiles(
+          [file.path],
+          subject: 'Receipt from Your Company',
+          text: 'Attached is your receipt.',
+          sharePositionOrigin: Rect.fromLTWH(0, 0, 1, 1) // Used for iPad sharing dialog positioning
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send receipt: $e')),
+      );
+    }
+  }
+  pw.Widget _printLine(pw.Document pdf, String label, String value, double fontSize) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        pw.Text(
+          label,
+          style: pw.TextStyle(
+            font: pw.Font.courierBold(),
+            fontSize: fontSize,
+            fontWeight: pw.FontWeight.bold,
+          ),
         ),
-        elevation: MaterialStateProperty.all(6), // slightly raised
-        shadowColor: MaterialStateProperty.all(Colors.black45), // darker shadow for more depth
-        overlayColor: MaterialStateProperty.resolveWith<Color>(
-                (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) return color.withOpacity(0.5);
-              if (states.contains(MaterialState.hovered)) return color.withOpacity(0.1);
-              return color; // Default case
-            }
+        pw.Text(
+          value,
+          style: pw.TextStyle(
+            font: pw.Font.courier(),
+            fontSize: fontSize,
+          ),
         ),
-      ),
+      ],
     );
   }
+
+
 
 
   void _printReceipt(Map<String, dynamic> receipt) {
@@ -232,11 +317,12 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-  void _sendReceipt(Map<String, dynamic> receipt) {
-    // Send logic for individual receipt
-  }
+
 
   void _sendSelectedReceipts() {
-    // Send logic for selected receipts
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SendReceiptScreen()),
+    );
   }
 }

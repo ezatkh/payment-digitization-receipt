@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:intl/intl.dart'; // If you're using this for formatting dates
 
 class PrintSettingsScreen extends StatefulWidget {
   @override
@@ -120,7 +125,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
       ),
       title: Text('Print Settings', style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
       backgroundColor: Color(0xFFC62828),
-      leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+      leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.black), onPressed: () => Navigator.pop(context)),
     );
   }
 
@@ -142,6 +147,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
       ),
     );
   }
+
   Widget _buildExpandReceiptButton() {
     return Container(
       alignment: Alignment.centerLeft,
@@ -330,10 +336,70 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
             text: 'Print',
             color: Theme.of(context).primaryColor,
             onPressed: () {
-              // Trigger the final print process with selected settings
+              generateAndPrintReceipt();
             },
             isPrimary: true,
           ),
+        ],
+      ),
+    );
+  }
+  Future<void> generateAndPrintReceipt() async {
+    final pdf = pw.Document();
+    final now = DateTime.now();
+    const double fontSize = 14.0;
+    const double titleFontSize = 24.0;
+    const double paddingValue = 16.0;
+
+    // Build the PDF page
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) => pw.Container(
+          padding: pw.EdgeInsets.all(paddingValue),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text('RECEIPT', style: pw.TextStyle(font: pw.Font.courierBold(), fontSize: titleFontSize)),
+              pw.SizedBox(height: paddingValue),
+              _printLine2(pdf, 'Date:', DateFormat('yyyy-MM-dd').format(now), fontSize),
+              _printLine2(pdf, 'Time:', DateFormat('HH:mm:ss').format(now), fontSize),
+              pw.Divider(color: PdfColors.grey),
+              _printLine2(pdf, 'Customer Name', 'John Doe', fontSize),
+              _printLine2(pdf, 'MSISDN', '1234567890', fontSize),
+              _printLine2(pdf, 'PR#', 'PR20231015', fontSize),
+              _printLine2(pdf, 'Amount', '\$250.00', fontSize),
+              _printLine2(pdf, 'Currency', 'USD', fontSize),
+              _printLine2(pdf, 'Method', 'Credit Card', fontSize),
+              pw.Divider(color: PdfColors.grey),
+              pw.Text('Notes:', style: pw.TextStyle(font: pw.Font.courierBold(), fontSize: fontSize)),
+              pw.Text('Payment for services rendered.', style: pw.TextStyle(font: pw.Font.courier(), fontSize: fontSize)),
+              pw.Divider(color: PdfColors.grey),
+              pw.Center(
+                child: pw.Text(
+                  '--- Thank You! ---',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(font: pw.Font.courierBold(), fontSize: titleFontSize),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Trigger the printing process
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdf.save());
+  }
+
+  pw.Widget _printLine2(pw.Document pdf, String label, String value, double fontSize) {
+    return pw.Padding(
+      padding: pw.EdgeInsets.symmetric(vertical: 4),
+      child: pw.Row(
+        children: [
+          pw.Expanded(
+            child: pw.Text(label, style: pw.TextStyle(font: pw.Font.courierBold(), fontSize: fontSize)),
+          ),
+          pw.Text(value, style: pw.TextStyle(font: pw.Font.courier(), fontSize: fontSize)),
         ],
       ),
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../Custom_Widgets/CusyomExpansionTile.dart';
+import '../Custom_Widgets/CustomExpansionTile.dart';
 import 'PaymentConfirmationScreen.dart';
 
 class RecordPaymentScreen extends StatefulWidget {

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import '../Custom_Widgets/CustomButton.dart';
 import '../Custom_Widgets/CustomTextField.dart';
@@ -15,10 +16,38 @@ class LoginScreen extends StatelessWidget {
 
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690), minTextAdapt: true);
-
+    final LocalAuthentication auth = LocalAuthentication();
     final theme = Theme.of(context);
     double maxWidth = ScreenUtil().screenWidth > 600 ? 600.w : ScreenUtil().screenWidth * 0.9;
+    Future<void> _authenticateWithBiometrics(BuildContext context) async {
+      bool authenticated = false;
+      try {
+        // Check if we can check biometrics
+        bool canCheckBiometrics = await auth.canCheckBiometrics;
 
+        if (canCheckBiometrics) {
+          // Authenticate using biometrics
+          authenticated = await auth.authenticate(
+            localizedReason: 'Scan your face to authenticate',
+            options: const AuthenticationOptions(
+              useErrorDialogs: true,
+              stickyAuth: true,
+              biometricOnly: true,
+            ),
+          );
+        }
+
+        // If successfully authenticated
+        if (authenticated) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => DashboardScreen()),
+          );
+        }
+      } catch (e) {
+        // If an error occurs, handle it here
+      }
+    }
      final screenSize = MediaQuery.of(context).size;
     final isLandscape = screenSize.width > screenSize.height;
 // Ensure the maxWidth is not larger than the design width
@@ -76,14 +105,14 @@ class LoginScreen extends StatelessWidget {
                               IconButton(
                                 icon: const Icon(Icons.fingerprint),
                                 onPressed: () {
-                                  /* Add Touch ID login logic here */
+                                  _showLoginFailedDialog(context);
                                 },
                                 tooltip: 'Touch ID',
                               ),
                               IconButton(
                                 icon: const Icon(Icons.face),
-                                onPressed: () {
-                                  _showLoginFailedDialog(context);
+                                onPressed: () {            _authenticateWithBiometrics(context);
+
                                 },
                                 tooltip: 'Face ID',
                               ),
