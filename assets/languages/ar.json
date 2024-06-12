@@ -78,5 +78,18 @@
   "back": "رجوع",
   "confirmCancellation": "تأكيد الإلغاء",
   "confirmCancellationBody": "هل أنت متأكد أنك تريد إلغاء هذا الدفع؟",
-  "confirm": "تأكيد"
+  "confirm": "تأكيد",
+
+
+  "paymentHistory": "تاريخ الدفعات",
+  "from": "من",
+  "to": "إلى",
+  "search": "البحث",
+
+  "recordPayment": "تسجيل الدفعة",
+  "customerDetails": "تفاصيل العميل",
+  "paymentInformation": "معلومات الدفعة",
+  "submitPayment": " إرسال الدفعة"
+
+
 }

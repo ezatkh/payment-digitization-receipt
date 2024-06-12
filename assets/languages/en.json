@@ -79,6 +79,16 @@
   "back": "Back",
   "confirmCancellation": "Confirm Cancellation",
   "confirmCancellationBody": "Are you sure you want to cancel this payment ?",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+
+  "paymentHistory": "Payment History",
+  "from": "From",
+  "to": "To",
+  "search": "Search",
+
+  "recordPayment": "Record Payment",
+  "customerDetails": "Customer Details",
+  "paymentInformation": "Payment Information",
+  "submitPayment": "Submit Payment"
 
 }

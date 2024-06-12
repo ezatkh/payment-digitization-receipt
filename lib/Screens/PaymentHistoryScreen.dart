@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 
 class PaymentHistoryScreen extends StatefulWidget {
   @override
@@ -12,7 +14,25 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   final TextEditingController _toDateController = TextEditingController();
   DateTime? _selectedFromDate;
   DateTime? _selectedToDate;
+  String paymentHistory='';
+  String from='';
+  String to='';
+  String search='';
+  void _initializeLocalizationStrings( ) {
+    final localizationService = Provider.of<LocalizationService>(
+        context, listen: false);
+    paymentHistory = localizationService.getLocalizedString('paymentHistory');
+    from = localizationService.getLocalizedString('from');
+    to = localizationService.getLocalizedString('to');
+    search = localizationService.getLocalizedString('search');
+  }
 
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the localization strings
+    _initializeLocalizationStrings();
+  }
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
@@ -26,7 +46,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             height: 1.0,
           ),
         ),
-        title: Text('Payment History',
+        title: Text(paymentHistory,
             style: TextStyle(
               color: Colors.white,
               fontSize: 20.sp,
@@ -55,7 +75,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         Expanded(
           child: _buildDateField(
             context,
-            label: 'From',
+            label: from,
             controller: _fromDateController,
             onDateSelected: (date) {
               setState(() => _selectedFromDate = date);
@@ -66,7 +86,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         Expanded(
           child: _buildDateField(
             context,
-            label: 'To',
+            label: to,
             controller: _toDateController,
             onDateSelected: (date) {
               setState(() => _selectedToDate = date);
@@ -109,7 +129,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   Widget _buildSearchButton() {
     return ElevatedButton.icon(
       icon: Icon(Icons.search, color: Colors.white),
-      label: Text('Search',
+      label: Text(search,
           style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI')),
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFFC62828),

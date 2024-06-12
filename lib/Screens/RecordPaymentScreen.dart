@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../Custom_Widgets/CustomExpansionTile.dart';
 import 'PaymentConfirmationScreen.dart';
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 
 class RecordPaymentScreen extends StatefulWidget {
   @override
@@ -19,6 +21,11 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   String? _selectedPaymentMethod;
   List<String> _currencies = ['USD', 'EUR', 'QAR'];
   List<String> _paymentMethods = ['Cash', 'Check', 'Credit Card'];
+
+  String recordPayment = "";
+  String customerDetails = "";
+  String paymentInformation = "";
+  String submitPayment = ""';
 
   bool _isCustomerDetailsExpanded = false;
   bool _isPaymentInfoExpanded = false;
@@ -89,7 +96,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                       _prNumberController.text.isNotEmpty;
                 }),
             _buildExpandableSection(
-                title: 'Payment Information',
+                title: paymentInformation,
                 iconData: Icons.payment,
                 isExpanded: _isPaymentInfoExpanded,
                 children: [
