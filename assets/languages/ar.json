@@ -48,5 +48,35 @@
   "syncFailed": "فشلت المزامنة",
   "lastSync": "آخر مزامنة",
   "notSyncedYet": "لم تتم المزامنة بعد",
-  "retry": "إعادة المحاولة"
+  "retry": "إعادة المحاولة",
+
+  "printreceipt": "طباعة الإيصال",
+  "filterNumber": "رقم القسيمة",
+  "voucher": "قسيمة",
+  "amount": "المبلغ",
+  "sendSelected": "إرسال المحدد",
+  "printSelected": "طباعة المحدد",
+  "date": "التاريخ",
+
+  "printSettings": "إعدادات الطباعة",
+  "hideReceipt": "إخفاء الفاتورة",
+  "showReceipt": "إظهار الفاتورة",
+  "numberCopies": "اختر عدد النسخ",
+  "duplexPrinting": "الطباعة على الوجهين",
+  "colorPrinting": "الطباعة بالألوان",
+  "copies": "النسخ",
+  "cancel": "إلغاء",
+  "print": "طباعة",
+
+  "cancelPayment": "إلغاء الدفع",
+  "selectPaymentToCancel": "اختر الدفع للإلغاء",
+  "choosePayment": "اختر الدفع",
+  "reasonForCancellation": "سبب الإلغاء",
+  "enterTheReason": "أدخل السبب",
+  "additionalDetail": "تفاصيل إضافية (اختياري)",
+  "addMoreDetail": "إضافة تفاصيل أكثر",
+  "back": "رجوع",
+  "confirmCancellation": "تأكيد الإلغاء",
+  "confirmCancellationBody": "هل أنت متأكد أنك تريد إلغاء هذا الدفع؟",
+  "confirm": "تأكيد"
 }

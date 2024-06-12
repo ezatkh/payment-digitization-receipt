@@ -6,6 +6,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart'; // If you're using this for formatting dates
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 
 class PrintSettingsScreen extends StatefulWidget {
   @override
@@ -20,11 +22,41 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
   bool _colorPrint = false;
   bool _isReceiptExpanded = true;  // New state variable
 
+  String print = '';
+  String cancel = '';
+  String copies = '';
+  String  colorPrinting= '';
+  String  duplexPrinting= '';
+  String  numberCopies= '';
+  String  hideReceipt= '';
+  String  showReceipt= '';
+  String  printSettings= '';
+  void _initializeLocalizationStrings() {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    print = localizationService.getLocalizedString('print');
+    cancel = localizationService.getLocalizedString('cancel');
+    copies = localizationService.getLocalizedString('copies');
+    colorPrinting = localizationService.getLocalizedString('colorPrinting');
+    numberCopies = localizationService.getLocalizedString('duplexPrinting');
+    duplexPrinting = localizationService.getLocalizedString('duplexPrinting');
+    numberCopies = localizationService.getLocalizedString('numberCopies');
+    hideReceipt = localizationService.getLocalizedString('hideReceipt');
+    showReceipt = localizationService.getLocalizedString('showReceipt');
+    printSettings = localizationService.getLocalizedString('printSettings');
+
+  }
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the localization strings
+    _initializeLocalizationStrings();
+  }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(printSettings),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
         child: Column(
@@ -34,16 +66,16 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
             SizedBox(height: 10.h),
             _buildPreviewCard(),
             SizedBox(height: 20.h),
-            _buildCopiesSection(),
+            _buildCopiesSection(copies,numberCopies),
             _buildPaperSizeDropdown(),
-            _buildPrintingOptions(),
-            _buildActionButtons(),
+            _buildPrintingOptions(duplexPrinting,colorPrinting),
+            _buildActionButtons(cancel , print),
           ],
         ),
       ),
     );
   }
-  Widget _buildPrintingOptions() {
+  Widget _buildPrintingOptions(String dublexPrint, String colorPrinting) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -53,11 +85,11 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
       margin: EdgeInsets.symmetric(vertical: 8.h),
       child: Column(
         children: [
-          _buildSwitchListTile('Duplex Printing', _duplex, (bool value) {
+          _buildSwitchListTile(dublexPrint, _duplex, (bool value) {
             setState(() { _duplex = value; });
           }),
           _buildDivider(),
-          _buildSwitchListTile('Color Printing', _colorPrint, (bool value) {
+          _buildSwitchListTile(colorPrinting, _colorPrint, (bool value) {
             setState(() { _colorPrint = value; });
           }),
         ],
@@ -113,7 +145,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
   }
 
 
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(String printSettings) {
     return AppBar(
       elevation: 4,
       bottom: PreferredSize(
@@ -123,7 +155,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
           height: 1.0,
         ),
       ),
-      title: Text('Print Settings', style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
+      title: Text(printSettings, style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
       backgroundColor: Color(0xFFC62828),
       leading: IconButton(icon: Icon(Icons.arrow_back, color: Colors.black), onPressed: () => Navigator.pop(context)),
     );
@@ -140,7 +172,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
       child: Column(
 
         children: [
-          Center(child: _buildExpandReceiptButton()),
+          Center(child: _buildExpandReceiptButton(hideReceipt,showReceipt)),
 
           if (_isReceiptExpanded) _buildFullReceipt(),  // Only build the full receipt if expanded
         ],
@@ -148,7 +180,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
     );
   }
 
-  Widget _buildExpandReceiptButton() {
+  Widget _buildExpandReceiptButton(String hideReceipt, String showReceipt) {
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -158,7 +190,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
           color: Color(0xFFC62828),
         ),
         label: Text(
-          _isReceiptExpanded ? 'Hide Receipt' : 'Show Receipt',
+          _isReceiptExpanded ? hideReceipt : showReceipt,
           style: TextStyle(     fontWeight: FontWeight.bold,          fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
               fontFamily: 'NotoSansUI',color: Color(0xFFC62828)),
         ),
@@ -224,7 +256,6 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
     );
   }
 
-
   Widget _printLine(String label, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -239,12 +270,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
     );
   }
 
-
-
-
-
-
-  Widget _buildCopiesSection() {
+  Widget _buildCopiesSection(String copies , String numberCopies) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
       decoration: BoxDecoration(
@@ -258,7 +284,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Select the number of copies:',
+            numberCopies,
             style: TextStyle(
               fontFamily: 'NotoSansUI',
               fontWeight: FontWeight.bold,
@@ -293,7 +319,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
           ),
           Row(
             children: [
-              Text('Copies:', style: Theme.of(context).textTheme.titleMedium),
+              Text(copies+":", style: Theme.of(context).textTheme.titleMedium),
               Spacer(),
               Text('$_numCopies', style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
             ],
@@ -320,20 +346,20 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
       ),
     );
   }
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(String cancel , String print) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 20.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _styledElevatedButton(
-            text: 'Cancel',
+            text: cancel,
             color: Colors.grey.shade400,
             onPressed: () => Navigator.pop(context),
             isPrimary: false,
           ),
           _styledElevatedButton(
-            text: 'Print',
+            text: print,
             color: Theme.of(context).primaryColor,
             onPressed: () {
               generateAndPrintReceipt();

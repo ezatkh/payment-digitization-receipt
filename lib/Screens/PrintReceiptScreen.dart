@@ -6,7 +6,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 import 'PrintSettingsScreen.dart';
 import 'SendReceiptScreen.dart';
 
@@ -40,22 +41,50 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     },
   ];
 
+  // Variables for localized strings
+  String printReceipt = '';
+  String searchByFilterNumber ='';
+  String voucher ='';
+  String amount ='';
+  String sendSelected ='';
+  String printSelected ='';
+  String receiptDate ='';
+
+  void _initializeLocalizationStrings() {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    printReceipt = localizationService.getLocalizedString('printreceipt');
+    searchByFilterNumber = localizationService.getLocalizedString('filterNumber');
+    voucher = localizationService.getLocalizedString('voucher');
+    amount = localizationService.getLocalizedString('amount');
+    sendSelected = localizationService.getLocalizedString('sendSelected');
+    printSelected = localizationService.getLocalizedString('printSelected');
+    receiptDate = localizationService.getLocalizedString('date');
+
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the localization strings
+    _initializeLocalizationStrings();
+  }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
     return Scaffold(
-      appBar: _buildAppBar(), // Use the AppBar method here
+      appBar: _buildAppBar(printReceipt), // Use the AppBar method here
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildFilterOptions(),
+            _buildFilterOptions(searchByFilterNumber),
             ListView.builder(
               itemCount: receipts.length,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) => _buildReceiptCard(receipts[index], index),
+              itemBuilder: (context, index) => _buildReceiptCard(receipts[index], index,amount,voucher,receiptDate),
             ),
-            _buildActionButtons(),
+            _buildActionButtons(printSelected,sendSelected),
           ],
         ),
       ),
@@ -63,8 +92,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-
-  AppBar _buildAppBar() {
+  AppBar _buildAppBar(String printReceipt ) {
     return AppBar(
       elevation: 4,
       bottom: PreferredSize(
@@ -74,7 +102,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
           height: 1.0,
         ),
       ),
-      title: Text('Print Receipt',
+      title: Text(printReceipt,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20.sp,
@@ -88,7 +116,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-  Widget _buildFilterOptions() {
+  Widget _buildFilterOptions(String voucherNumber) {
     return Padding(
       padding: EdgeInsets.all(16.w),
       child: Row(
@@ -96,9 +124,33 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
           Expanded(
             child: TextField(
               decoration: InputDecoration(
-                labelText: 'Search by Voucher Number',
+                labelText: voucherNumber,
                 suffixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Adjust border radius here
+                  borderSide: BorderSide(
+                    color: Colors.red, // Example color, you can change it to your preference
+                    width: 2.0, // Width of the border
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Adjust border radius here
+                  borderSide: BorderSide(
+                    color: Colors.black, // Example color, you can change it to your preference
+                    width: 2.0, // Width of the border
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Adjust border radius here
+                  borderSide: BorderSide(
+                    color: Colors.red, // Example color, you can change it to your preference
+                    width: 2.0, // Width of the border
+                  ),
+                ),
+              ),
+              style: TextStyle(
+                color: Colors.black87, // Adjust text color here
+                fontSize: 16.0, // Adjust font size
               ),
               onChanged: (value) {
                 // Filter logic here
@@ -110,7 +162,8 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-  Widget _buildReceiptCard(Map<String, dynamic> receipt, int index) {
+
+  Widget _buildReceiptCard(Map<String, dynamic> receipt, int index, String amountLabel,String voucherLabel , String dateLabel) {
     return Card(
       elevation: 5,
       shadowColor: Colors.grey.withOpacity(0.5),
@@ -125,10 +178,10 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
             });
           },
         ),
-        title: Text('Voucher: ${receipt['voucherNumber']}'),
-        subtitle: Text('Amount: ${receipt['amount']} - Date: ${receipt['transactionDate'].toString().split(' ')[0]}'),
+        title: Text('$voucherLabel: ${receipt['voucherNumber']}'),
+        subtitle: Text('$amountLabel: ${receipt['amount']}           $dateLabel: ${receipt['transactionDate'].toString().split(' ')[0]}'),
         trailing: Wrap(
-          spacing: 12, // space between two icons
+          spacing: 1, // space between two icons
           children: <Widget>[
             Icon(receipt['synced'] ? Icons.check_circle : Icons.error, color: receipt['synced'] ? Colors.green : Colors.red),
             IconButton(
@@ -151,7 +204,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(String printSelected , String sendSelected) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: Row(
@@ -162,7 +215,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
               padding: EdgeInsets.symmetric(horizontal: 4.w),  // Add padding to ensure some space between buttons
               child: ElevatedButton(
                 onPressed: _printSelectedReceipts,
-                child: Text('Print Selected', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: Text(printSelected, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFC62828),
                   padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -179,7 +232,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
               padding: EdgeInsets.symmetric(horizontal: 4.w),  // Add padding to ensure some space between buttons
               child: ElevatedButton(
                 onPressed: _sendReceipt,
-                child: Text('Send Selected', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: Text(sendSelected, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -195,7 +248,6 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
       ),
     );
   }
-
 
   void _sendReceipt() async {
     try {
@@ -303,9 +355,6 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     );
   }
 
-
-
-
   void _printReceipt(Map<String, dynamic> receipt) {
 
   }
@@ -316,8 +365,6 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
       MaterialPageRoute(builder: (context) => PrintSettingsScreen()),
     );
   }
-
-
 
   void _sendSelectedReceipts() {
     Navigator.push(

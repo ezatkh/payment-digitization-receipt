@@ -1,10 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui';  // Required for ImageFilter
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 
-class PaymentCancellationScreen extends StatelessWidget {
+
+class PaymentCancellationScreen extends StatefulWidget {
+  @override
+  _PaymentCancellationScreenState createState() => _PaymentCancellationScreenState();
+}
+
+class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
   final List<String> paymentIds = ['PR12345', 'PR67890', 'PR23456'];  // Example PR#s
+  String cancelPayment='';
+  String selectPaymentToCancel='';
+  String choosePayment='';
+  String reasonForCancellation='';
+  String enterTheReason='';
+  String additionalDetail='';
+  String addMoreDetail='';
+  String back='';
+  String confirmCancellation='';
+  String confirmCancellationBody='';
+  String confirm='';
+  String cancel='';
 
+  void _initializeLocalizationStrings( ) {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    cancelPayment= localizationService.getLocalizedString('cancelPayment');
+    selectPaymentToCancel= localizationService.getLocalizedString('selectPaymentToCancel');
+    choosePayment= localizationService.getLocalizedString('choosePayment');
+    reasonForCancellation= localizationService.getLocalizedString('reasonForCancellation');
+    enterTheReason= localizationService.getLocalizedString('enterTheReason');
+    additionalDetail= localizationService.getLocalizedString('additionalDetail');
+    addMoreDetail= localizationService.getLocalizedString('addMoreDetail');
+    back= localizationService.getLocalizedString('back');
+    confirmCancellation= localizationService.getLocalizedString('confirmCancellation');
+    confirmCancellationBody= localizationService.getLocalizedString('confirmCancellationBody');
+    confirm= localizationService.getLocalizedString('confirm');
+    cancel= localizationService.getLocalizedString('cancel');
+  }
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the localization strings
+    _initializeLocalizationStrings();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,7 +59,7 @@ class PaymentCancellationScreen extends StatelessWidget {
             height: 1.0,
           ),
         ),
-        title: Text('Cancel Payment',
+        title: Text(cancelPayment,
             style: TextStyle(
               color: Colors.white,
               fontSize: 20.sp,
@@ -37,13 +78,13 @@ class PaymentCancellationScreen extends StatelessWidget {
           children: [
             _buildSelectionCard(context),
             SizedBox(height: 24.h),
-            _buildInputCard(context, 'Reason for Cancellation', 'Enter the reason'),
+            _buildInputCard(context, reasonForCancellation, enterTheReason),
             SizedBox(height: 16.h),
-            _buildInputCard(context, 'Additional Details (optional)', 'Add more details', maxLines: 3),
+            _buildInputCard(context, additionalDetail, addMoreDetail, maxLines: 3),
             SizedBox(height: 30.h),
-            _buildActionButton(context, 'Cancel Payment', Color(0xFFD32F2F)),
+            _buildActionButton(context, cancelPayment, Color(0xFFD32F2F)),
             SizedBox(height: 12.h),
-            _buildActionButton(context, 'Back', Colors.black, isOutlined: true),
+            _buildActionButton(context, back, Colors.black, isOutlined: true),
           ],
         ),
       ),
@@ -60,7 +101,7 @@ class PaymentCancellationScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Select Payment to Cancel", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            Text(selectPaymentToCancel, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
             DropdownButton<String>(
               isExpanded: true,
               underline: Container(height: 0),
@@ -71,7 +112,7 @@ class PaymentCancellationScreen extends StatelessWidget {
                 );
               }).toList(),
               onChanged: (_) {},
-              hint: Text("Choose a payment"),
+              hint: Text(choosePayment),
             ),
           ],
         ),
@@ -130,15 +171,15 @@ class PaymentCancellationScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirm Cancellation"),
-          content: Text("Are you sure you want to cancel this payment?"),
+          title: Text(confirmCancellation),
+          content: Text(confirmCancellationBody),
           actions: <Widget>[
             TextButton(
-              child: Text("Cancel"),
+              child: Text(cancel),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: Text("Confirm"),
+              child: Text(confirm),
               onPressed: () {
                 // TODO: Implement the cancellation logic
                 Navigator.of(context).pop();

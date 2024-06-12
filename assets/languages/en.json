@@ -48,5 +48,37 @@
   "syncFailed": "Sync Failed",
   "lastSync": "Last Sync",
   "notSyncedYet": "Not Synced Yet",
-  "retry": "Retry"
+  "retry": "Retry",
+
+  "printreceipt": "Print Receipt",
+  "filterNumber": "Voucher Number",
+  "voucher": "Voucher",
+  "amount": "Amount",
+  "sendSelected": "Send Selected",
+  "printSelected": "Print Selected",
+  "date": "Date",
+
+  "printSettings": "PrintSettings",
+  "hideReceipt": "Hide Receipt",
+  "showReceipt": "Show Receipt",
+  "numberCopies": "Select the number of copies",
+  "duplexPrinting": "Duplex Printing",
+  "colorPrinting": "Color Printing",
+  "copies": "Copies",
+  "cancel": "Cancel",
+  "print": "Print",
+
+  "cancelPayment": "Cancel Payment",
+  "selectPaymentToCancel": "Select Payment To Cancel",
+  "choosePayment": "Choose Payment",
+  "reasonForCancellation": "Reason For Cancellation",
+  "enterTheReason": "Enter The Reason",
+  "additionalDetail": "Additional Details(optional)",
+  "addMoreDetail": "Add More Detail",
+  "cancelPayment": "Cancel Payment",
+  "back": "Back",
+  "confirmCancellation": "Confirm Cancellation",
+  "confirmCancellationBody": "Are you sure you want to cancel this payment ?",
+  "confirm": "Confirm"
+
 }
