@@ -181,7 +181,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
         title: Text('$voucherLabel: ${receipt['voucherNumber']}'),
         subtitle: Text('$amountLabel: ${receipt['amount']}           $dateLabel: ${receipt['transactionDate'].toString().split(' ')[0]}'),
         trailing: Wrap(
-          spacing: 1, // space between two icons
+          spacing: 0.5, // space between two icons
           children: <Widget>[
             Icon(receipt['synced'] ? Icons.check_circle : Icons.error, color: receipt['synced'] ? Colors.green : Colors.red),
             IconButton(

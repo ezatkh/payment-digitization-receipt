@@ -28,7 +28,10 @@
   "aboutus": "حول",
   "logout": "تسجيل خروج",
 
-  "changeLanguage": "تحويل اللغة الى الانجليزية",
+  "languageSettings": "إعدادات اللغة",
+  "selectPreferredLanguage": "اختر اللغة المفضلة",
+  "arabic": "العربية",
+  "english": "الإنجليزية",
   "theme": "السمة",
   "security": "الأمان",
   "dataStorage": "البيانات والتخزين",
@@ -89,6 +92,8 @@
   "recordPayment": "تسجيل الدفعة",
   "customerDetails": "تفاصيل العميل",
   "paymentInformation": "معلومات الدفعة",
+  "MSISDN": "رقم الهاتف",
+  "PR": "مسؤول الدفعة",
   "submitPayment": " إرسال الدفعة",
   "paymentMethod": "طريقة الدفع",
   "currency": "العملة",
@@ -99,5 +104,12 @@
 
   "noNotificationsYet": "لا توجد إشعارات بعد",
   "checkBackHereForUpdates": "تحقق هنا للحصول على التحديثات",
-  "pleaseWait": "يرجى الانتظار"
+  "pleaseWait": "يرجى الانتظار",
+
+  "usd": "دولار",
+  "eur": "يورو",
+  "nis": "شيقل",
+  "cash": "كاش",
+  "check": "شيك",
+  "creditCard": "بطاقة فيزا"
 }

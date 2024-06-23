@@ -28,7 +28,10 @@
   "aboutus": "About Us",
   "logout": "Log Out",
 
-  "changeLanguage": "change language to Arabic",
+  "languageSettings": "language Settings",
+  "selectPreferredLanguage": "Select the preferred language",
+  "arabic": "Arabic",
+  "english": "English",
   "theme": "Theme",
   "security": "Security",
   "dataStorage": "Data & Storage",
@@ -89,6 +92,8 @@
   "recordPayment": "Record Payment",
   "customerDetails": "Customer Details",
   "paymentInformation": "Payment Information",
+  "MSISDM": "MSISDM",
+  "PR": "PR",
   "submitPayment": "Submit Payment",
   "paymentMethod": "Payment Method",
   "currency": "Currency",
@@ -99,5 +104,12 @@
 
   "noNotificationsYet": "No Notifications Yet",
   "checkBackHereForUpdates": "check back here for updates",
-  "pleaseWait": "Please Wait"
+  "pleaseWait": "Please Wait",
+
+  "usd": "USD",
+  "eur": "EUR",
+  "nis": "NIS",
+  "cash": "Cash",
+  "check": "Check",
+  "creditCard": "Credit Card"
 }

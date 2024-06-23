@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 import '../Custom_Widgets/CustomExpansionTile.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Services/LocalizationService.dart';
-import 'package:provider/provider.dart';
 
 class RecordPaymentScreen extends StatefulWidget {
   @override
@@ -19,8 +19,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   final TextEditingController _notesController = TextEditingController();
   String? _selectedCurrency;
   String? _selectedPaymentMethod;
-  List<String> _currencies = ['USD', 'EUR', 'QAR'];
-  List<String> _paymentMethods = ['Cash', 'Check', 'Credit Card'];
+  List<String> _currencies = ['usd', 'eur', 'nis'];
+  List<String> _paymentMethods = ['cash', 'check', 'creditCard'];
 
   bool _isCustomerDetailsExpanded = false;
   bool _isPaymentInfoExpanded = false;
@@ -38,11 +38,13 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   String customerName = "";
   String fieldsMissedMessageError = "";
   String fieldsMissedMessageSuccess = "";
+  String PR = "";
+  String MSISDN = "";
+
   @override
   void initState() {
     super.initState();
-    final localizationService = Provider.of<LocalizationService>(
-        context, listen: false);
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
     recordPayment = localizationService.getLocalizedString('recordPayment');
     customerDetails = localizationService.getLocalizedString('customerDetails');
     paymentInformation = localizationService.getLocalizedString('paymentInformation');
@@ -54,6 +56,18 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     customerName = localizationService.getLocalizedString('customerName');
     fieldsMissedMessageError = localizationService.getLocalizedString('fieldsMissedMessageError');
     fieldsMissedMessageSuccess = localizationService.getLocalizedString('fieldsMissedMessageSuccess');
+    PR = localizationService.getLocalizedString('PR');
+    MSISDN = localizationService.getLocalizedString('MSISDN');
+
+    // Localize and ensure unique values
+    _paymentMethods = _paymentMethods
+        .map((method) => localizationService.getLocalizedString(method))
+        .toSet()
+        .toList();
+    _currencies = _currencies
+        .map((currency) => localizationService.getLocalizedString(currency))
+        .toSet()
+        .toList();
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 100),
@@ -69,28 +83,31 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     _animationController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
 
     return Scaffold(
-      appBar: AppBar( elevation: 4,  // Adds a subtle shadow for depth
-          bottom: PreferredSize(
-        preferredSize: Size.fromHeight(4.0),
-        child: Container(
-          color: Colors.white.withOpacity(0.2), // subtle separator for visual definition
-          height: 1.0,
+      appBar: AppBar(
+        elevation: 4,
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(4.0),
+          child: Container(
+            color: Colors.white.withOpacity(0.2),
+            height: 1.0,
+          ),
         ),
-      ),
         title: Text(recordPayment,
-            style: TextStyle(color: Colors.white, fontSize: 20.sp     ,   fontFamily: 'NotoSansUI',)),
+            style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
         backgroundColor: Color(0xFFC62828),
         actions: [
           IconButton(
             icon: Icon(Icons.save),
             onPressed: _submitPayment,
-            tooltip: 'Save Payment',color: Colors.white,
-          )
+            tooltip: 'Save Payment',
+            color: Colors.white,
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -102,11 +119,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                 iconData: Icons.account_circle,
                 isExpanded: _isCustomerDetailsExpanded,
                 children: [
-                  _buildTextField(_customerNameController, customerName,
-                      Icons.person_outline),
-                  _buildTextField(
-                      _msisdnController, 'MSISDN', Icons.phone_android),
-                  _buildTextField(_prNumberController, 'PR#', Icons.receipt),
+                  _buildTextField(_customerNameController, customerName, Icons.person_outline),
+                  _buildTextField(_msisdnController, MSISDN, Icons.phone_android),
+                  _buildTextField(_prNumberController, PR, Icons.receipt),
                 ],
                 onExpansionChanged: (bool expanded) {
                   setState(() => _isCustomerDetailsExpanded = expanded);
@@ -121,12 +136,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                 iconData: Icons.payment,
                 isExpanded: _isPaymentInfoExpanded,
                 children: [
-                  _buildTextField(
-                      _amountController, amount, Icons.attach_money),
+                  _buildTextField(_amountController, amount, Icons.attach_money),
                   _buildDropdown(currency, _currencies),
                   _buildDropdown(paymentMethod, _paymentMethods),
-                  _buildTextField(_notesController, notes, Icons.note_add,
-                      maxLines: 3),
+                  _buildTextField(_notesController, notes, Icons.note_add, maxLines: 3),
                 ],
                 onExpansionChanged: (bool expanded) {
                   setState(() => _isPaymentInfoExpanded = expanded);
@@ -150,37 +163,34 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     required List<Widget> children,
     required bool isExpanded,
     required ValueChanged<bool> onExpansionChanged,
-    required bool Function() checkIfFilled, // A function that checks if the fields are filled
+    required bool Function() checkIfFilled,
   }) {
     bool isFilled = checkIfFilled();
-    Color iconColor = isFilled ? Color(0xFF4CAF50) : Colors.grey[600]!; // Adjust color based on field status
+    Color iconColor = isFilled ? Color(0xFF4CAF50) : Colors.grey[600]!;
     return Card(
       elevation: 4,
       margin: EdgeInsets.symmetric(vertical: 10.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: CustomExpansionTile(
         initiallyExpanded: isExpanded,
-        title: Text(title, style: TextStyle(        fontFamily: 'NotoSansUI',fontSize: 18.sp, fontWeight: FontWeight.bold, color: iconColor)),
+        title: Text(title, style: TextStyle(fontFamily: 'NotoSansUI', fontSize: 18.sp, fontWeight: FontWeight.bold, color: iconColor)),
         leading: Icon(iconData, size: 30.sp, color: iconColor),
         children: children,
         onExpansionChanged: onExpansionChanged,
-        animationDuration: Duration(milliseconds: 200), // Set your desired speed of the animation
+        animationDuration: Duration(milliseconds: 200),
       ),
     );
   }
 
-
-
-  Widget _buildTextField(
-      TextEditingController controller, String labelText, IconData icon,
-      {int maxLines = 1}) {
+  Widget _buildTextField(TextEditingController controller, String labelText, IconData icon, {int maxLines = 1}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         decoration: InputDecoration(
-          labelText: labelText,labelStyle: TextStyle(        fontFamily: 'NotoSansUI',),
+          labelText: labelText,
+          labelStyle: TextStyle(fontFamily: 'NotoSansUI'),
           prefixIcon: Icon(icon, color: Color(0xFFC62828)),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           fillColor: Colors.white,
@@ -196,16 +206,17 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
-          labelText: label,labelStyle: TextStyle(        fontFamily: 'NotoSansUI'),
+          labelText: label,
+          labelStyle: TextStyle(fontFamily: 'NotoSansUI'),
           contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.white,
         ),
-        value: label == 'Currency' ? _selectedCurrency : _selectedPaymentMethod,
+        value: label == currency ? _selectedCurrency : _selectedPaymentMethod,
         onChanged: (String? newValue) {
           setState(() {
-            if (label == 'Currency') {
+            if (label == currency) {
               _selectedCurrency = newValue;
             } else {
               _selectedPaymentMethod = newValue;
@@ -221,7 +232,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
       ),
     );
   }
-
   Widget _buildSubmitButton() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h),

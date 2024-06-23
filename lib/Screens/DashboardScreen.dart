@@ -172,9 +172,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         padding: EdgeInsets.all(10.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
-          crossAxisSpacing: 6.w,
-          mainAxisSpacing: 6.h,
-          childAspectRatio: 1 / 1.5,
+          crossAxisSpacing: 10.w,
+          mainAxisSpacing: 10.h,
+          childAspectRatio: 1 / 1.15,
         ),
         itemCount: dashboardItems.length,
         itemBuilder: (context, index) {

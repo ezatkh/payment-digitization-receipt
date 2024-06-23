@@ -18,10 +18,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String department = "";
   String lastLogin = "";
   String systemRole = "";
-  late final String home ;
-  late final String more ;
-  late final String myAccount ;
 
+  @override
   void initState() {
     super.initState();
     final localizationService = Provider.of<LocalizationService>(
@@ -33,15 +31,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     department = localizationService.getLocalizedString('department');
     lastLogin = localizationService.getLocalizedString('lastLogin');
     systemRole = localizationService.getLocalizedString('systemRole');
-    home = localizationService.getLocalizedString('home');
-    more = localizationService.getLocalizedString('more');
-    myAccount = localizationService.getLocalizedString('myAccount');
-
   }
 
   @override
   Widget build(BuildContext context) {
     int _selectedIndex2 = 1;  // Starting index
+
     void _onItemTapped(int index) {
       setState(() {
         _selectedIndex2 = index;
@@ -51,66 +46,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
           context,
           MaterialPageRoute(builder: (context) => MoreScreen()),
         );
-      }
-      else if (index ==1) {
+      } else if (index == 1) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>ProfileScreen()  ),
+          MaterialPageRoute(builder: (context) => ProfileScreen()),
         );
-      }
-      else if(index==0){
+      } else if (index == 0) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => DashboardScreen()),
         );
       }
     }
+
     ScreenUtil.init(context, designSize: Size(360, 690));
-    return PopScope(
-      canPop: false,
+    return WillPopScope(
+      onWillPop: () async => false,
       child: Scaffold(
-        appBar: AppBar(leading: Text(' '),
+        appBar: AppBar(
+          leading: Container(), // Remove leading widget
           title: Text(
             profile,
-            style: TextStyle(color: Colors.white, fontFamily: "NotoSansUI", fontSize: 20.sp),
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: "NotoSansUI",
+              fontSize: 20.sp,
+            ),
           ),
           backgroundColor: Color(0xFFA60016),
           elevation: 0,
           centerTitle: true,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          items: const <BottomNavigationBarItem>[ BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'home', // Home
-           // label: home, // Home
-          ),
-
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.work_outline),
-            //   label: 'Services', // Services
-            // ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_sharp),
-              label: 'myAccount', // My Account
-              //label: myAccount, // My Account
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu),
-              label: 'more',
-             // label: more, // More
-            ),
-          ],
-          currentIndex: _selectedIndex2,
-          selectedItemColor: Color(0xFFC62828),
-          unselectedItemColor: Colors.grey,
-          showUnselectedLabels: true,
-          onTap: _onItemTapped,
-          selectedFontSize: 14,
-          unselectedFontSize: 14,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-          backgroundColor: Colors.white,
+        bottomNavigationBar: Consumer<LocalizationService>(
+          builder: (context, localizationService, _) {
+            return BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: localizationService.getLocalizedString('home'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline_sharp),
+                  label: localizationService.getLocalizedString('myAccount'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.menu),
+                  label: localizationService.getLocalizedString('more'),
+                ),
+              ],
+              currentIndex: _selectedIndex2,
+              selectedItemColor: Color(0xFFC62828),
+              unselectedItemColor: Colors.grey,
+              showUnselectedLabels: true,
+              onTap: _onItemTapped,
+              selectedFontSize: 14,
+              unselectedFontSize: 14,
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
+              backgroundColor: Colors.white,
+            );
+          },
         ),
         body: SingleChildScrollView(
           child: Column(
@@ -120,7 +116,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 radius: 60.r, // You can adjust the radius as needed
                 imageUrl: 'https://via.placeholder.com/150', // Replace with actual user image URL if available
               ),
-
               SizedBox(height: 20.h),
               Text(
                 'John Doe',
