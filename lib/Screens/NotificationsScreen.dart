@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+
+  String notifications = "";
+  String noNotificationsYet = "";
+  String checkBackHereForUpdates = "";
+  @override
+  void initState() {
+    super.initState();
+    final localizationService = Provider.of<LocalizationService>(
+        context, listen: false);
+    notifications = localizationService.getLocalizedString('notifications');
+    noNotificationsYet = localizationService.getLocalizedString('noNotificationsYet');
+    checkBackHereForUpdates = localizationService.getLocalizedString('checkBackHereForUpdates');
+  }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
@@ -21,7 +42,7 @@ class NotificationsScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Notifications', // Replace with your actual title text if necessary.
+          notifications, // Replace with your actual title text if necessary.
           style: TextStyle(fontWeight: FontWeight.bold,
             color: Colors.black, // Title color is black or similar to the image.
             fontSize: 20.sp,
@@ -49,7 +70,7 @@ class NotificationsScreen extends StatelessWidget {
             ),
             SizedBox(height: 20.h),
             Text(
-              'No notifications yet',
+              noNotificationsYet,
               style: TextStyle(
                 fontSize: 20.sp,fontWeight: FontWeight.bold,
                 color: Colors.grey.shade600,
@@ -58,7 +79,7 @@ class NotificationsScreen extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
             Text(
-              'Check back here for updates',
+              checkBackHereForUpdates,
               style: TextStyle(
                 fontSize: 16.sp,
                 color: Colors.grey.shade600,

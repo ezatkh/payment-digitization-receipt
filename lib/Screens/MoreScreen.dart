@@ -99,9 +99,6 @@ class MoreScreen extends StatelessWidget {
   }
 
   Widget _buildMenuList(BuildContext context,LocalizationService localizationService) {
-    final labels = [
-      'notifications','paymentHistory','paymentCancellation','aboutus','logout'
-    ];
     final labelsLocalization= [
       localizationService.getLocalizedString('notifications'),
       localizationService.getLocalizedString('paymentHistory'),
@@ -109,15 +106,16 @@ class MoreScreen extends StatelessWidget {
       localizationService.getLocalizedString('aboutus'),
       localizationService.getLocalizedString('logout'),
     ];
+    final labelsItems= ['notifications','paymentHistory','paymentCancellation','aboutus','logout'];
     return ListView.separated(
       padding: EdgeInsets.all(14.w),
       itemCount: labelsLocalization.length,
       separatorBuilder: (context, index) => Divider(color: Colors.grey.shade300, height: 20.h),
-      itemBuilder: (context, index) => _buildMenuItem(context, labelsLocalization[index]),
+      itemBuilder: (context, index) => _buildMenuItem(context,labelsItems[index], labelsLocalization[index]),
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, String label) {
+  Widget _buildMenuItem(BuildContext context,String labelTitle ,String label) {
     return ListTile(
       title: Text(
         label,
@@ -128,17 +126,13 @@ class MoreScreen extends StatelessWidget {
           fontFamily: "NotoSansUI",
         ),
       ),
-      onTap: () => _handleTap(context, label),
+      onTap: () => _handleTap(context,labelTitle ,label),
     );
   }
 
-  // localizationService.getLocalizedString('notifications'),
-  // localizationService.getLocalizedString('paymentHistory'),
-  // localizationService.getLocalizedString('paymentCancellation'),
-  // localizationService.getLocalizedString('aboutus'),
-  // localizationService.getLocalizedString('logout'),
-  void _handleTap(BuildContext context, String label) {
-    switch (label) {
+  void _handleTap(BuildContext context,String labelTitle, String label) {
+    print("tap detail: $label");
+    switch (labelTitle) {
       case 'paymentHistory':
         Navigator.of(context).push(MaterialPageRoute(builder: (_) => PaymentHistoryScreen()));
         break;
@@ -250,7 +244,7 @@ class MoreScreen extends StatelessWidget {
       },
     );
   }
-  Widget _buildLogoutDialogContent(BuildContext context) {
+  Widget _buildLogoutDialogContent(BuildContext context ,) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(16.0),
       child: BackdropFilter(
@@ -367,4 +361,6 @@ class MoreScreen extends StatelessWidget {
       },
     );
   }
+
+
 }

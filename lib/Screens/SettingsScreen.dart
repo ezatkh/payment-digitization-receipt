@@ -1,7 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import '../Services/LocalizationService.dart';
+import 'DashboardScreen.dart';
+import 'LoginScreen.dart';
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -89,8 +94,8 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _buildSettingSection('Preferences', [
-                      _buildSettingOption(Icons.language, 'languageRegion', onTap: () {
-                        // TODO: Handle Language & Region setting
+                      _buildSettingOption(Icons.language, 'changeLanguage', onTap: () {
+                        _handleChangeLanguage(context,localizationService);
                       }, localizationService: localizationService),
                       _buildSettingOption(Icons.palette, 'theme', onTap: () {
                         // TODO: Handle Theme
@@ -104,7 +109,7 @@ class SettingsScreen extends StatelessWidget {
                         // TODO: Handle Data & Storage
                       }, localizationService: localizationService),
                       _buildSettingOption(Icons.logout, 'logout', onTap: () {
-                        // TODO: Handle Logout
+                        _showLogoutDialog(context);
                       }, localizationService: localizationService),
                     ], localizationService),
                     _buildSettingSection('Notifications', [
@@ -127,6 +132,196 @@ class SettingsScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+  void _handleChangeLanguage(
+      BuildContext context, LocalizationService localizationService) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: _buildProgressDialog(localizationService),
+        );
+      },
+    );
+
+    await Future.delayed(const Duration(seconds: 2));
+    Navigator.of(context).pop(); // Dismiss the progress indicator dialog
+
+    // Toggle language
+    if (localizationService.selectedLanguageCode == 'en') {
+      localizationService.selectedLanguageCode = 'ar';
+    } else {
+      localizationService.selectedLanguageCode = 'en';
+    }
+
+    // Example navigation after language change with animation
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            FadeTransition(
+              opacity: animation,
+              child: DashboardScreen(),
+            ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: Duration(milliseconds: 1500),
+      ),
+    );
+  }
+
+  Widget _buildProgressDialog(LocalizationService localizationService) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 7, sigmaY:7),
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SpinKitFadingCircle(
+                  itemBuilder: (BuildContext context, int index) {
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index.isEven ? Colors.white : Colors.grey[300],
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(height: 10.h),
+                Text(
+                  localizationService.getLocalizedString('pleaseWait'),
+                  style: TextStyle(
+                    decoration: TextDecoration.none,
+                    color: Colors.white.withOpacity(0.8), // Slightly brighter text
+                    fontFamily: 'NotoSansUI',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            child: _buildLogoutDialogContent(dialogContext),
+          ),
+        );
+      },
+    );
+  }
+  Widget _buildLogoutDialogContent(BuildContext context ,) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16.0),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.44),
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.0,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Are you sure you want to log out?',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontFamily: "NotoSansUI",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // Ooredoo theme color
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildDialogButton(
+                    context: context,
+                    label: 'Cancel',
+                    onPressed: () => Navigator.of(context).pop(), // Close the dialog
+                    backgroundColor: Colors.grey.shade300,
+                    textColor: Colors.black,
+                  ),
+                  _buildDialogButton(
+                    context: context,
+                    label: 'Logout',
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
+                    backgroundColor: Color(0xFFC62828), // Ooredoo theme color
+                    textColor: Colors.white,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogButton({
+    required BuildContext context,
+    required String label,
+    required VoidCallback onPressed,
+    required Color backgroundColor,
+    required Color textColor,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: Text(label, style: TextStyle(fontFamily: "NotoSansUI", color: textColor)),
     );
   }
 }

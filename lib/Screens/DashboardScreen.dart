@@ -17,7 +17,6 @@ import 'PrintReceiptScreen.dart';
 import 'ProfileScreen.dart';
 import 'RecordPaymentScreen.dart';
 import 'SettingsScreen.dart';
-import 'UserManagementScreen.dart';
 
 class DashboardScreen extends StatefulWidget {
   DashboardScreen({Key? key}) : super(key: key);
@@ -30,7 +29,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex2 = 0;  // Starting index
   List<DashboardItemModel> dashboardItems = []; // Initialize as empty list
   late SharedPreferences prefs; // SharedPreferences instance
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -78,9 +76,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   // Define a list of dashboard items with icons and titles
   @override
   void initState() {
+    print("dashboard page");
     super.initState();
     _initializeLocalization();
     _initializeDashboardItems();
+   // _checkToken();
+  }
+  Future<void> _checkToken() async {
+    prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token == null) {
+      // No token found, navigate to LoginScreen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    }
   }
   Future<void> _initializeLocalization() async {
     print("initLocalization inside dashboard function");
@@ -340,10 +351,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
 
 }
-
-
-
-
 
 class DashboardItemModel {
   final IconData iconData;

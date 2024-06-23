@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'DashboardScreen.dart';
 import 'MoreScreen.dart';
+import '../Services/LocalizationService.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -10,6 +11,34 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  String profile = "";
+  String email = "";
+  String phone = "";
+  String region = "";
+  String department = "";
+  String lastLogin = "";
+  String systemRole = "";
+  late final String home ;
+  late final String more ;
+  late final String myAccount ;
+
+  void initState() {
+    super.initState();
+    final localizationService = Provider.of<LocalizationService>(
+        context, listen: false);
+    profile = localizationService.getLocalizedString('profile');
+    email = localizationService.getLocalizedString('email');
+    phone = localizationService.getLocalizedString('phone');
+    region = localizationService.getLocalizedString('region');
+    department = localizationService.getLocalizedString('department');
+    lastLogin = localizationService.getLocalizedString('lastLogin');
+    systemRole = localizationService.getLocalizedString('systemRole');
+    home = localizationService.getLocalizedString('home');
+    more = localizationService.getLocalizedString('more');
+    myAccount = localizationService.getLocalizedString('myAccount');
+
+  }
+
   @override
   Widget build(BuildContext context) {
     int _selectedIndex2 = 1;  // Starting index
@@ -37,13 +66,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
     ScreenUtil.init(context, designSize: Size(360, 690));
-
     return PopScope(
       canPop: false,
       child: Scaffold(
         appBar: AppBar(leading: Text(' '),
           title: Text(
-            'Profile',
+            profile,
             style: TextStyle(color: Colors.white, fontFamily: "NotoSansUI", fontSize: 20.sp),
           ),
           backgroundColor: Color(0xFFA60016),
@@ -54,7 +82,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           type: BottomNavigationBarType.fixed,
           items: const <BottomNavigationBarItem>[ BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home', // Home
+            label: 'home', // Home
+           // label: home, // Home
           ),
 
             // BottomNavigationBarItem(
@@ -63,11 +92,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_sharp),
-              label: 'My Account', // My Account
+              label: 'myAccount', // My Account
+              //label: myAccount, // My Account
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.menu),
-              label: 'More', // More
+              label: 'more',
+             // label: more, // More
             ),
           ],
           currentIndex: _selectedIndex2,
@@ -107,18 +138,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _buildProfileCard(
                       child: Column(
                         children: [
-                          _buildProfileInfo('Email', 'johndoe@example.com'),
-                          _buildProfileInfo('Phone', '+1234567890'),
-                          _buildProfileInfo('Region', 'North Territory'),
+                          _buildProfileInfo(email, 'johndoe@example.com'),
+                          _buildProfileInfo(phone, '+1234567890'),
+                          _buildProfileInfo(region, 'North Territory'),
                         ],
                       ),
                     ),
                     _buildProfileCard(
                       child: Column(
                         children: [
-                          _buildProfileInfo('Department', 'Sales'),
-                          _buildProfileInfo('Last Login', '2023-04-12 08:30 AM'),
-                          _buildProfileInfo('System Role', 'Admin'),
+                          _buildProfileInfo(department, 'Sales'),
+                          _buildProfileInfo(lastLogin, '2023-04-12 08:30 AM'),
+                          _buildProfileInfo(systemRole, 'Admin'),
                         ],
                       ),
                     ),

@@ -110,7 +110,7 @@ class LoginScreen extends StatelessWidget {
                                         bool? loginResult =
                                         await loginState.login();
                                         if (true||loginResult ?? false) {
-                                          _handleLogin(context, loginState);
+                                          _handleLogin(context,localizationService);
                                         } else {
                                           _showLoginFailedDialog(
                                             context,
@@ -167,7 +167,7 @@ class LoginScreen extends StatelessWidget {
                                       bool authenticated =
                                       await loginState.authenticate(context);
                                       if (authenticated) {
-                                        _handleLogin(context, loginState);
+                                        _handleLogin(context,localizationService);
                                       } else {
                                         print("Smart login not supported or authentication failed.");
                                       }
@@ -209,40 +209,46 @@ class LoginScreen extends StatelessWidget {
   }
 
   Widget _buildLanguageDropdown(BuildContext context, LocalizationService localizationService) {
+    print("_buildLanguageDropdown invoked in loginScreen");
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: PopupMenuButton<String>(
-        child: Row(
-          children: [
-            Icon(Icons.language, color: Colors.black),
-            SizedBox(width: 8.0),
-            Text(
-              getLanguageName(localizationService.selectedLanguageCode),
-              style: TextStyle(color: Colors.black),
-            ),
-          ],
-        ),
-        itemBuilder: (BuildContext context) {
-          return LoginScreen.languages.map((Map<String, String> language) {
-            return PopupMenuItem<String>(
-              value: language['code']!,
-              child: ListTile(
-                title: Text(
-                  language['name']!,
-                  style: TextStyle(fontSize: 16.0),
+      child: GestureDetector(
+        onTap: () {
+          // Open the PopupMenu when the Row is tapped
+          final dynamic state = context.findRenderObject();
+          state.showButtonMenu();
+        },
+        child: PopupMenuButton<String>(
+          onSelected: (String newValue) {
+            localizationService.selectedLanguageCode = newValue;
+          },
+          itemBuilder: (BuildContext context) {
+            return LoginScreen.languages.map((Map<String, String> language) {
+              return PopupMenuItem<String>(
+                value: language['code']!,
+                child: ListTile(
+                  title: Text(
+                    language['name']!,
+                    style: TextStyle(fontSize: 16.0),
+                  ),
                 ),
+              );
+            }).toList();
+          },
+          child: Row(
+            children: [
+              Icon(Icons.language, color: Colors.black),
+              SizedBox(width: 8.0),
+              Text(
+                getLanguageName(localizationService.selectedLanguageCode),
+                style: TextStyle(color: Colors.black),
               ),
-            );
-          }).toList();
-        },
-        onSelected: (String newValue) {
-          localizationService.selectedLanguageCode = newValue;
-        },
+            ],
+          ),
+        ),
       ),
     );
   }
-
-
 
   String getLanguageName(String code) {
     // Function to return the language name based on the language code
@@ -253,7 +259,6 @@ class LoginScreen extends StatelessWidget {
     }
     return ''; // Return empty string if language code not found (should not happen in ideal scenarios)
   }
-
   // Builds a trademark notice at the bottom or any preferred location of the screen.
   Widget _buildTrademarkNotice() {
     return Text(
@@ -353,6 +358,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   bool validateLoginInputs(LoginState loginState) {
+    print("validateLoginInputs invoked in loginScreen");
     String username = loginState.username ??
         ''; // Get username from loginState or use an empty string if null
     String password = loginState.password ??
@@ -366,7 +372,9 @@ class LoginScreen extends StatelessWidget {
 
     return true; // Validation succeeded
   }
-  void _handleLogin(BuildContext context, LoginState loginState) async {
+
+  void _handleLogin(BuildContext context,LocalizationService localizationService) async {
+    print("_handleLogin invoked in loginScreen");
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -406,7 +414,7 @@ class LoginScreen extends StatelessWidget {
                     SizedBox(height: 10.h),
                     // Reduced space between spinner and text
                     Text(
-                      'Please Wait',
+                      localizationService.getLocalizedString('pleaseWait'),
                       style: TextStyle(
                         decoration: TextDecoration.none,
                         color: Colors.white,

@@ -28,7 +28,7 @@
   "aboutus": "حول",
   "logout": "تسجيل خروج",
 
-  "languageRegion": "اللغة & المنطقة",
+  "changeLanguage": "تحويل اللغة الى الانجليزية",
   "theme": "السمة",
   "security": "الأمان",
   "dataStorage": "البيانات والتخزين",
@@ -89,7 +89,15 @@
   "recordPayment": "تسجيل الدفعة",
   "customerDetails": "تفاصيل العميل",
   "paymentInformation": "معلومات الدفعة",
-  "submitPayment": " إرسال الدفعة"
+  "submitPayment": " إرسال الدفعة",
+  "paymentMethod": "طريقة الدفع",
+  "currency": "العملة",
+  "notes": "الملاحظات",
+  "customerName": "إسم العميل",
+  "fieldsMissedMessageError": "يجب تعبئة جميع الحقول.",
+  "fieldsMissedMessageSuccess": "'تم تسجيل الدفعة بنجاح",
 
-
+  "noNotificationsYet": "لا توجد إشعارات بعد",
+  "checkBackHereForUpdates": "تحقق هنا للحصول على التحديثات",
+  "pleaseWait": "يرجى الانتظار"
 }

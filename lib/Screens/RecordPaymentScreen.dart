@@ -22,18 +22,39 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   List<String> _currencies = ['USD', 'EUR', 'QAR'];
   List<String> _paymentMethods = ['Cash', 'Check', 'Credit Card'];
 
-  String recordPayment = "";
-  String customerDetails = "";
-  String paymentInformation = "";
-  String submitPayment = ""';
-
   bool _isCustomerDetailsExpanded = false;
   bool _isPaymentInfoExpanded = false;
   late AnimationController _animationController;
   late Animation<double> _buttonScaleAnimation;
+
+  String recordPayment = "";
+  String customerDetails = "";
+  String paymentInformation = "";
+  String submitPayment = "";
+  String currency = "";
+  String amount = "";
+  String notes = "";
+  String paymentMethod = "";
+  String customerName = "";
+  String fieldsMissedMessageError = "";
+  String fieldsMissedMessageSuccess = "";
   @override
   void initState() {
     super.initState();
+    final localizationService = Provider.of<LocalizationService>(
+        context, listen: false);
+    recordPayment = localizationService.getLocalizedString('recordPayment');
+    customerDetails = localizationService.getLocalizedString('customerDetails');
+    paymentInformation = localizationService.getLocalizedString('paymentInformation');
+    submitPayment = localizationService.getLocalizedString('submitPayment');
+    paymentMethod = localizationService.getLocalizedString('paymentMethod');
+    currency = localizationService.getLocalizedString('currency');
+    notes = localizationService.getLocalizedString('notes');
+    amount = localizationService.getLocalizedString('amount');
+    customerName = localizationService.getLocalizedString('customerName');
+    fieldsMissedMessageError = localizationService.getLocalizedString('fieldsMissedMessageError');
+    fieldsMissedMessageSuccess = localizationService.getLocalizedString('fieldsMissedMessageSuccess');
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: this,
@@ -61,7 +82,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
           height: 1.0,
         ),
       ),
-        title: Text('Record Payment',
+        title: Text(recordPayment,
             style: TextStyle(color: Colors.white, fontSize: 20.sp     ,   fontFamily: 'NotoSansUI',)),
         backgroundColor: Color(0xFFC62828),
         actions: [
@@ -77,11 +98,11 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
         child: Column(
           children: [
             _buildExpandableSection(
-                title: 'Customer Details',
+                title: customerDetails,
                 iconData: Icons.account_circle,
                 isExpanded: _isCustomerDetailsExpanded,
                 children: [
-                  _buildTextField(_customerNameController, 'Customer Name',
+                  _buildTextField(_customerNameController, customerName,
                       Icons.person_outline),
                   _buildTextField(
                       _msisdnController, 'MSISDN', Icons.phone_android),
@@ -101,10 +122,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                 isExpanded: _isPaymentInfoExpanded,
                 children: [
                   _buildTextField(
-                      _amountController, 'Amount', Icons.attach_money),
-                  _buildDropdown('Currency', _currencies),
-                  _buildDropdown('Payment Method', _paymentMethods),
-                  _buildTextField(_notesController, 'Notes', Icons.note_add,
+                      _amountController, amount, Icons.attach_money),
+                  _buildDropdown(currency, _currencies),
+                  _buildDropdown(paymentMethod, _paymentMethods),
+                  _buildTextField(_notesController, notes, Icons.note_add,
                       maxLines: 3),
                 ],
                 onExpansionChanged: (bool expanded) {
@@ -219,7 +240,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
               ),
               onPressed: _submitPayment,
               child: Text(
-                'Submit Payment',
+                submitPayment,
                 style: TextStyle(color: Colors.white, fontSize: 16.sp, fontFamily: 'NotoSansUI'),
               ),
             ),
@@ -233,7 +254,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     if ([_customerNameController.text, _msisdnController.text, _prNumberController.text, _amountController.text, _selectedCurrency, _selectedPaymentMethod].any((element) => element == null || element.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Please fill all the fields', style: TextStyle(fontFamily: 'NotoSansUI',)),
+            content: Text(fieldsMissedMessageError, style: TextStyle(fontFamily: 'NotoSansUI',)),
             backgroundColor: Colors.red),
       );
       return;
@@ -257,7 +278,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text('Payment Successfully Recorded', style: TextStyle(fontFamily: 'NotoSansUI',)),
+          content: Text(fieldsMissedMessageSuccess, style: TextStyle(fontFamily: 'NotoSansUI',)),
           backgroundColor: Color(0xFF4CAF50)),
     );
 

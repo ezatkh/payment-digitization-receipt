@@ -28,7 +28,7 @@
   "aboutus": "About Us",
   "logout": "Log Out",
 
-  "languageRegion": "Language & Region",
+  "changeLanguage": "change language to Arabic",
   "theme": "Theme",
   "security": "Security",
   "dataStorage": "Data & Storage",
@@ -89,6 +89,15 @@
   "recordPayment": "Record Payment",
   "customerDetails": "Customer Details",
   "paymentInformation": "Payment Information",
-  "submitPayment": "Submit Payment"
+  "submitPayment": "Submit Payment",
+  "paymentMethod": "Payment Method",
+  "currency": "Currency",
+  "notes": "Notes",
+  "customerName": "Customer Name",
+  "fieldsMissedMessageError": "All fields must be filled in. Thank you.",
+  "fieldsMissedMessageSuccess": "'Payment Successfully Recorded",
 
+  "noNotificationsYet": "No Notifications Yet",
+  "checkBackHereForUpdates": "check back here for updates",
+  "pleaseWait": "Please Wait"
 }
