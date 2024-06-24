@@ -2,20 +2,64 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
+import '../Services/LocalizationService.dart';
 import 'DashboardScreen.dart';
 
-class PaymentConfirmationScreen extends StatelessWidget {
+class PaymentConfirmationScreen extends StatefulWidget {
   final PaymentDetails paymentDetails;
 
   PaymentConfirmationScreen({required this.paymentDetails});
 
   @override
+  State<PaymentConfirmationScreen> createState() => _PaymentConfirmationScreenState();
+}
+
+class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
+  String confirmPayment='';
+  String paymentSummary='';
+  String customerName='';
+  String MSISDN='';
+  String PR='';
+  String amount='';
+  String currency='';
+  String paymentMethod='';
+  String date='';
+  String confirm='';
+  String cancel='';
+  String paymentSuccessful='';
+  String paymentSuccessfulBody='';
+  String ok='';
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the localization strings
+    _initializeLocalizationStrings();
+  }
+  void _initializeLocalizationStrings( ) {
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    confirmPayment= localizationService.getLocalizedString('confirmPayment');
+    paymentSummary= localizationService.getLocalizedString('paymentSummary');
+    customerName= localizationService.getLocalizedString('customerName');
+    MSISDN= localizationService.getLocalizedString('MSISDN');
+    PR= localizationService.getLocalizedString('PR');
+    amount= localizationService.getLocalizedString('amount');
+    currency= localizationService.getLocalizedString('currency');
+    paymentMethod= localizationService.getLocalizedString('paymentMethod');
+    date= localizationService.getLocalizedString('date');
+    confirm= localizationService.getLocalizedString('confirm');
+    cancel= localizationService.getLocalizedString('cancel');
+    paymentSuccessful= localizationService.getLocalizedString('paymentSuccessful');
+    paymentSuccessfulBody= localizationService.getLocalizedString('paymentSuccessfulBody');
+    ok= localizationService.getLocalizedString('ok');
+  }
+  @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Confirm Payment', style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
+        title: Text(confirmPayment, style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
         backgroundColor: Color(0xFFC62828),
         elevation: 0,
       ),
@@ -52,15 +96,15 @@ class PaymentConfirmationScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Payment Summary', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828))),
+          Text(paymentSummary, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828))),
           Divider(color: Color(0xFFC62828), thickness: 1, height: 20.h),
-          _detailItem('Customer Name', paymentDetails.customerName),
-          _detailItem('MSISDN', paymentDetails.msisdn),
-          _detailItem('PR#', paymentDetails.prNumber),
-          _detailItem('Amount', ' ${paymentDetails.amount.toStringAsFixed(2)}'),
-          _detailItem('Currency', paymentDetails.currency),
-          _detailItem('Payment Method', paymentDetails.paymentMethod),
-          _detailItem('Date', paymentDetails.date),
+          _detailItem(customerName, widget.paymentDetails.customerName),
+          _detailItem(MSISDN, widget.paymentDetails.msisdn),
+          _detailItem(PR, widget.paymentDetails.prNumber),
+          _detailItem(amount, ' ${widget.paymentDetails.amount.toStringAsFixed(2)}'),
+          _detailItem(currency, widget.paymentDetails.currency),
+          _detailItem(paymentMethod, widget.paymentDetails.paymentMethod),
+          _detailItem(date, widget.paymentDetails.date),
         ],
       ),
     );
@@ -85,11 +129,12 @@ class PaymentConfirmationScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _actionButton(context, 'Cancel', Colors.red.shade300, () => Navigator.of(context).pop()),
-        _actionButton(context, 'Confirm', Color(0xFF4CAF50), () => _confirmPayment(context)),
+        _actionButton(context, cancel, Colors.red.shade300, () => Navigator.of(context).pop()),
+        _actionButton(context, confirm, Color(0xFF4CAF50), () => _confirmPayment(context)),
       ],
     );
   }
+
   void _confirmPayment(BuildContext context) async {
     showDialog(
       context: context,
@@ -129,7 +174,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Text('Payment Successful',
+                    Text(paymentSuccessful,
                         textAlign: TextAlign.center,
                         style: TextStyle(decoration: TextDecoration.none,
                           fontSize: 20.sp,
@@ -139,7 +184,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
                         )
                     ),
                     SizedBox(height: 16.h),
-                    Text('The payment has been successfully processed.',
+                      Text(paymentSuccessfulBody,
                         textAlign: TextAlign.center,
                         style: TextStyle(decoration: TextDecoration.none,
                           fontSize: 16.sp,
@@ -161,7 +206,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                          'OK',
+                          ok,
                           style: TextStyle(
                             fontFamily: 'NotoSansUI',
                             color: Color(0xFF4CAF50), // Green color for text

@@ -301,23 +301,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     context: context,
                     label: 'Logout',
                     onPressed: () async {
-                    prefs = await SharedPreferences.getInstance();
-                    String? token= prefs.getString('token');
-                    print("token value before delete  :$token");
-                    await prefs.remove('token'); // Remove 'token' key
-                    token= prefs.getString('token');
-                    print("token value after delete  :$token");
+                      // Clear user data
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.remove('token');
+                      await prefs.remove('language_code');
+                      await prefs.setString('language_code', 'en'); // Set default language
 
-                    String? language_code= prefs.getString('language_code');
-                    print("language_code value before delete  :$language_code");
-                    await prefs.remove('language_code'); // Remove 'code' key
-                    await prefs.setString('language_code','en');
-                     print("language_code value after updated  :$language_code");
-
-
-                      Navigator.pushReplacement(
+                      // Navigate to login screen
+                      Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(builder: (context) => LoginScreen()),
+                            (route) => false, // This disables popping the LoginScreen route
                       );
                     },
                     backgroundColor: Color(0xFFC62828), // Ooredoo theme color
@@ -331,6 +325,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+
 
   Widget _buildDialogButton({
     required BuildContext context,

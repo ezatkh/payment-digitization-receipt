@@ -92,9 +92,10 @@
   "recordPayment": "Record Payment",
   "customerDetails": "Customer Details",
   "paymentInformation": "Payment Information",
-  "MSISDM": "MSISDM",
+  "MSISDN": "MSISDN",
   "PR": "PR",
   "submitPayment": "Submit Payment",
+  "savePayment": "Save Payment",
   "paymentMethod": "Payment Method",
   "currency": "Currency",
   "notes": "Notes",
@@ -107,9 +108,17 @@
   "pleaseWait": "Please Wait",
 
   "usd": "USD",
-  "eur": "EUR",
-  "nis": "NIS",
+  "euro": "EURO",
+  "ils": "ILS",
+  "jd": "JD",
   "cash": "Cash",
   "check": "Check",
-  "creditCard": "Credit Card"
+  "creditCard": "Credit Card",
+
+  "confirmPayment": "Confirm Payment",
+  "paymentSummary": "payment Summary",
+  "paymentSuccessful": "Payment Successful",
+  "paymentSuccessfulBody": "The payment has been successfully processed.",
+  "ok": "Ok"
+
 }

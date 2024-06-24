@@ -17,10 +17,16 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   final TextEditingController _prNumberController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+  final FocusNode _customerNameFocusNode = FocusNode();
+  final FocusNode _msisdnFocusNode = FocusNode();
+  final FocusNode _prNumberFocusNode = FocusNode();
+  final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _notesFocusNode = FocusNode();
   String? _selectedCurrency;
   String? _selectedPaymentMethod;
-  List<String> _currencies = ['usd', 'eur', 'nis'];
+  List<String> _currencies = ['usd', 'euro', 'ils', 'jd'];
   List<String> _paymentMethods = ['cash', 'check', 'creditCard'];
+  bool _showCheckFields = false; // Whether to show the additional fields for check payment
 
   bool _isCustomerDetailsExpanded = false;
   bool _isPaymentInfoExpanded = false;
@@ -31,6 +37,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   String customerDetails = "";
   String paymentInformation = "";
   String submitPayment = "";
+  String savePayment = "";
   String currency = "";
   String amount = "";
   String notes = "";
@@ -48,6 +55,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     recordPayment = localizationService.getLocalizedString('recordPayment');
     customerDetails = localizationService.getLocalizedString('customerDetails');
     paymentInformation = localizationService.getLocalizedString('paymentInformation');
+    savePayment = localizationService.getLocalizedString('savePayment');
     submitPayment = localizationService.getLocalizedString('submitPayment');
     paymentMethod = localizationService.getLocalizedString('paymentMethod');
     currency = localizationService.getLocalizedString('currency');
@@ -70,7 +78,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
         .toList();
 
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 100),
+      duration: const Duration(milliseconds: 300),
       vsync: this,
     );
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
@@ -81,6 +89,16 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   @override
   void dispose() {
     _animationController.dispose();
+    _customerNameController.dispose();
+    _msisdnController.dispose();
+    _prNumberController.dispose();
+    _amountController.dispose();
+    _notesController.dispose();
+    _customerNameFocusNode.dispose();
+    _msisdnFocusNode.dispose();
+    _prNumberFocusNode.dispose();
+    _amountFocusNode.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 
@@ -105,41 +123,70 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
           IconButton(
             icon: Icon(Icons.save),
             onPressed: _submitPayment,
-            tooltip: 'Save Payment',
+            tooltip: savePayment,
             color: Colors.white,
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            _buildExpandableSection(
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            children: [
+              _buildExpandableSection(
                 title: customerDetails,
                 iconData: Icons.account_circle,
                 isExpanded: _isCustomerDetailsExpanded,
                 children: [
-                  _buildTextField(_customerNameController, customerName, Icons.person_outline),
-                  _buildTextField(_msisdnController, MSISDN, Icons.phone_android),
-                  _buildTextField(_prNumberController, PR, Icons.receipt),
+                  _buildTextField(
+                    _customerNameController,
+                    customerName,
+                    Icons.person_outline,
+                    focusNode: _customerNameFocusNode,
+                  ),
+                  _buildTextField(
+                    _msisdnController,
+                    MSISDN,
+                    Icons.phone_android,
+                    focusNode: _msisdnFocusNode,
+                  ),
+                  _buildTextField(
+                    _prNumberController,
+                    PR,
+                    Icons.receipt,
+                    focusNode: _prNumberFocusNode,
+                  ),
                 ],
                 onExpansionChanged: (bool expanded) {
                   setState(() => _isCustomerDetailsExpanded = expanded);
                 },
                 checkIfFilled: () {
-                  return _customerNameController.text.isNotEmpty &&
-                      _msisdnController.text.isNotEmpty &&
-                      _prNumberController.text.isNotEmpty;
-                }),
-            _buildExpandableSection(
+                  return _customerNameController.text.isNotEmpty;
+                },
+              ),
+              _buildExpandableSection(
                 title: paymentInformation,
                 iconData: Icons.payment,
                 isExpanded: _isPaymentInfoExpanded,
                 children: [
-                  _buildTextField(_amountController, amount, Icons.attach_money),
+                  _buildTextField(
+                    _amountController,
+                    amount,
+                    Icons.attach_money,
+                    focusNode: _amountFocusNode,
+                  ),
                   _buildDropdown(currency, _currencies),
                   _buildDropdown(paymentMethod, _paymentMethods),
-                  _buildTextField(_notesController, notes, Icons.note_add, maxLines: 3),
+                  _buildTextField(
+                    _notesController,
+                    notes,
+                    Icons.note_add,
+                    maxLines: 3,
+                    focusNode: _notesFocusNode,
+                  ),
                 ],
                 onExpansionChanged: (bool expanded) {
                   setState(() => _isPaymentInfoExpanded = expanded);
@@ -147,11 +194,12 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                 checkIfFilled: () {
                   return _amountController.text.isNotEmpty &&
                       _selectedCurrency != null &&
-                      _selectedPaymentMethod != null &&
-                      _notesController.text.isNotEmpty;
-                }),
-            _buildSubmitButton(),
-          ],
+                      _selectedPaymentMethod != null;
+                },
+              ),
+              _buildSubmitButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -168,35 +216,59 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     bool isFilled = checkIfFilled();
     Color iconColor = isFilled ? Color(0xFF4CAF50) : Colors.grey[600]!;
     return Card(
-      elevation: 4,
-      margin: EdgeInsets.symmetric(vertical: 10.h),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 3,
+      margin: EdgeInsets.symmetric(vertical: 8.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: CustomExpansionTile(
         initiallyExpanded: isExpanded,
-        title: Text(title, style: TextStyle(fontFamily: 'NotoSansUI', fontSize: 18.sp, fontWeight: FontWeight.bold, color: iconColor)),
-        leading: Icon(iconData, size: 30.sp, color: iconColor),
+        title: Text(title, style: TextStyle(fontFamily: 'NotoSansUI', fontSize: 14.sp, fontWeight: FontWeight.bold, color: iconColor)),
+        leading: Icon(iconData, size: 22.sp, color: iconColor),
         children: children,
         onExpansionChanged: onExpansionChanged,
-        animationDuration: Duration(milliseconds: 200),
+        animationDuration: Duration(milliseconds: 300),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText, IconData icon, {int maxLines = 1}) {
+  Widget _buildTextField(TextEditingController controller, String labelText, IconData icon, {int maxLines = 1, required FocusNode focusNode}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
       child: TextField(
         controller: controller,
+        focusNode: focusNode,
         maxLines: maxLines,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: TextStyle(fontFamily: 'NotoSansUI'),
-          prefixIcon: Icon(icon, color: Color(0xFFC62828)),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          labelStyle: TextStyle(fontFamily: 'NotoSansUI', fontSize: 12.sp, color: Colors.grey[500]),
+          prefixIcon: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: Icon(icon, color: Color(0xFFC62828)),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey[400]!,
+              width: 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(0xFFC62828),
+              width: 1.5,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey[300]!,
+              width: 1.5,
+            ),
+          ),
           fillColor: Colors.white,
           filled: true,
         ),
-        style: TextStyle(fontSize: 14.sp),
+        style: TextStyle(fontSize: 14.sp, color: Colors.black),
       ),
     );
   }
@@ -207,10 +279,29 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(fontFamily: 'NotoSansUI'),
+          labelStyle: TextStyle(fontFamily: 'NotoSansUI', fontSize: 12.sp, color: Colors.grey[500]),
           contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey[400]!,
+              width: 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(0xFFC62828),
+              width: 1.5,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey[300]!,
+              width: 1.5,
+            ),
+          ),          filled: true,
           fillColor: Colors.white,
         ),
         value: label == currency ? _selectedCurrency : _selectedPaymentMethod,
@@ -226,12 +317,17 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
         items: items.map<DropdownMenuItem<String>>((String value) {
           return DropdownMenuItem<String>(
             value: value,
-            child: Text(value),
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 12.sp), // Adjust the font size of the selected item here
+            ),
+
           );
         }).toList(),
       ),
     );
   }
+
   Widget _buildSubmitButton() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.h),
@@ -251,7 +347,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
               onPressed: _submitPayment,
               child: Text(
                 submitPayment,
-                style: TextStyle(color: Colors.white, fontSize: 16.sp, fontFamily: 'NotoSansUI'),
+                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontFamily: 'NotoSansUI'),
               ),
             ),
           ),
@@ -295,8 +391,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     _clearFields();
   }
 
-
-
   void _clearFields() {
     _customerNameController.clear();
     _msisdnController.clear();
@@ -306,7 +400,4 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     _selectedCurrency = null;
     _selectedPaymentMethod = null;
   }
-
-
 }
-

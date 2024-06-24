@@ -99,7 +99,7 @@ class SettingsScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            transitionDuration: Duration(milliseconds: 500), // Adjust as necessary
+                            transitionDuration: Duration(milliseconds: 400), // Adjust as necessary
                             pageBuilder: (context, animation, secondaryAnimation) {
                               return SlideTransition(
                                 position: Tween<Offset>(
