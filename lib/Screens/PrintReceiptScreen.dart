@@ -21,21 +21,21 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     {
       'voucherNumber': 'W-12345',
       'transactionDate': DateTime.now().subtract(Duration(days: 1)),
-      'amount': '150 USD',
+      'amount': 3150,
       'synced': true,
       'selected': false,
     },
     {
       'voucherNumber': 'W-12346',
       'transactionDate': DateTime.now().subtract(Duration(days: 2)),
-      'amount': '200 USD',
+      'amount': 240,
       'synced': false,
       'selected': false,
     },
     {
       'voucherNumber': 'W-12347',
       'transactionDate': DateTime.now(),
-      'amount': '250 USD',
+      'amount': 250,
       'synced': true,
       'selected': false,
     },
@@ -50,6 +50,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
   String printSelected ='';
   String receiptDate ='';
 
+
   void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
     printReceipt = localizationService.getLocalizedString('printreceipt');
@@ -59,6 +60,8 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     sendSelected = localizationService.getLocalizedString('sendSelected');
     printSelected = localizationService.getLocalizedString('printSelected');
     receiptDate = localizationService.getLocalizedString('date');
+
+
 
   }
 

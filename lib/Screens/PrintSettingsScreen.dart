@@ -8,6 +8,9 @@ import 'package:printing/printing.dart';
 import 'package:intl/intl.dart'; // If you're using this for formatting dates
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
+import 'package:number_to_word_arabic/number_to_word_arabic.dart';
+import 'package:number_to_words_english/number_to_words_english.dart';
+
 
 class PrintSettingsScreen extends StatefulWidget {
   @override
@@ -31,6 +34,24 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
   String  hideReceipt= '';
   String  showReceipt= '';
   String  printSettings= '';
+  String languageCode="";
+
+
+  String receipt ='';
+  String date ='';
+  String time ='';
+  String customerName ='';
+  String MSISDN ='';
+  String PR ='';
+  String paymentMethod ='';
+  String amount ='';
+  String currency ='';
+  String theSumOf ='';
+  String notes ='';
+  String thankYou ='';
+
+
+
   void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
     print = localizationService.getLocalizedString('print');
@@ -43,6 +64,19 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
     hideReceipt = localizationService.getLocalizedString('hideReceipt');
     showReceipt = localizationService.getLocalizedString('showReceipt');
     printSettings = localizationService.getLocalizedString('printSettings');
+    receipt = localizationService.getLocalizedString('receipt');
+    date = localizationService.getLocalizedString('date');
+    time = localizationService.getLocalizedString('time');
+    customerName = localizationService.getLocalizedString('customerName');
+    MSISDN = localizationService.getLocalizedString('MSISDN');
+    PR = localizationService.getLocalizedString('PR');
+    paymentMethod = localizationService.getLocalizedString('paymentMethod');
+    amount = localizationService.getLocalizedString('amount');
+    currency = localizationService.getLocalizedString('currency');
+    notes = localizationService.getLocalizedString('notes');
+    thankYou = localizationService.getLocalizedString('thankYou');
+    theSumOf = localizationService.getLocalizedString('theSumOf');
+    languageCode = localizationService.selectedLanguageCode;
 
   }
   @override
@@ -218,7 +252,7 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'RECEIPT',
+            receipt,
             style: TextStyle(
               fontFamily: 'CourierPrime',
               fontWeight: FontWeight.bold,
@@ -226,23 +260,26 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
             ),
           ),
           SizedBox(height: 12.h),
-          _printLine('Date:', DateFormat('yyyy-MM-dd').format(DateTime.now())),
-          _printLine('Time:', DateFormat('HH:mm:ss').format(DateTime.now())),
+          _printLine("$date:", DateFormat('yyyy-MM-dd').format(DateTime.now())),
+          _printLine("$time:", DateFormat('HH:mm:ss').format(DateTime.now())),
           SizedBox(height: 12.h),
           Divider(color: Colors.grey[800]),
-          _printLine('Customer Name', 'John Doe'),
-          _printLine('MSISDN', '1234567890'),
-          _printLine('PR#', 'PR20231015'),
-          _printLine('Amount', '\$250.00'),
-          _printLine('Currency', 'USD'),
-          _printLine('Method', 'Credit Card'),
+          _printLine("$customerName:", 'John Doe'),
+          _printLine('$MSISDN:', '1234567890'),
+          _printLine('$PR:', 'PR20231015'),
+          _printLine('$paymentMethod:', 'Credit Card'),
+          _printLine('$amount:', '\$12853.00'),
+          _printLine('$currency:', 'USD'),
           Divider(color: Colors.grey[800]),
-          Text('Notes:', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp, fontWeight: FontWeight.bold)),
+          Text('$theSumOf:', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp, fontWeight: FontWeight.bold)),
+          Text((languageCode)=='ar'?Tafqeet.convert('12853'):NumberToWordsEnglish.convert(12853), style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp)),
+          Divider(color: Colors.grey[800]),
+          Text('$notes:', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp, fontWeight: FontWeight.bold)),
           Text('Payment for services rendered.', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp)),
           Divider(color: Colors.grey[800]),
           Center(
             child: Text(
-              '--- Thank You! ---',
+              thankYou,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'CourierPrime',

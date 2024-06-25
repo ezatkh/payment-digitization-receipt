@@ -113,12 +113,20 @@
   "jd": "JD",
   "cash": "Cash",
   "check": "Check",
+  "amountCheck": "Amount check",
+  "checkNumber": "Check number",
+  "bankBranchCheck": "Bank/Branch",
+  "dueDateCheck": "Due date",
   "creditCard": "Credit Card",
 
   "confirmPayment": "Confirm Payment",
   "paymentSummary": "payment Summary",
   "paymentSuccessful": "Payment Successful",
   "paymentSuccessfulBody": "The payment has been successfully processed.",
-  "ok": "Ok"
+  "ok": "Ok",
+  "theSumOf": "The sum of",
 
+  "receipt": "RECEIPT",
+  "time": "Time",
+  "thankyou": "'--- Thank You! ---'"
 }

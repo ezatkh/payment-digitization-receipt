@@ -16,18 +16,24 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   final TextEditingController _msisdnController = TextEditingController();
   final TextEditingController _prNumberController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _amountCheckController = TextEditingController();
+  final TextEditingController _checkNumberController = TextEditingController();
+  final TextEditingController _bankBranchController = TextEditingController();
+  final TextEditingController _dueDateCheckController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   final FocusNode _customerNameFocusNode = FocusNode();
   final FocusNode _msisdnFocusNode = FocusNode();
   final FocusNode _prNumberFocusNode = FocusNode();
   final FocusNode _amountFocusNode = FocusNode();
+  final FocusNode _amountCheckFocusNode = FocusNode();
+  final FocusNode _checkNumberFocusNode = FocusNode();
+  final FocusNode _bankBranchFocusNode = FocusNode();
+  final FocusNode _dueDateCheckFocusNode = FocusNode();
   final FocusNode _notesFocusNode = FocusNode();
   String? _selectedCurrency;
   String? _selectedPaymentMethod;
   List<String> _currencies = ['usd', 'euro', 'ils', 'jd'];
-  List<String> _paymentMethods = ['cash', 'check', 'creditCard'];
-  bool _showCheckFields = false; // Whether to show the additional fields for check payment
-
+  List<String> _paymentMethods = ['cash', 'check'];
   bool _isCustomerDetailsExpanded = false;
   bool _isPaymentInfoExpanded = false;
   late AnimationController _animationController;
@@ -40,6 +46,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   String savePayment = "";
   String currency = "";
   String amount = "";
+  String amountCheck = "";
+  String checkNumber = "";
+  String bankBranchCheck = "";
+  String dueDateCheck = "";
   String notes = "";
   String paymentMethod = "";
   String customerName = "";
@@ -47,6 +57,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   String fieldsMissedMessageSuccess = "";
   String PR = "";
   String MSISDN = "";
+  String cash="";
+  String check="";
 
   @override
   void initState() {
@@ -61,11 +73,17 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     currency = localizationService.getLocalizedString('currency');
     notes = localizationService.getLocalizedString('notes');
     amount = localizationService.getLocalizedString('amount');
+    amountCheck = localizationService.getLocalizedString('amountCheck');
+    checkNumber = localizationService.getLocalizedString('checkNumber');
+    bankBranchCheck = localizationService.getLocalizedString('bankBranchCheck');
+    dueDateCheck = localizationService.getLocalizedString('dueDateCheck');
     customerName = localizationService.getLocalizedString('customerName');
     fieldsMissedMessageError = localizationService.getLocalizedString('fieldsMissedMessageError');
     fieldsMissedMessageSuccess = localizationService.getLocalizedString('fieldsMissedMessageSuccess');
     PR = localizationService.getLocalizedString('PR');
     MSISDN = localizationService.getLocalizedString('MSISDN');
+    cash = localizationService.getLocalizedString('cash');
+    check = localizationService.getLocalizedString('check');
 
     // Localize and ensure unique values
     _paymentMethods = _paymentMethods
@@ -94,11 +112,20 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     _prNumberController.dispose();
     _amountController.dispose();
     _notesController.dispose();
+    _amountCheckController.dispose();
+    _checkNumberController.dispose();
+    _bankBranchController.dispose();
+    _dueDateCheckController.dispose();
+
     _customerNameFocusNode.dispose();
     _msisdnFocusNode.dispose();
     _prNumberFocusNode.dispose();
     _amountFocusNode.dispose();
     _notesFocusNode.dispose();
+    _amountCheckFocusNode.dispose();
+    _checkNumberFocusNode.dispose();
+    _bankBranchFocusNode.dispose();
+    _dueDateCheckFocusNode.dispose();
     super.dispose();
   }
 
@@ -172,14 +199,47 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                 iconData: Icons.payment,
                 isExpanded: _isPaymentInfoExpanded,
                 children: [
-                  _buildTextField(
-                    _amountController,
-                    amount,
-                    Icons.attach_money,
-                    focusNode: _amountFocusNode,
-                  ),
-                  _buildDropdown(currency, _currencies),
+  //
                   _buildDropdown(paymentMethod, _paymentMethods),
+                  if (_selectedPaymentMethod == cash)
+                    _buildTextField(
+                      _amountController,
+                      amount,
+                      Icons.attach_money,
+                      focusNode: _amountFocusNode,
+                    ),
+                  if (_selectedPaymentMethod == cash)
+                    _buildDropdown(currency, _currencies),
+                  if (_selectedPaymentMethod == check)
+                    _buildTextField(
+                      _amountCheckController,
+                      amountCheck,
+                      Icons.attach_money,
+                      focusNode: _amountCheckFocusNode,
+                    ),
+                  if (_selectedPaymentMethod == check)
+                    _buildTextField(
+                      _checkNumberController,
+                      checkNumber,
+                      Icons.receipt_long_outlined,
+                      focusNode: _checkNumberFocusNode,
+                    ),
+                  if (_selectedPaymentMethod == check)
+                    _buildTextField(
+                      _bankBranchController,
+                      bankBranchCheck,
+                      Icons.account_balance_outlined,
+                      focusNode: _bankBranchFocusNode,
+                    ),
+
+                  if (_selectedPaymentMethod == check)
+                    _buildTextField(
+                      _dueDateCheckController,
+                      dueDateCheck,
+                      Icons.date_range_outlined,
+                      focusNode: _dueDateCheckFocusNode,
+                    ),
+
                   _buildTextField(
                     _notesController,
                     notes,
@@ -306,6 +366,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
         ),
         value: label == currency ? _selectedCurrency : _selectedPaymentMethod,
         onChanged: (String? newValue) {
+          //Here put changes when the payment method changes
+          if(newValue =='')
           setState(() {
             if (label == currency) {
               _selectedCurrency = newValue;

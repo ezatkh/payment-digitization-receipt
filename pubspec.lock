@@ -341,6 +341,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  number_to_word_arabic:
+    dependency: "direct main"
+    description:
+      name: number_to_word_arabic
+      sha256: "76971eadadf39590e29fc8fd41cbc98d6f92facd0946655eb7dc298114cd51b1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.8"
+  number_to_words_english:
+    dependency: "direct main"
+    description:
+      name: number_to_words_english
+      sha256: e55563f5f39fe8a4d570ff1de4efe234c0a8403ac185eb026b46d89e11cf83f3
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
   path:
     dependency: transitive
     description:

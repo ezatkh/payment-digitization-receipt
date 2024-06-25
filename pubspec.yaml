@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  number_to_word_arabic: ^0.0.8
+  number_to_words_english: ^2.0.2
   pdf: ^3.6.0
   permission_handler: ^10.0.0
   local_auth: ^2.2.0

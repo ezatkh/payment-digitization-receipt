@@ -113,11 +113,20 @@
   "jd": "دينار",
   "cash": "كاش",
   "check": "شيك",
+  "amountCheck": "قيمة الشيك",
+  "checkNumber": "رقم الشيك",
+  "bankBranchCheck": "البنك/الفرع",
+  "dueDateCheck": "تاريخ الاستحقاق",
   "creditCard": "بطاقة ائتمان",
 
   "confirmPayment": "تاكيد الدفعة",
   "paymentSummary": "ملخص الدفعة",
   "paymentSuccessful": "تمت عملية الدفع بنجاح",
   "paymentSuccessfulBody": "تم معالجة عملية الدفع بنجاح.",
-  "ok": "حسنا"
+  "ok": "حسنا",
+  "theSumOf": "مبلغاً وقدره",
+  "receipt": "إيصال",
+  "time": "الوقت",
+  "thankYou": "'--- شكراً لك! ---'"
+
 }
