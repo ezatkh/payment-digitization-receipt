@@ -7,10 +7,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 //import 'package:digital_payment_app/generated/l10n.dart;
 import 'Services/LocalizationService.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  LocalizationService localizeService =LocalizationService();
+  LocalizationService localizeService = LocalizationService();
   print("Initializing localization...");
 
   try {
@@ -35,9 +34,12 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    const Color primaryRed = Color(0xFFD32F2F); // Adjust this hex to match exact color from image
-    const Color backgroundGrey = Color(0xFFF7F7F7); // Adjust this hex to match exact color from image
-    const Color inputFieldGrey = Color(0xFFE0E0E0); // Adjust this hex to match exact color from image
+    const Color primaryRed =
+        Color(0xFFD32F2F); // Adjust this hex to match exact color from image
+    const Color backgroundGrey =
+        Color(0xFFF7F7F7); // Adjust this hex to match exact color from image
+    const Color inputFieldGrey =
+        Color(0xFFE0E0E0); // Adjust this hex to match exact color from image
 
     final ThemeData theme = ThemeData(
       brightness: Brightness.light,
@@ -50,7 +52,8 @@ class MyApp extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: inputFieldGrey,
-        contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 25.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 25.0),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
@@ -71,7 +74,8 @@ class MyApp extends StatelessWidget {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white, backgroundColor: primaryRed,
+          foregroundColor: Colors.white,
+          backgroundColor: primaryRed,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 2,
         ),
@@ -85,29 +89,29 @@ class MyApp extends StatelessWidget {
     return Consumer<LocalizationService>(
       builder: (context, localizeService, _) {
         return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'OoPay', // App title
-            theme: theme,
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('en', 'US'), // English
-              Locale('ar', 'AE'), // Arabic
-              // Add more locales as needed
-            ],
-            locale: Locale(localizeService.selectedLanguageCode),
-        home: SplashScreen(),
-        builder: (context, child) {
-        return Directionality(
-        textDirection: localizeService.selectedLanguageCode == 'en'
-        ? TextDirection.ltr
-            : TextDirection.rtl,
-        child: child!,
-        );
-        },
+          debugShowCheckedModeBanner: false,
+          title: 'OoPay', // App title
+          theme: theme,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', 'US'), // English
+            Locale('ar', 'AE'), // Arabic
+            // Add more locales as needed
+          ],
+          locale: Locale(localizeService.selectedLanguageCode),
+          home: SplashScreen(),
+          builder: (context, child) {
+            return Directionality(
+              textDirection: localizeService.selectedLanguageCode == 'en'
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
+              child: child!,
+            );
+          },
         );
       },
     );

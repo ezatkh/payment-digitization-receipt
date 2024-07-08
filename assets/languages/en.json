@@ -95,7 +95,8 @@
   "MSISDN": "MSISDN",
   "PR": "PR",
   "submitPayment": "Submit Payment",
-  "savePayment": "Save Payment",
+  "confirmPayment": "Confirm Payment",
+  "savePayment": "Save",
   "paymentMethod": "Payment Method",
   "currency": "Currency",
   "notes": "Notes",
@@ -119,7 +120,7 @@
   "dueDateCheck": "Due date",
   "creditCard": "Credit Card",
 
-  "confirmPayment": "Confirm Payment",
+  "confirmPayment": "Save & Confirm",
   "paymentSummary": "payment Summary",
   "paymentSuccessful": "Payment Successful",
   "paymentSuccessfulBody": "The payment has been successfully processed.",
@@ -128,5 +129,7 @@
 
   "receipt": "RECEIPT",
   "time": "Time",
-  "thankyou": "'--- Thank You! ---'"
+  "thankyou": "'--- Thank You! ---'",
+
+  "paymentInvoiceFor": "for the payment of the following invoices"
 }

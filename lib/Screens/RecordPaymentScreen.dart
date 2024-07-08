@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
-import '../Custom_Widgets/CustomExpansionTile.dart';
 import 'PaymentConfirmationScreen.dart';
+import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
 
 class RecordPaymentScreen extends StatefulWidget {
@@ -11,7 +10,8 @@ class RecordPaymentScreen extends StatefulWidget {
   _RecordPaymentScreenState createState() => _RecordPaymentScreenState();
 }
 
-class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTickerProviderStateMixin {
+class _RecordPaymentScreenState extends State<RecordPaymentScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _customerNameController = TextEditingController();
   final TextEditingController _msisdnController = TextEditingController();
   final TextEditingController _prNumberController = TextEditingController();
@@ -20,7 +20,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   final TextEditingController _checkNumberController = TextEditingController();
   final TextEditingController _bankBranchController = TextEditingController();
   final TextEditingController _dueDateCheckController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _paymentInvoiceForController = TextEditingController();
   final FocusNode _customerNameFocusNode = FocusNode();
   final FocusNode _msisdnFocusNode = FocusNode();
   final FocusNode _prNumberFocusNode = FocusNode();
@@ -29,20 +29,18 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   final FocusNode _checkNumberFocusNode = FocusNode();
   final FocusNode _bankBranchFocusNode = FocusNode();
   final FocusNode _dueDateCheckFocusNode = FocusNode();
-  final FocusNode _notesFocusNode = FocusNode();
+  final FocusNode _paymentInvoiceForNode = FocusNode();
   String? _selectedCurrency;
   String? _selectedPaymentMethod;
   List<String> _currencies = ['usd', 'euro', 'ils', 'jd'];
   List<String> _paymentMethods = ['cash', 'check'];
-  bool _isCustomerDetailsExpanded = false;
-  bool _isPaymentInfoExpanded = false;
   late AnimationController _animationController;
   late Animation<double> _buttonScaleAnimation;
 
   String recordPayment = "";
   String customerDetails = "";
   String paymentInformation = "";
-  String submitPayment = "";
+  String confirmPayment = "";
   String savePayment = "";
   String currency = "";
   String amount = "";
@@ -50,40 +48,44 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
   String checkNumber = "";
   String bankBranchCheck = "";
   String dueDateCheck = "";
-  String notes = "";
   String paymentMethod = "";
   String customerName = "";
   String fieldsMissedMessageError = "";
   String fieldsMissedMessageSuccess = "";
+  String paymentInvoiceFor = "";
   String PR = "";
   String MSISDN = "";
-  String cash="";
-  String check="";
+  String cash = "";
+  String check = "";
 
   @override
   void initState() {
     super.initState();
-    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    final localizationService =
+        Provider.of<LocalizationService>(context, listen: false);
     recordPayment = localizationService.getLocalizedString('recordPayment');
     customerDetails = localizationService.getLocalizedString('customerDetails');
-    paymentInformation = localizationService.getLocalizedString('paymentInformation');
+    paymentInformation =
+        localizationService.getLocalizedString('paymentInformation');
     savePayment = localizationService.getLocalizedString('savePayment');
-    submitPayment = localizationService.getLocalizedString('submitPayment');
+    confirmPayment = localizationService.getLocalizedString('confirmPayment');
     paymentMethod = localizationService.getLocalizedString('paymentMethod');
     currency = localizationService.getLocalizedString('currency');
-    notes = localizationService.getLocalizedString('notes');
     amount = localizationService.getLocalizedString('amount');
     amountCheck = localizationService.getLocalizedString('amountCheck');
     checkNumber = localizationService.getLocalizedString('checkNumber');
     bankBranchCheck = localizationService.getLocalizedString('bankBranchCheck');
     dueDateCheck = localizationService.getLocalizedString('dueDateCheck');
     customerName = localizationService.getLocalizedString('customerName');
-    fieldsMissedMessageError = localizationService.getLocalizedString('fieldsMissedMessageError');
-    fieldsMissedMessageSuccess = localizationService.getLocalizedString('fieldsMissedMessageSuccess');
+    fieldsMissedMessageError =
+        localizationService.getLocalizedString('fieldsMissedMessageError');
+    fieldsMissedMessageSuccess =
+        localizationService.getLocalizedString('fieldsMissedMessageSuccess');
     PR = localizationService.getLocalizedString('PR');
     MSISDN = localizationService.getLocalizedString('MSISDN');
     cash = localizationService.getLocalizedString('cash');
     check = localizationService.getLocalizedString('check');
+    paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor');
 
     // Localize and ensure unique values
     _paymentMethods = _paymentMethods
@@ -111,21 +113,22 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     _msisdnController.dispose();
     _prNumberController.dispose();
     _amountController.dispose();
-    _notesController.dispose();
     _amountCheckController.dispose();
     _checkNumberController.dispose();
     _bankBranchController.dispose();
     _dueDateCheckController.dispose();
+    _paymentInvoiceForController.dispose();
+
 
     _customerNameFocusNode.dispose();
     _msisdnFocusNode.dispose();
     _prNumberFocusNode.dispose();
     _amountFocusNode.dispose();
-    _notesFocusNode.dispose();
     _amountCheckFocusNode.dispose();
     _checkNumberFocusNode.dispose();
     _bankBranchFocusNode.dispose();
     _dueDateCheckFocusNode.dispose();
+    _paymentInvoiceForNode.dispose();
     super.dispose();
   }
 
@@ -144,35 +147,30 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
           ),
         ),
         title: Text(recordPayment,
-            style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 20.sp,
+                fontFamily: 'NotoSansUI')),
         backgroundColor: Color(0xFFC62828),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: _submitPayment,
-            tooltip: savePayment,
-            color: Colors.white,
-          ),
-        ],
       ),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
         },
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.all(15.w),
           child: Column(
             children: [
               _buildExpandableSection(
                 title: customerDetails,
                 iconData: Icons.account_circle,
-                isExpanded: _isCustomerDetailsExpanded,
                 children: [
                   _buildTextField(
                     _customerNameController,
                     customerName,
                     Icons.person_outline,
                     focusNode: _customerNameFocusNode,
+                      required:true
                   ),
                   _buildTextField(
                     _msisdnController,
@@ -183,13 +181,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
                   _buildTextField(
                     _prNumberController,
                     PR,
-                    Icons.receipt,
+                    Icons.numbers_sharp,
                     focusNode: _prNumberFocusNode,
                   ),
                 ],
-                onExpansionChanged: (bool expanded) {
-                  setState(() => _isCustomerDetailsExpanded = expanded);
-                },
                 checkIfFilled: () {
                   return _customerNameController.text.isNotEmpty;
                 },
@@ -197,67 +192,81 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
               _buildExpandableSection(
                 title: paymentInformation,
                 iconData: Icons.payment,
-                isExpanded: _isPaymentInfoExpanded,
                 children: [
-  //
-                  _buildDropdown(paymentMethod, _paymentMethods),
+                  //
+                  _buildDropdown(paymentMethod, _paymentMethods,required: true),
                   if (_selectedPaymentMethod == cash)
-                    _buildTextField(
-                      _amountController,
-                      amount,
-                      Icons.attach_money,
-                      focusNode: _amountFocusNode,
-                    ),
-                  if (_selectedPaymentMethod == cash)
-                    _buildDropdown(currency, _currencies),
-                  if (_selectedPaymentMethod == check)
-                    _buildTextField(
-                      _amountCheckController,
-                      amountCheck,
-                      Icons.attach_money,
-                      focusNode: _amountCheckFocusNode,
-                    ),
-                  if (_selectedPaymentMethod == check)
-                    _buildTextField(
-                      _checkNumberController,
-                      checkNumber,
-                      Icons.receipt_long_outlined,
-                      focusNode: _checkNumberFocusNode,
-                    ),
-                  if (_selectedPaymentMethod == check)
-                    _buildTextField(
-                      _bankBranchController,
-                      bankBranchCheck,
-                      Icons.account_balance_outlined,
-                      focusNode: _bankBranchFocusNode,
-                    ),
+                    ...[
+                      _buildTextField(
+                        _amountController,
+                        amount,
+                        Icons.attach_money,
+                        focusNode: _amountFocusNode,
+                          required:true
+                      ),
+                      _buildDropdown(currency, _currencies,required: true),
+                    ],
 
                   if (_selectedPaymentMethod == check)
-                    _buildTextField(
-                      _dueDateCheckController,
-                      dueDateCheck,
-                      Icons.date_range_outlined,
-                      focusNode: _dueDateCheckFocusNode,
-                    ),
-
+                    ...[
+                      _buildTextField(
+                        _amountCheckController,
+                        amountCheck,
+                        Icons.attach_money,
+                        focusNode: _amountCheckFocusNode,
+                          required:true
+                      ),
+                      _buildTextField(
+                        _checkNumberController,
+                        checkNumber,
+                        Icons.receipt_long_outlined,
+                        focusNode: _checkNumberFocusNode,
+                          required:true
+                      ),
+                      _buildTextField(
+                        _bankBranchController,
+                        bankBranchCheck,
+                        Icons.account_balance_outlined,
+                        focusNode: _bankBranchFocusNode,
+                          required:true
+                      ),
+                      _buildTextField(
+                        _dueDateCheckController,
+                        dueDateCheck,
+                        Icons.date_range_outlined,
+                        focusNode: _dueDateCheckFocusNode,
+                          isDate: true,
+                          required:true
+                      ),
+                    ],
                   _buildTextField(
-                    _notesController,
-                    notes,
-                    Icons.note_add,
+                    _paymentInvoiceForController,
+                    paymentInvoiceFor,
+                    Icons.receipt,
                     maxLines: 3,
-                    focusNode: _notesFocusNode,
+                    focusNode: _paymentInvoiceForNode,
                   ),
                 ],
-                onExpansionChanged: (bool expanded) {
-                  setState(() => _isPaymentInfoExpanded = expanded);
-                },
                 checkIfFilled: () {
-                  return _amountController.text.isNotEmpty &&
-                      _selectedCurrency != null &&
-                      _selectedPaymentMethod != null;
+                  if (_selectedPaymentMethod == cash) {
+                    return _amountController.text.isNotEmpty &&
+                        _selectedCurrency != null;
+                  } else if (_selectedPaymentMethod == check) {
+                    return _amountCheckController.text.isNotEmpty &&
+                        _checkNumberController.text.isNotEmpty &&
+                        _bankBranchController.text.isNotEmpty &&
+                        _dueDateCheckController.text.isNotEmpty;
+                  }
+                  return false;
                 },
               ),
-              _buildSubmitButton(),
+              Row(
+                children: [
+                  Expanded(child: _buildSaveButton()), // Takes full width
+                  SizedBox(width: 16.w), // Adjust spacing between buttons
+                  Expanded(child: _buildConfirmedButton()), // Takes full width
+                ],
+              ),
             ],
           ),
         ),
@@ -269,47 +278,103 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     required String title,
     required IconData iconData,
     required List<Widget> children,
-    required bool isExpanded,
-    required ValueChanged<bool> onExpansionChanged,
     required bool Function() checkIfFilled,
   }) {
     bool isFilled = checkIfFilled();
     Color iconColor = isFilled ? Color(0xFF4CAF50) : Colors.grey[600]!;
     return Card(
-      elevation: 3,
-      margin: EdgeInsets.symmetric(vertical: 8.h),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: CustomExpansionTile(
-        initiallyExpanded: isExpanded,
-        title: Text(title, style: TextStyle(fontFamily: 'NotoSansUI', fontSize: 14.sp, fontWeight: FontWeight.bold, color: iconColor)),
-        leading: Icon(iconData, size: 22.sp, color: iconColor),
-        children: children,
-        onExpansionChanged: onExpansionChanged,
-        animationDuration: Duration(milliseconds: 300),
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 5.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Padding(
+        padding: EdgeInsets.all(11.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(iconData, size: 22.sp, color: iconColor),
+                SizedBox(width: 10.w),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'NotoSansUI',
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: iconColor,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12.h),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...children,
+                SizedBox(height: 8.h),
+                _buildRequiredFieldsIndicator(checkIfFilled),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText, IconData icon, {int maxLines = 1, required FocusNode focusNode}) {
+  Widget _buildRequiredFieldsIndicator(bool Function() checkIfFilled) {
+    return Row(
+      children: [
+        Text(
+          '* ',
+          style: TextStyle(color: Colors.red),
+        ),
+        Text(
+          'Required fields',
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 12.sp,
+          ),
+        ),
+      ],
+    );
+  }
+
+
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        controller.text = "${pickedDate.toLocal()}".split(' ')[0];
+      });
+    }
+  }
+
+  Widget _buildTextField(TextEditingController controller, String labelText, IconData icon,
+      {int maxLines = 1,
+        required FocusNode focusNode,
+        bool required = false,
+        bool isDate = false}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 16.w),
       child: TextField(
         controller: controller,
         focusNode: focusNode,
         maxLines: maxLines,
+        readOnly: isDate, // Make the field read-only if it's a date field
         decoration: InputDecoration(
-          labelText: labelText,
-          labelStyle: TextStyle(fontFamily: 'NotoSansUI', fontSize: 12.sp, color: Colors.grey[500]),
+          labelText: labelText + (required ? ' *' : ''), // Add '*' if required
+          labelStyle: TextStyle(
+              fontFamily: 'NotoSansUI',
+              fontSize: 12.sp,
+              color: Colors.grey[500]),
           prefixIcon: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Icon(icon, color: Color(0xFFC62828)),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[400]!,
-              width: 1.5,
-            ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -329,17 +394,22 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
           filled: true,
         ),
         style: TextStyle(fontSize: 14.sp, color: Colors.black),
+        onTap: isDate ? () => _selectDate(context, controller) : null,
       ),
     );
   }
 
-  Widget _buildDropdown(String label, List<String> items) {
+  Widget _buildDropdown(String label, List<String> items, {bool required = false}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(fontFamily: 'NotoSansUI', fontSize: 12.sp, color: Colors.grey[500]),
+          labelText: label + (required ? ' *' : ''),
+          labelStyle: TextStyle(
+            fontFamily: 'NotoSansUI',
+            fontSize: 12.sp,
+            color: Colors.grey[500],
+          ),
           contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -361,18 +431,18 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
               color: Colors.grey[300]!,
               width: 1.5,
             ),
-          ),          filled: true,
+          ),
+          filled: true,
           fillColor: Colors.white,
         ),
         value: label == currency ? _selectedCurrency : _selectedPaymentMethod,
         onChanged: (String? newValue) {
-          //Here put changes when the payment method changes
-          if(newValue =='')
           setState(() {
             if (label == currency) {
               _selectedCurrency = newValue;
             } else {
               _selectedPaymentMethod = newValue;
+              _clearPaymentMethodFields(); // Clear fields when payment method changes
             }
           });
         },
@@ -381,18 +451,18 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
             value: value,
             child: Text(
               value,
-              style: TextStyle(fontSize: 12.sp), // Adjust the font size of the selected item here
+              style: TextStyle(
+                fontSize: 12.sp,
+              ),
             ),
-
           );
         }).toList(),
       ),
     );
   }
-
-  Widget _buildSubmitButton() {
+  Widget _buildConfirmedButton() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 20.h),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: GestureDetector(
         onTapDown: (_) => _animationController.forward(),
         onTapUp: (_) => _animationController.reverse(),
@@ -404,12 +474,16 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFC62828),
                 padding: EdgeInsets.symmetric(vertical: 12.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
               ),
-              onPressed: _submitPayment,
+              onPressed: _confirmPayment,
               child: Text(
-                submitPayment,
-                style: TextStyle(color: Colors.white, fontSize: 14.sp, fontFamily: 'NotoSansUI'),
+                confirmPayment,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.sp,
+                    fontFamily: 'NotoSansUI'),
               ),
             ),
           ),
@@ -418,47 +492,129 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen> with SingleTi
     );
   }
 
-  void _submitPayment() {
-    if ([_customerNameController.text, _msisdnController.text, _prNumberController.text, _amountController.text, _selectedCurrency, _selectedPaymentMethod].any((element) => element == null || element.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(fieldsMissedMessageError, style: TextStyle(fontFamily: 'NotoSansUI',)),
-            backgroundColor: Colors.red),
-      );
-      return;
+  Widget _buildSaveButton() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 6.h),
+      child: GestureDetector(
+        onTapDown: (_) => _animationController.forward(),
+        onTapUp: (_) => _animationController.reverse(),
+        child: ScaleTransition(
+          scale: _buttonScaleAnimation,
+          child: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFC62828),
+                padding: EdgeInsets.symmetric(vertical: 12.h),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+              ),
+              onPressed: _savePayment,
+              child: Text(
+                savePayment,
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.sp,
+                    fontFamily: 'NotoSansUI'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _confirmPayment() {
+    if(_selectedPaymentMethod=='cash'){
+      if ([
+        _customerNameController.text,
+        _amountController.text,
+        _selectedCurrency,
+        _selectedPaymentMethod
+      ].any((element) => element == null || element.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(fieldsMissedMessageError,
+                  style: TextStyle(
+                    fontFamily: 'NotoSansUI',
+                  )),
+              backgroundColor: Colors.red),
+        );
+        return;
+      }
+    }
+      else if(_selectedPaymentMethod=='check'){
+      if ([
+        _customerNameController.text,
+        _selectedPaymentMethod,
+        _amountCheckController.text,
+      _checkNumberController.text,
+      _bankBranchController.text,
+      _dueDateCheckController.text,
+      ].any((element) => element == null || element.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(fieldsMissedMessageError,
+                  style: TextStyle(
+                    fontFamily: 'NotoSansUI',
+                  )),
+              backgroundColor: Colors.red),
+        );
+        return;
+      }
     }
 
     // Assuming you have a model or class for passing payment details
-    PaymentDetails paymentDetails = PaymentDetails(
-      customerName: _customerNameController.text,
-      msisdn: _msisdnController.text,
-      prNumber: _prNumberController.text,
-      amount: double.parse(_amountController.text),  // Ensure that amount is a double, handle parsing errors as needed
-      paymentMethod: _selectedPaymentMethod!,
-      date: DateTime.now().toString(), // Example date, adjust formatting as needed
-      currency: _selectedCurrency!,  // Example currency
-    );
+    // Payment paymentDetails = Payment(
+    //   customerName: _customerNameController.text,
+    //   msisdn: _msisdnController.text,
+    //   prNumber: _prNumberController.text,
+    //   paymentMethod: _selectedPaymentMethod!,
+    //   amount: _selectedPaymentMethod == cash ? double.tryParse(_amountController.text) : null,
+    //   amountCheck: _selectedPaymentMethod == check ? double.tryParse(_amountCheckController.text) : null,
+    //   currency: _selectedCurrency,
+    //   checkNumber: _selectedPaymentMethod == 'check' ? _checkNumberController.text : null,
+    //   bankBranch: _selectedPaymentMethod == 'check' ? _bankBranchController.text : null,
+    //   dueDateCheck: _selectedPaymentMethod == 'check' ? _dueDateCheckController.text : null,
+    //   notes: _paymentInvoiceForController.text,
+    // );
 
     // Navigate to the Payment Confirmation Screen
-    Navigator.push(context, MaterialPageRoute(
-      builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails),
-    ));
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) =>
+    //           PaymentConfirmationScreen(paymentDetails: paymentDetails),
+    //     ));
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(fieldsMissedMessageSuccess, style: TextStyle(fontFamily: 'NotoSansUI',)),
+          content: Text(fieldsMissedMessageSuccess,
+              style: TextStyle(
+                fontFamily: 'NotoSansUI',
+              )),
           backgroundColor: Color(0xFF4CAF50)),
     );
 
     _clearFields();
   }
 
+  void _savePayment() {
+    //_clearFields();
+  }
+  void _clearPaymentMethodFields() {
+    _amountController.clear();
+    _amountCheckController.clear();
+    _checkNumberController.clear();
+    _bankBranchController.clear();
+    _dueDateCheckController.clear();
+  }
   void _clearFields() {
     _customerNameController.clear();
     _msisdnController.clear();
     _prNumberController.clear();
     _amountController.clear();
-    _notesController.clear();
+    _paymentInvoiceForController.clear();
     _selectedCurrency = null;
     _selectedPaymentMethod = null;
   }

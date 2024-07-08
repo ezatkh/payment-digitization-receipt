@@ -95,7 +95,8 @@
   "MSISDN": "رقم الهاتف",
   "PR": "رقم الحساب",
   "submitPayment": " إرسال الدفعة",
-  "savePayment": "حفظ الدفعة",
+  "confirmPayment": "تأكيد الدفعة",
+  "savePayment": "حفظ",
   "paymentMethod": "طريقة الدفع",
   "currency": "العملة",
   "notes": "الملاحظات",
@@ -118,8 +119,7 @@
   "bankBranchCheck": "البنك/الفرع",
   "dueDateCheck": "تاريخ الاستحقاق",
   "creditCard": "بطاقة ائتمان",
-
-  "confirmPayment": "تاكيد الدفعة",
+  "confirmPayment": "حفظ و تاكيد",
   "paymentSummary": "ملخص الدفعة",
   "paymentSuccessful": "تمت عملية الدفع بنجاح",
   "paymentSuccessfulBody": "تم معالجة عملية الدفع بنجاح.",
@@ -127,6 +127,8 @@
   "theSumOf": "مبلغاً وقدره",
   "receipt": "إيصال",
   "time": "الوقت",
-  "thankYou": "'--- شكراً لك! ---'"
+  "thankYou": "'--- شكراً لك! ---'",
+
+  "paymentInvoiceFor": "وذلك تسديد عن الفواتير التالية"
 
 }

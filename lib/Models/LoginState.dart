@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:ffi';
-import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../Services/networking.dart';
@@ -12,7 +9,8 @@ class LoginState with ChangeNotifier {
   String _username = '';
   String _password = '';
   bool _rememberMe = false;
-  bool _hasInternetConnection = true; // You should check internet connectivity and set this flag accordingly
+  bool _hasInternetConnection =
+      true; // You should check internet connectivity and set this flag accordingly
   final LocalAuthentication auth = LocalAuthentication();
 
   bool _isLoading = false;
@@ -83,31 +81,84 @@ class LoginState with ChangeNotifier {
     }
   }
 
-  Future<bool> authenticate(context) async {
+  Future<bool> getAvailableBiometricsTypes() async {
+    late List<BiometricType> availableBiometrics;
     try {
-      bool didAuthenticate = await auth.authenticate(
-        localizedReason: 'Please authenticate to proceed',
+      availableBiometrics = await auth.getAvailableBiometrics();
+      if (availableBiometrics.isNotEmpty) {
+        print("Available biometrics: ");
+        for (BiometricType type in availableBiometrics) {
+          if (type == BiometricType.face) {
+            print("Face ID is available.");
+            bool authResult = await authWithFaceId();
+            return authResult;
+          } else if (type == BiometricType.fingerprint) {
+            print("Touch ID is available.");
+            return false;
+          } else if (type == BiometricType.iris) {
+            print("Iris authentication is available.");
+            return false;
+          }
+        }
+      } else {
+        print("No biometric authentication methods are available.");
+      }
+      return false;
+    } on PlatformException catch (e) {
+      availableBiometrics = <BiometricType>[];
+      print(e);
+      return false;
+    }
+  }
+
+  Future<bool> authWithFaceId() async {
+    bool authenticated = false;
+    try {
+      authenticated = await auth.authenticate(
+        localizedReason:
+            'Please authenticate using Face ID to access this feature',
         options: const AuthenticationOptions(
-          biometricOnly: true,
+          useErrorDialogs: true,
+          stickyAuth: true,
+          biometricOnly: true, // Ensure only biometrics are used
         ),
       );
-
-      if (didAuthenticate) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Authenticated successfully')),
-        );
-        return true;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Authentication failed')),
-        );
-        return false;
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error during authentication: $e')),
-      );
+    } on PlatformException catch (e) {
+      print(e);
     }
+    if (authenticated) {
+      print("Face ID authentication successful!");
+      return true;
+    } else
+      print("Face ID authentication failed.");
     return false;
   }
+
+  // Future<bool> authenticate(context) async {
+  //   try {
+  //     bool didAuthenticate = await auth.authenticate(
+  //       localizedReason: 'Please authenticate to proceed',
+  //       options: const AuthenticationOptions(
+  //         biometricOnly: true,
+  //       ),
+  //     );
+
+  //     if (didAuthenticate) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Authenticated successfully')),
+  //       );
+  //       return true;
+  //     } else {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Authentication failed')),
+  //       );
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error during authentication: $e')),
+  //     );
+  //   }
+  //   return false;
+  // }
 }
