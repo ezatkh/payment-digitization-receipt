@@ -17,8 +17,29 @@ class Payment {
   String? bankBranch;
   DateTime? dueDateCheck;
   String? currency;
-  String? notes;
+  String? paymentInvoiceFor;
+  String status;
+  DateTime createdDate;
+  //String createdBy;
 
+  //user
+  //date
+
+  void printAllFields() {
+    print("customerName: " + (this.customerName ?? ''));
+    print("msisdn: " + (this.msisdn ?? ''));
+    print("prNumber: " + (this.prNumber ?? ''));
+    print("paymentMethod: " + (this.paymentMethod ?? ''));
+    print("amount: " + (this.amount?.toString() ?? ''));
+    print("amountCheck: " + (this.amountCheck?.toString() ?? ''));
+    print("checkNumber: " + (this.checkNumber ?? ''));
+    print("bankBranch: " + (this.bankBranch ?? ''));
+    print("dueDateCheck: " + (this.dueDateCheck?.toIso8601String() ?? ''));
+    print("currency: " + (this.currency ?? ''));
+    print("paymentInvoiceFor: " + (this.paymentInvoiceFor ?? ''));
+    print("status: " + this.status);
+    print("createdDate: " + this.createdDate.toIso8601String());
+  }
   Payment({
     this.voucherSerialNumber = '',
     required this.customerName,
@@ -31,8 +52,14 @@ class Payment {
     this.bankBranch,
     this.dueDateCheck,
     this.currency,
-    this.notes,
-  });
+    this.paymentInvoiceFor,
+    required this.status
+  }): createdDate=DateTime.now()
+
+  {
+    printAllFields();
+  }
+
 
   // Method to create a Payment object from a JSON map
   factory Payment.fromJson(Map<String, dynamic> json) {
@@ -49,7 +76,8 @@ class Payment {
       dueDateCheck: json['dueDateCheck'] != null ? DateTime.parse(
           json['dueDateCheck']) : null,
       currency: json['currency'],
-      notes: json['notes'],
+      paymentInvoiceFor: json['notes'],
+      status: json['status'],
     );
   }
 
@@ -67,7 +95,11 @@ class Payment {
       'bankBranch': bankBranch,
       'dueDateCheck': dueDateCheck?.toIso8601String(),
       'currency': currency,
-      'notes': notes,
+      'notes': paymentInvoiceFor,
+      'status': status,
+      'createdDate': createdDate.toIso8601String(),
     };
   }
+
+
 }

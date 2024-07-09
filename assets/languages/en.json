@@ -131,5 +131,14 @@
   "time": "Time",
   "thankyou": "'--- Thank You! ---'",
 
-  "paymentInvoiceFor": "for the payment of the following invoices"
+  "paymentInvoiceFor": "for the payment of the following invoices",
+
+  "confirmTitle": "Confirm Payment",
+  "saveTitle": "Save Payment",
+  "requiredFields": "Required Fields"
+
+
+
+
+
 }

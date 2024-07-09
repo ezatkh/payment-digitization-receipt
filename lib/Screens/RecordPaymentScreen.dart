@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
+import 'package:intl/intl.dart';
 
 class RecordPaymentScreen extends StatefulWidget {
   @override
@@ -37,6 +38,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   late AnimationController _animationController;
   late Animation<double> _buttonScaleAnimation;
 
+  bool _isLoading = false;
   String recordPayment = "";
   String customerDetails = "";
   String paymentInformation = "";
@@ -57,16 +59,17 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   String MSISDN = "";
   String cash = "";
   String check = "";
+  String requiredFields="";
 
   @override
   void initState() {
     super.initState();
     final localizationService =
         Provider.of<LocalizationService>(context, listen: false);
+    requiredFields = localizationService.getLocalizedString('requiredFields');
     recordPayment = localizationService.getLocalizedString('recordPayment');
     customerDetails = localizationService.getLocalizedString('customerDetails');
-    paymentInformation =
-        localizationService.getLocalizedString('paymentInformation');
+    paymentInformation = localizationService.getLocalizedString('paymentInformation');
     savePayment = localizationService.getLocalizedString('savePayment');
     confirmPayment = localizationService.getLocalizedString('confirmPayment');
     paymentMethod = localizationService.getLocalizedString('paymentMethod');
@@ -329,7 +332,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           style: TextStyle(color: Colors.red),
         ),
         Text(
-          'Required fields',
+          requiredFields,
           style: TextStyle(
             color: Colors.grey[600],
             fontSize: 12.sp,
@@ -460,6 +463,93 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       ),
     );
   }
+
+  bool _validateFields() {
+    // Validate customer name
+    if (_customerNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Customer name is required."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
+    // Validate payment method
+    if (_selectedPaymentMethod == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Payment method is required."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
+    // Validate based on selected payment method
+    if (_selectedPaymentMethod == cash) {
+      // Validate amount for cash payment
+      if (_amountController.text.isEmpty || _selectedCurrency == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(fieldsMissedMessageError),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+      // Validate amount format (accepts decimal numbers)
+      if (double.tryParse(_amountController.text) == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Invalid amount format for cash."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+    } else if (_selectedPaymentMethod == check) {
+      // Validate fields for check payment
+      if (_amountCheckController.text.isEmpty ||
+          _checkNumberController.text.isEmpty ||
+          _bankBranchController.text.isEmpty ||
+          _dueDateCheckController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(fieldsMissedMessageError),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+
+      // Validate amount check format (accepts decimal numbers)
+      if (double.tryParse(_amountCheckController.text) == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Invalid amount format for check."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+
+      // Validate check number (only numeric characters)
+      if (!RegExp(r'^[0-9]*$').hasMatch(_checkNumberController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Check number must contain only numbers."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   Widget _buildConfirmedButton() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -525,83 +615,91 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _confirmPayment() {
-    if(_selectedPaymentMethod=='cash'){
-      if ([
-        _customerNameController.text,
-        _amountController.text,
-        _selectedCurrency,
-        _selectedPaymentMethod
-      ].any((element) => element == null || element.isEmpty)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(fieldsMissedMessageError,
-                  style: TextStyle(
-                    fontFamily: 'NotoSansUI',
-                  )),
-              backgroundColor: Colors.red),
-        );
-        return;
-      }
-    }
-      else if(_selectedPaymentMethod=='check'){
-      if ([
-        _customerNameController.text,
-        _selectedPaymentMethod,
-        _amountCheckController.text,
-      _checkNumberController.text,
-      _bankBranchController.text,
-      _dueDateCheckController.text,
-      ].any((element) => element == null || element.isEmpty)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(fieldsMissedMessageError,
-                  style: TextStyle(
-                    fontFamily: 'NotoSansUI',
-                  )),
-              backgroundColor: Colors.red),
-        );
-        return;
-      }
-    }
+    if (!_validateFields()) return;
 
-    // Assuming you have a model or class for passing payment details
-    // Payment paymentDetails = Payment(
-    //   customerName: _customerNameController.text,
-    //   msisdn: _msisdnController.text,
-    //   prNumber: _prNumberController.text,
-    //   paymentMethod: _selectedPaymentMethod!,
-    //   amount: _selectedPaymentMethod == cash ? double.tryParse(_amountController.text) : null,
-    //   amountCheck: _selectedPaymentMethod == check ? double.tryParse(_amountCheckController.text) : null,
-    //   currency: _selectedCurrency,
-    //   checkNumber: _selectedPaymentMethod == 'check' ? _checkNumberController.text : null,
-    //   bankBranch: _selectedPaymentMethod == 'check' ? _bankBranchController.text : null,
-    //   dueDateCheck: _selectedPaymentMethod == 'check' ? _dueDateCheckController.text : null,
-    //   notes: _paymentInvoiceForController.text,
-    // );
-
-    // Navigate to the Payment Confirmation Screen
-    // Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) =>
-    //           PaymentConfirmationScreen(paymentDetails: paymentDetails),
-    //     ));
-
+    Payment paymentDetails = _preparePaymentObject('confirmed');
+    // Use paymentDetails as needed
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-          content: Text(fieldsMissedMessageSuccess,
-              style: TextStyle(
-                fontFamily: 'NotoSansUI',
-              )),
-          backgroundColor: Color(0xFF4CAF50)),
+        content: Text("Payment confirmed."),
+        backgroundColor: Color(0xFF4CAF50),
+      ),
     );
 
-    _clearFields();
+
+      // Navigate to PaymentConfirmationScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
+      );
+
+  }
+  void _savePayment() {
+    if (!_validateFields()) return;
+
+    Payment paymentDetails = _preparePaymentObject('saved');
+    // Use paymentDetails as needed
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Payment saved."),
+        backgroundColor: Color(0xFF4CAF50),
+      ),
+    );
+
+
+      // Navigate to PaymentConfirmationScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
+      );
+
+  }
+  Payment _preparePaymentObject(String status) {
+    DateTime? parseDueDate;
+    if (_selectedPaymentMethod!.toLowerCase() == 'cash' || _selectedPaymentMethod!.toLowerCase() == 'كاش') {
+      if ([_customerNameController.text, _amountController.text, _selectedCurrency, _selectedPaymentMethod]
+          .any((element) => element == null || element.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(fieldsMissedMessageError),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return Payment(customerName: '', paymentMethod: '', status: '');
+      }
+    } else if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
+      if ([_customerNameController.text, _selectedPaymentMethod, _amountCheckController.text,
+        _checkNumberController.text, _bankBranchController.text, _dueDateCheckController.text]
+          .any((element) => element == null || element.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(fieldsMissedMessageError),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return Payment(customerName: '', paymentMethod: '', status: '');
+      }
+      print("_dueDateCheckController.text");
+      print(_dueDateCheckController.text);
+      parseDueDate = DateTime.parse(_dueDateCheckController.text);
+    }
+
+    return Payment(
+      customerName: _customerNameController.text,
+      msisdn: _msisdnController.text!,
+      prNumber: _prNumberController.text!,
+      paymentMethod: _selectedPaymentMethod!,
+      amount: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? double.tryParse(_amountController.text) : null,
+      currency: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? _selectedCurrency: null,
+      paymentInvoiceFor: _paymentInvoiceForController.text,
+      amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
+      checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _checkNumberController.text : null,
+      bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
+      dueDateCheck: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? parseDueDate : null,
+      status: status,
+    );
   }
 
-  void _savePayment() {
-    //_clearFields();
-  }
   void _clearPaymentMethodFields() {
     _amountController.clear();
     _amountCheckController.clear();
