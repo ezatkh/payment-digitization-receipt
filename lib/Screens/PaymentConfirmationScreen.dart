@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:digital_payment_app/Screens/PaymentHistoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../Models/Payment.dart';
+import '../Repositories/database.dart';
 import '../Services/LocalizationService.dart';
 import 'DashboardScreen.dart';
 import 'package:intl/intl.dart';
@@ -186,7 +188,34 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     // Simulate a network request/waiting time
     await Future.delayed(Duration(seconds: 2));
 
-    Navigator.pop(context); // Close the CircularProgressIndicator
+//   Navigator.pop(context); // Close the CircularProgressIndicator
+
+    try{
+      await DatabaseProvider.savePayment({
+        'voucherSerialNumber': '123456',
+        'customerName': 'John Doe',
+        'msisdn': '555-1234',
+        'prNumber': 'PR123',
+        'paymentMethod': 'Credit Card',
+        'amount': 100.0,
+        'amountCheck': null,
+        'checkNumber': null,
+        'bankBranch': null,
+        'dueDateCheck': null,
+        'currency': 'USD',
+        'paymentInvoiceFor': 'Some description',
+        'status': 'saved',
+        'createdDate': DateTime.now().toIso8601String(),
+      });
+
+      // Fetch all payments from the database
+      List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
+      print('All Payments:');
+      payments.forEach((payment) {
+        print(payment);
+      });
+
+      Navigator.pop(context);
 
     showDialog(
       context: context,
@@ -251,7 +280,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                       ),
                       onPressed: () {
                         Navigator.of(dialogContext).pop(); // Dismiss the dialog
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen())); // Navigate to Dashboard
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to Dashboard
                       },
                     )
                   ],
@@ -262,6 +291,11 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         );
       },
     );
+    }catch (e) {
+      print('Error saving payment: $e');
+      // Handle error scenario
+    }
+
   }
 
   Widget _actionButton(String text, Color color, VoidCallback onPressed) {
