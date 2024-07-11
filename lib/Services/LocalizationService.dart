@@ -34,18 +34,13 @@ class LocalizationService extends ChangeNotifier {
     if (savedLanguageCode != null) {
       _selectedLanguageCode = savedLanguageCode;
     }
-    print("invoke the load localization inside the initLocalization");
     _loadLocalizedStrings();
   }
 
   void _loadLocalizedStrings() async {
-    print("Loading localized strings for language code: $_selectedLanguageCode");
     try {
-      print("inside try");
       String jsonString = await rootBundle.loadString('assets/languages/$_selectedLanguageCode.json');
-      print("inside try1");
       _localizedStrings = json.decode(jsonString);
-      print("_selectedLanguageCode after get from the assets: $_selectedLanguageCode");
       _isLocalizationLoaded = true;
       notifyListeners(); // Notify listeners when localized strings are loaded
     } catch (e) {

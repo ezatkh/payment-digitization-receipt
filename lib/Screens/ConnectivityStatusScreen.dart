@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart'; // Add intl package for date formatting
+import '../Apis/payment_api.dart';
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 class ConnectivityStatusScreen extends StatefulWidget {
@@ -116,7 +117,7 @@ class _ConnectivityStatusScreenState extends State<ConnectivityStatusScreen> wit
             Spacer(),
             ElevatedButton(
               onPressed: () {
-                // Trigger connectivity check
+                PaymentApi.syncConfirmedPayments();
               },
               style: ElevatedButton.styleFrom(foregroundColor: Color(0xFFA60016), backgroundColor: Colors.white),
               child: Text(_retry,style: TextStyle(fontFamily: "NotoSansUI",),),

@@ -38,7 +38,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   late AnimationController _animationController;
   late Animation<double> _buttonScaleAnimation;
 
-  bool _isLoading = false;
   String recordPayment = "";
   String customerDetails = "";
   String paymentInformation = "";
@@ -615,9 +614,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _confirmPayment() {
+    print("_confirmPaymentMethod");
     if (!_validateFields()) return;
 
-    Payment paymentDetails = _preparePaymentObject('confirmed');
+    Payment paymentDetails = _preparePaymentObject('Confirmed');
     // Use paymentDetails as needed
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -637,7 +637,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   void _savePayment() {
     if (!_validateFields()) return;
 
-    Payment paymentDetails = _preparePaymentObject('saved');
+    Payment paymentDetails = _preparePaymentObject('Saved');
     // Use paymentDetails as needed
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -679,25 +679,30 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         );
         return Payment(customerName: '', paymentMethod: '', status: '');
       }
-      print("_dueDateCheckController.text");
-      print(_dueDateCheckController.text);
-      parseDueDate = DateTime.parse(_dueDateCheckController.text);
+      if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
+        if (_dueDateCheckController.text.isNotEmpty) {
+           parseDueDate = DateFormat('yyyy-MM-dd').parse(_dueDateCheckController.text);
+          print("the date before saved to database ${parseDueDate.toString()}");
+        }
+      }
+
     }
 
-    return Payment(
-      customerName: _customerNameController.text,
-      msisdn: _msisdnController.text!,
-      prNumber: _prNumberController.text!,
-      paymentMethod: _selectedPaymentMethod!,
-      amount: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? double.tryParse(_amountController.text) : null,
-      currency: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? _selectedCurrency: null,
-      paymentInvoiceFor: _paymentInvoiceForController.text,
-      amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
-      checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _checkNumberController.text : null,
-      bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
-      dueDateCheck: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? parseDueDate : null,
-      status: status,
-    );
+Payment paymentDetail= Payment(
+  customerName: _customerNameController.text,
+  msisdn: _msisdnController.text.isNotEmpty?_msisdnController.text: null,
+  prNumber: _prNumberController.text!,
+  paymentMethod: _selectedPaymentMethod!,
+  amount: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? double.tryParse(_amountController.text) : null,
+  currency: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? _selectedCurrency: null,
+  paymentInvoiceFor: _paymentInvoiceForController.text.length>0?_paymentInvoiceForController.text:null,
+  amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
+  checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'?  int.tryParse(_checkNumberController.text) : null,
+  bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
+  dueDateCheck: parseDueDate , // Formatting the date
+  status: status,
+);
+    return paymentDetail;
   }
 
   void _clearPaymentMethodFields() {

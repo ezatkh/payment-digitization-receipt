@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 
@@ -10,14 +11,12 @@ class Payment {
   String paymentMethod;
   double? amount;
   double? amountCheck;
-  String? checkNumber;
+  int? checkNumber;
   String? bankBranch;
   DateTime? dueDateCheck;
   String? currency;
   String? paymentInvoiceFor;
   String status;
-  DateTime createdDate;
-  //String createdBy;
 
   //user
   //date
@@ -29,13 +28,12 @@ class Payment {
     print("paymentMethod: " + (this.paymentMethod ?? ''));
     print("amount: " + (this.amount?.toString() ?? ''));
     print("amountCheck: " + (this.amountCheck?.toString() ?? ''));
-    print("checkNumber: " + (this.checkNumber ?? ''));
+    print("checkNumber: " + (this.checkNumber.toString() ?? ''));
     print("bankBranch: " + (this.bankBranch ?? ''));
-    print("dueDateCheck: " + (this.dueDateCheck?.toIso8601String() ?? ''));
+    print("dueDateCheck: " + (this.dueDateCheck.toString() ?? ''));
     print("currency: " + (this.currency ?? ''));
     print("paymentInvoiceFor: " + (this.paymentInvoiceFor ?? ''));
     print("status: " + this.status);
-    print("createdDate: " + this.createdDate.toIso8601String());
   }
   Payment({
     this.voucherSerialNumber = '',
@@ -51,11 +49,11 @@ class Payment {
     this.currency,
     this.paymentInvoiceFor,
     required this.status
-  }): createdDate=DateTime.now()
-
+  })
   {
     printAllFields();
   }
+
 
 
   // Method to create a Payment object from a JSON map
@@ -94,11 +92,6 @@ class Payment {
       'currency': currency,
       'notes': paymentInvoiceFor,
       'status': status,
-      'createdDate': createdDate.toIso8601String(),
     };
   }
-
-
-
-
 }

@@ -1,15 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
-
 import 'package:digital_payment_app/Screens/PaymentHistoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../Models/Payment.dart';
-import '../Repositories/database.dart';
+import '../Services/database.dart';
 import '../Services/LocalizationService.dart';
-import 'DashboardScreen.dart';
 import 'package:intl/intl.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
@@ -22,6 +20,8 @@ class PaymentConfirmationScreen extends StatefulWidget {
 }
 
 class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
+
+  String paymentInvoiceFor="";
   String amountCheck="";
   String checkNumber="";
   String bankBranch="";
@@ -52,6 +52,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
   void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor') ?? 'Confirm Payment';
     amountCheck = localizationService.getLocalizedString('amountCheck') ?? 'Confirm Payment';
     checkNumber = localizationService.getLocalizedString('checkNumber') ?? 'Confirm Payment';
     bankBranch = localizationService.getLocalizedString('bankBranchCheck') ?? 'Confirm Payment';
@@ -84,7 +85,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     ScreenUtil.init(context, designSize: Size(360, 690));
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.paymentDetails.status == 'saved'?saveTitle :confirmTitle, style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
+        title: Text(widget.paymentDetails.status.toLowerCase() == 'saved'?saveTitle :confirmTitle, style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
         backgroundColor: Color(0xFFC62828),
         elevation: 0,
       ),
@@ -95,7 +96,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           children: [
             _buildPaymentDetailCard(),
             SizedBox(height: 24.h),
-            _buildConfirmationActions(),
+            _buildConfirmationActions(widget.paymentDetails),
           ],
         ),
       ),
@@ -121,7 +122,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(paymentSummary, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828))),
+          Text(paymentSummary, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828))),
           Divider(color: Color(0xFFC62828), thickness: 1, height: 20.h),
           _detailItem(customerName, widget.paymentDetails.customerName),
           _detailItem(paymentMethod, widget.paymentDetails.paymentMethod),
@@ -137,13 +138,40 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             _detailItem(bankBranch, widget.paymentDetails.bankBranch.toString()),
           if (widget.paymentDetails.paymentMethod.toLowerCase() =="check" ||widget.paymentDetails.paymentMethod =="شيك")
             _detailItem(dueDateCheck, DateFormat('yyyy-MM-dd').format(widget.paymentDetails.dueDateCheck!).toString()),
-
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="cach" ||widget.paymentDetails.paymentMethod =="كاش")
+          if (widget.paymentDetails.paymentMethod.toLowerCase() =="cash" ||widget.paymentDetails.paymentMethod =="كاش")
             _detailItem(amount, widget.paymentDetails.amount.toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="cach" ||widget.paymentDetails.paymentMethod =="كاش")
+          if (widget.paymentDetails.paymentMethod.toLowerCase() =="cash" ||widget.paymentDetails.paymentMethod =="كاش")
           _detailItem(currency, widget.paymentDetails.currency.toString()),
+          if (widget.paymentDetails.paymentInvoiceFor != null && widget.paymentDetails.paymentInvoiceFor!.isNotEmpty)
+            _detailNoteItem(paymentInvoiceFor, widget.paymentDetails.paymentInvoiceFor.toString()),
 
 
+        ],
+      ),
+    );
+  }
+  Widget _detailNoteItem(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, fontFamily: 'NotoSansUI', color: Colors.grey.shade800)),
+          SizedBox(height: 8.h),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI', color: Colors.black87),
+              maxLines: null, // Allow unlimited lines
+              textAlign: TextAlign.left,
+            ),
+          ),
         ],
       ),
     );
@@ -155,26 +183,26 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, fontFamily: 'NotoSansUI', color: Colors.grey.shade800)),
+          Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, fontFamily: 'NotoSansUI', color: Colors.grey.shade800)),
           Flexible(
-            child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 16.sp, fontFamily: 'NotoSansUI', color: Colors.black87)),
+            child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI', color: Colors.black87)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildConfirmationActions() {
+  Widget _buildConfirmationActions(Payment paymentDetails) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _actionButton(cancel, Color(0xFFC62828), () => Navigator.of(context).pop()),
-        _actionButton(widget.paymentDetails.status == 'saved'?savePayment :confirmPayment, Color(0xFF4CAF50), () => _confirmPayment()),
+        _actionButton(widget.paymentDetails.status.toLowerCase() == 'saved'?savePayment :confirmPayment, Color(0xFF4CAF50), () => _confirmPayment(paymentDetails)),
       ],
     );
   }
 
-  void _confirmPayment() async {
+  void _confirmPayment(Payment paymentDetails) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -189,27 +217,28 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     await Future.delayed(Duration(seconds: 2));
 
 //   Navigator.pop(context); // Close the CircularProgressIndicator
+    // msisdn TEXT,
+    // prNumber TEXT,
 
     try{
       await DatabaseProvider.savePayment({
-        'voucherSerialNumber': '123456',
-        'customerName': 'John Doe',
-        'msisdn': '555-1234',
-        'prNumber': 'PR123',
-        'paymentMethod': 'Credit Card',
-        'amount': 100.0,
-        'amountCheck': null,
-        'checkNumber': null,
-        'bankBranch': null,
-        'dueDateCheck': null,
-        'currency': 'USD',
-        'paymentInvoiceFor': 'Some description',
-        'status': 'saved',
-        'createdDate': DateTime.now().toIso8601String(),
+        'customerName': paymentDetails.customerName,
+        'paymentMethod': paymentDetails.paymentMethod,
+        'status':paymentDetails.status,
+      'msisdn': paymentDetails.msisdn,
+        'prNumber': paymentDetails.prNumber,
+        'amount': paymentDetails.amount ,
+        'currency':  paymentDetails.currency,
+        'amountCheck':  paymentDetails.amountCheck,
+        'checkNumber':  paymentDetails.checkNumber,
+        'bankBranch': paymentDetails.bankBranch ,
+        'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
+        'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
       });
+      print("saved to db Successfully");
 
       // Fetch all payments from the database
-      List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
+      List<Map<String, dynamic>> payments = await DatabaseProvider.getConfirmedPayments();
       print('All Payments:');
       payments.forEach((payment) {
         print(payment);
@@ -280,7 +309,8 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                       ),
                       onPressed: () {
                         Navigator.of(dialogContext).pop(); // Dismiss the dialog
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to Dashboard
+                        Navigator.of(dialogContext).pop(); //Dismess the recordPaymentScreen
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to PaymentHistoryScreen with Dismess the confirmationPaymentScreen
                       },
                     )
                   ],
@@ -305,7 +335,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         backgroundColor: color,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-        textStyle: TextStyle(decoration: TextDecoration.none, fontSize: 16.sp, fontFamily: 'NotoSansUI', color: Colors.white),
+        textStyle: TextStyle(decoration: TextDecoration.none, fontSize: 14.sp, fontFamily: 'NotoSansUI', color: Colors.white),
       ),
       child: Text(text),
     );

@@ -131,7 +131,7 @@
   "time": "Time",
   "thankyou": "'--- Thank You! ---'",
 
-  "paymentInvoiceFor": "for the payment of the following invoices",
+  "paymentInvoiceFor": "Payment is for the following invoices:",
 
   "confirmTitle": "Confirm Payment",
   "saveTitle": "Save Payment",

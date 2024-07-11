@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:intl/intl.dart';
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
+import '../Services/database.dart';
+import '../Models/Payment.dart';
+
 
 class PaymentHistoryScreen extends StatefulWidget {
   @override
@@ -18,6 +21,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   String from='';
   String to='';
   String search='';
+  List<Payment> _paymentRecords = [];
   void _initializeLocalizationStrings( ) {
     final localizationService = Provider.of<LocalizationService>(
         context, listen: false);
@@ -29,6 +33,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   @override
   void initState() {
+    _fetchPayments();
     super.initState();
     // Initialize the localization strings
     _initializeLocalizationStrings();
@@ -136,49 +141,57 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         minimumSize: Size(double.infinity, 40.h),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      onPressed: () {},
+      onPressed: _fetchConfirmPayments,
     );
   }
 
   Widget _buildPaymentRecordsList() {
-    List<PaymentRecord> paymentRecords = [
-      PaymentRecord(
-          customerName: "John Doe",
-          amount: 150.00,
-          date: "2023-04-12",
-          paymentMethod: "Credit Card",
-          msisdn: "123456789",
-          prNumber: "PR1234",
-          currency: "USD"),
-      PaymentRecord(
-          customerName: "Jane Smith",
-          amount: 200.00,
-          date: "2023-04-11",
-          paymentMethod: "Cash",
-          msisdn: "987654321",
-          prNumber: "PR1235",
-          currency: "EUR"),
-      PaymentRecord(
-          customerName: "Alice Johnson",
-          amount: 300.00,
-          date: "2023-04-10",
-          paymentMethod: "Check",
-          msisdn: "192837465",
-          prNumber: "PR1236",
-          currency: "QAR"),
-    ];
-
-    return ListView.builder(
+    return _paymentRecords.isEmpty
+        ? Center(child: Text('No records found'))
+        : ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      itemCount: paymentRecords.length,
+      itemCount: _paymentRecords.length,
       itemBuilder: (context, index) {
-        return _buildPaymentRecordItem(paymentRecords[index]);
+        return _buildPaymentRecordItem(_paymentRecords[index] );
       },
     );
   }
+  String _formatDate(DateTime? date) {
+    if (date == null) return ''; // handle null date
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
 
-  Widget _buildPaymentRecordItem(PaymentRecord record) {
+
+  Widget _buildPaymentRecordItem(Payment record) {
+    IconData statusIcon;
+    Color statusColor;
+
+    // Determine icon and color based on payment status
+    switch (record.status.toLowerCase()) {
+      case 'saved':
+        statusIcon = Icons.save_rounded;
+        statusColor = Color(0xFF284DA6);
+        break;
+      case 'confirmed':
+        statusIcon = Icons.sync_problem_outlined;
+        statusColor = Colors.blue;
+        break;
+      case 'synced':
+        statusIcon = Icons.check_circle;
+        statusColor = Colors.green;
+        break;
+      case 'canceled':
+        statusIcon = Icons.cancel;
+        statusColor = Colors.red;
+        break;
+      default:
+        statusIcon = Icons.payment;
+        statusColor = Color(0xFFC62828); // Default color
+        break;
+    }
+    print("_buildPaymentRecordItem");
+    record.printAllFields();
     return Card(
       elevation: 2,
       margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
@@ -187,20 +200,39 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         data: ThemeData(dividerColor: Colors.transparent),
         child: ExpansionTile(
           leading: CircleAvatar(
-            backgroundColor: Color(0xFFC62828),
-            child: Icon(Icons.payment, color: Colors.white),
+            backgroundColor: Colors.white,
+            child: Icon(statusIcon, color: statusColor, size: 26),
           ),
           title: Text(record.customerName,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
-          subtitle: Text('${record.currency} ${record.amount.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 15.sp, color: Colors.grey.shade600)),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+          subtitle: Text('${record.status} ',
+              style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
           childrenPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+
           children: [
             _paymentDetailRow('Payment Method', record.paymentMethod),
-            _paymentDetailRow('PR#', record.prNumber),
-            _paymentDetailRow('Date', record.date),
-            _paymentDetailRow('Currency', record.currency),
-            _paymentDetailRow('MSISDN', record.msisdn),
+            _paymentDetailRow('Status', record.status),
+            if (record.msisdn != null && record.msisdn!.length > 0)
+              _paymentDetailRow('MSISDN', record.msisdn.toString()),
+            if (record.prNumber != null && record.prNumber!.length > 0)
+              _paymentDetailRow('#PR', record.prNumber.toString()),
+            if (record.paymentMethod.toLowerCase() == 'cash')
+              _paymentDetailRow('Amount', record.amount.toString()),
+            if (record.paymentMethod.toLowerCase() == 'cash')
+              _paymentDetailRow('Currency', record.currency.toString()),
+            if (record.paymentMethod.toLowerCase() == 'check')
+              _paymentDetailRow('Amount', record.amountCheck.toString()),
+            if (record.paymentMethod.toLowerCase() == 'check')
+              _paymentDetailRow('Check Number', record.checkNumber.toString()),
+            if (record.paymentMethod.toLowerCase() == 'check')
+              _paymentDetailRow('Bank/Branch', record.bankBranch.toString()),
+            if (record.paymentMethod.toLowerCase() == 'check')
+              _paymentDetailRow('Due Date', _formatDate(record.dueDateCheck)),
+            if (record.paymentInvoiceFor != null &&
+                record.paymentInvoiceFor!.isNotEmpty)
+              _paymentDetailRowWithMultiline(
+                  'Payment Invoice For:', record.paymentInvoiceFor.toString()),
+            // i want add the paymentInvoiceFor field here
           ],
           onExpansionChanged: (bool expanded) {
             // Optionally add analytics or state management hooks here
@@ -216,30 +248,111 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade800)),
-          Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500, color: Colors.black87)),
+          Text(title, style: TextStyle(fontSize: 14.sp,fontWeight: FontWeight.w400,color: Colors.grey.shade500)),
+          Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.black87)),
         ],
       ),
     );
   }
+
+  Widget _paymentDetailRowWithMultiline(String title, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(title,
+                textAlign: TextAlign.start,
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400,color: Colors.grey.shade500)),
+          ),
+          SizedBox(height: 4.h),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(value,
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87)),
+          ),
+        ],
+      ),
+    );
+  }
+  void _fetchConfirmPayments() async {
+    //await DatabaseProvider.clearDatabase();
+
+    List<Map<String, dynamic>> payments = await DatabaseProvider.getConfirmedPayments();
+    String? dueDateCheckString ;
+    DateTime? dueDateCheck;
+    setState(() {
+      _paymentRecords = payments.map((payment) {
+        dueDateCheckString = payment['dueDateCheck'];
+        if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
+          try {
+            dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
+          } catch (e) {
+            print('Error parsing dueDateCheck: $dueDateCheckString');
+            dueDateCheck = null;
+          }
+        } else {
+          dueDateCheck = null;
+        }
+        return Payment(
+          customerName: payment['customerName'],
+          msisdn: payment['msisdn'],
+          prNumber: payment['prNumber'],
+          paymentMethod: payment['paymentMethod'],
+          amount: payment['amount'],
+          currency: payment['currency'],
+          amountCheck: payment['amountCheck'],
+          checkNumber: payment['checkNumber'],
+          bankBranch: payment['bankBranch'],
+          dueDateCheck: dueDateCheck,
+          paymentInvoiceFor: payment['paymentInvoiceFor'],
+          status: payment['status'],
+        );
+      }).toList();
+    });
+  }
+
+  void _fetchPayments() async {
+    //await DatabaseProvider.clearDatabase();
+
+    List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
+    String? dueDateCheckString ;
+    DateTime? dueDateCheck;
+    setState(() {
+      _paymentRecords = payments.map((payment) {
+        dueDateCheckString = payment['dueDateCheck'];
+        if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
+          try {
+            dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
+          } catch (e) {
+            print('Error parsing dueDateCheck: $dueDateCheckString');
+            dueDateCheck = null;
+          }
+        } else {
+          dueDateCheck = null;
+        }
+        return Payment(
+          customerName: payment['customerName'],
+          msisdn: payment['msisdn'],
+          prNumber: payment['prNumber'],
+          paymentMethod: payment['paymentMethod'],
+          amount: payment['amount'],
+          currency: payment['currency'],
+          amountCheck: payment['amountCheck'],
+          checkNumber: payment['checkNumber'],
+          bankBranch: payment['bankBranch'],
+          dueDateCheck: dueDateCheck,
+          paymentInvoiceFor: payment['paymentInvoiceFor'],
+          status: payment['status'],
+        );
+      }).toList();
+    });
+  }
 }
 
-class PaymentRecord {
-  final String customerName;
-  final double amount;
-  final String paymentMethod;
-  final String date;
-  final String msisdn;
-  final String prNumber;
-  final String currency;
-
-  PaymentRecord({
-    required this.customerName,
-    required this.amount,
-    required this.paymentMethod,
-    required this.date,
-    required this.msisdn,
-    required this.prNumber,
-    required this.currency,
-  });
-}
