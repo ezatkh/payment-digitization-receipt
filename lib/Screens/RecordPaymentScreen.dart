@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../Services/database.dart';
 import 'package:provider/provider.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Models/Payment.dart';
@@ -7,6 +8,9 @@ import '../Services/LocalizationService.dart';
 import 'package:intl/intl.dart';
 
 class RecordPaymentScreen extends StatefulWidget {
+  final int? id;
+  RecordPaymentScreen({this.id});
+
   @override
   _RecordPaymentScreenState createState() => _RecordPaymentScreenState();
 }
@@ -59,12 +63,50 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   String cash = "";
   String check = "";
   String requiredFields="";
+  int findCurrencyIndex(String currency) {
+    print("inside findCurrencyIndex method");
+
+    if (currency == null) {
+      print("wrong currency or null");
+      return -1;
+    }
+    print("currency : ${currency}");
+    int index=0;
+
+    if(currency == "دولار" || currency == "USD")
+      index =0;
+    else if(currency == "يورو" || currency == "EURO")
+      index =1;
+    else if(currency == "شيكل" || currency == "ILS")
+      index =2;
+    else if(currency == "دينار" || currency == "JD")
+      index =3;
+     else {
+       index= _currencies.indexOf(currency.toLowerCase());
+     }
+    return index;
+  }
 
   @override
   void initState() {
+    print(widget.id);
     super.initState();
+    _initializeLocalizationStrings();
+    _initializeFields();
+
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+//
+  }
+  void _initializeLocalizationStrings(){
     final localizationService =
-        Provider.of<LocalizationService>(context, listen: false);
+    Provider.of<LocalizationService>(context, listen: false);
     requiredFields = localizationService.getLocalizedString('requiredFields');
     recordPayment = localizationService.getLocalizedString('recordPayment');
     customerDetails = localizationService.getLocalizedString('customerDetails');
@@ -88,7 +130,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     cash = localizationService.getLocalizedString('cash');
     check = localizationService.getLocalizedString('check');
     paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor');
-
     // Localize and ensure unique values
     _paymentMethods = _paymentMethods
         .map((method) => localizationService.getLocalizedString(method))
@@ -98,16 +139,54 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         .map((currency) => localizationService.getLocalizedString(currency))
         .toSet()
         .toList();
-
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
   }
 
+  void _initializeFields() async {
+    if (widget.id != null) {
+      int id = widget.id!; // Ensure id is not null
+      Map<String, dynamic>? paymentToEdit = await DatabaseProvider.getPaymentById(id);
+      if (paymentToEdit != null) {
+        //print('Payment to parse: $paymentToEdit');
+
+        Payment payment = Payment.fromMap(paymentToEdit);
+       // print("from record init state payment to edit with class payment:");
+       // payment.printAllFields();
+        print("payment method from history to edit ${payment.paymentMethod}");
+        if (payment.paymentMethod == "Cash") {
+          String currentCurrency='';
+          currentCurrency= payment.currency!.toLowerCase();
+
+          setState(() {
+            _selectedPaymentMethod = cash;
+            int index= findCurrencyIndex(payment.currency!);
+            print("the returned index is : ${index}");
+
+               _selectedCurrency =_currencies[index];
+          });
+        } else if (payment.paymentMethod == "Check") {
+          setState(() {
+            _selectedPaymentMethod = check;
+          });
+        }
+
+          _customerNameController.text = payment.customerName;
+        _msisdnController.text = payment.msisdn ?? '';
+        _prNumberController.text = payment.prNumber?? '' ;
+        _amountController.text = payment.amount.toString()?? '';
+        _amountCheckController.text = payment.amountCheck.toString()?? '';
+        _checkNumberController.text = payment.checkNumber.toString()?? '';
+        _bankBranchController.text = payment.bankBranch?? '';
+        _paymentInvoiceForController.text = payment.paymentInvoiceFor?? '';
+        _dueDateCheckController.text = payment.dueDateCheck.toString()?? '';
+
+      } else {
+        print('No payment found with ID $id');
+      }
+    }
+   // _selectedPaymentMethod=methodValue;
+
+    print("_selectedPaymentMethod:${_selectedPaymentMethod} ");
+  }
   @override
   void dispose() {
     _animationController.dispose();
@@ -581,6 +660,28 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
   }
 
+  void _confirmPayment() {
+    print("_confirmPaymentMethod");
+    if (!_validateFields()) return;
+
+    Payment paymentDetails = _preparePaymentObject('Confirmed');
+    // Use paymentDetails as needed
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Payment confirmed."),
+        backgroundColor: Color(0xFF4CAF50),
+      ),
+    );
+
+
+      // Navigate to PaymentConfirmationScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
+      );
+
+  }
+
   Widget _buildSaveButton() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -613,32 +714,11 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
   }
 
-  void _confirmPayment() {
-    print("_confirmPaymentMethod");
-    if (!_validateFields()) return;
-
-    Payment paymentDetails = _preparePaymentObject('Confirmed');
-    // Use paymentDetails as needed
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Payment confirmed."),
-        backgroundColor: Color(0xFF4CAF50),
-      ),
-    );
-
-
-      // Navigate to PaymentConfirmationScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
-      );
-
-  }
   void _savePayment() {
+    print("_savePayment method started");
     if (!_validateFields()) return;
 
-    Payment paymentDetails = _preparePaymentObject('Saved');
-    // Use paymentDetails as needed
+     Payment paymentDetails = _preparePaymentObject('Saved');
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Payment saved."),
@@ -646,7 +726,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       ),
     );
 
-
+    print("_savePayment method end and then navigate to confirm");
       // Navigate to PaymentConfirmationScreen
       Navigator.push(
         context,
@@ -654,6 +734,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       );
 
   }
+
   Payment _preparePaymentObject(String status) {
     DateTime? parseDueDate;
     if (_selectedPaymentMethod!.toLowerCase() == 'cash' || _selectedPaymentMethod!.toLowerCase() == 'كاش') {
@@ -700,6 +781,7 @@ Payment paymentDetail= Payment(
   checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'?  int.tryParse(_checkNumberController.text) : null,
   bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
   dueDateCheck: parseDueDate , // Formatting the date
+  id:widget.id !=null ? widget.id : null,
   status: status,
 );
     return paymentDetail;
@@ -711,14 +793,7 @@ Payment paymentDetail= Payment(
     _checkNumberController.clear();
     _bankBranchController.clear();
     _dueDateCheckController.clear();
-  }
-  void _clearFields() {
-    _customerNameController.clear();
-    _msisdnController.clear();
-    _prNumberController.clear();
-    _amountController.clear();
-    _paymentInvoiceForController.clear();
     _selectedCurrency = null;
-    _selectedPaymentMethod = null;
   }
+
 }

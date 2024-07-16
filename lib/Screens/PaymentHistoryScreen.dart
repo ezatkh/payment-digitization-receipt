@@ -1,3 +1,4 @@
+import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -5,7 +6,7 @@ import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 import '../Services/database.dart';
 import '../Models/Payment.dart';
-
+import '../Custom_Widgets/CustomButton.dart';
 
 class PaymentHistoryScreen extends StatefulWidget {
   @override
@@ -33,6 +34,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   @override
   void initState() {
+    print("initalize history payment");
     _fetchPayments();
     super.initState();
     // Initialize the localization strings
@@ -70,6 +72,17 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             _buildPaymentRecordsList(),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Navigate to the RecordPaymentScreen to add a new payment
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RecordPaymentScreen()),
+          );
+        },
+        backgroundColor: Color(0xFFC62828),
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -131,6 +144,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return ''; // handle null date
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
   Widget _buildSearchButton() {
     return ElevatedButton.icon(
       icon: Icon(Icons.search, color: Colors.white),
@@ -141,7 +159,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         minimumSize: Size(double.infinity, 40.h),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      onPressed: _fetchConfirmPayments,
+      onPressed: () async {
+        await DatabaseProvider.clearDatabase();
+        // Add any post-operation logic if needed
+      },
     );
   }
 
@@ -157,11 +178,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       },
     );
   }
-  String _formatDate(DateTime? date) {
-    if (date == null) return ''; // handle null date
-    return DateFormat('yyyy-MM-dd').format(date);
-  }
-
 
   Widget _buildPaymentRecordItem(Payment record) {
     IconData statusIcon;
@@ -190,8 +206,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         statusColor = Color(0xFFC62828); // Default color
         break;
     }
-    print("_buildPaymentRecordItem");
-    record.printAllFields();
     return Card(
       elevation: 2,
       margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
@@ -208,7 +222,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           subtitle: Text('${record.status} ',
               style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
           childrenPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-
           children: [
             _paymentDetailRow('Payment Method', record.paymentMethod),
             _paymentDetailRow('Status', record.status),
@@ -232,7 +245,71 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 record.paymentInvoiceFor!.isNotEmpty)
               _paymentDetailRowWithMultiline(
                   'Payment Invoice For:', record.paymentInvoiceFor.toString()),
-            // i want add the paymentInvoiceFor field here
+            SizedBox(height: 8.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey :  Colors.blue),
+                    onPressed: record.status.toLowerCase() == 'confirmed' ? null : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => RecordPaymentScreen(id:record.id)),
+                      );
+                    },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey : Colors.red),
+                  onPressed: record.status.toLowerCase() == 'confirmed' ? null : () async {
+                    // Show a confirmation dialog before deleting
+                    bool confirmDelete = await showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext dialogContext) {
+                        return AlertDialog(
+                          title: Text('Confirm Delete'),
+                          content: Text('Are you sure you want to delete this payment record?'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: Text('Cancel'),
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(false); // Return false
+                              },
+                            ),
+                            TextButton(
+                              child: Text('Delete'),
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(true); // Return true
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (confirmDelete) {
+                      final int id=record.id!;
+                      await DatabaseProvider.deletePayment(id);
+                      // Optionally, you can show a message or update the UI after deletion
+                      print("Deleted from db Successfully");
+                      // Update the UI to reflect the deletion
+                      setState(() {
+                        _paymentRecords.removeWhere((item) => item.id == id);
+
+                        // Remove the deleted item from your data source
+                        // Example: payments.removeWhere((item) => item.id == record.id);
+                      });
+                    }
+                  },
+                ),
+
+              ],
+            ),
+    //         _buildCustomButtons("Delete",onPressed(){
+    //
+    // });
+
+           // _buildActionButtons(record);
           ],
           onExpansionChanged: (bool expanded) {
             // Optionally add analytics or state management hooks here
@@ -242,6 +319,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
+  // Widget _buildCustomButtons(String text,VoidCallback onPressed){
+  //
+  // }
   Widget _paymentDetailRow(String title, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -289,6 +369,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     DateTime? dueDateCheck;
     setState(() {
       _paymentRecords = payments.map((payment) {
+        print("idddd: ${payment['id']}");
         dueDateCheckString = payment['dueDateCheck'];
         if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
           try {
@@ -320,8 +401,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   void _fetchPayments() async {
     //await DatabaseProvider.clearDatabase();
-
+    print("inside fetch");
     List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
+
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
     setState(() {
@@ -338,6 +420,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           dueDateCheck = null;
         }
         return Payment(
+          id:payment['id'],
           customerName: payment['customerName'],
           msisdn: payment['msisdn'],
           prNumber: payment['prNumber'],

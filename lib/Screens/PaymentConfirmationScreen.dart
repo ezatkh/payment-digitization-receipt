@@ -217,32 +217,62 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     await Future.delayed(Duration(seconds: 2));
 
 //   Navigator.pop(context); // Close the CircularProgressIndicator
-    // msisdn TEXT,
-    // prNumber TEXT,
+
 
     try{
-      await DatabaseProvider.savePayment({
-        'customerName': paymentDetails.customerName,
-        'paymentMethod': paymentDetails.paymentMethod,
-        'status':paymentDetails.status,
-      'msisdn': paymentDetails.msisdn,
-        'prNumber': paymentDetails.prNumber,
-        'amount': paymentDetails.amount ,
-        'currency':  paymentDetails.currency,
-        'amountCheck':  paymentDetails.amountCheck,
-        'checkNumber':  paymentDetails.checkNumber,
-        'bankBranch': paymentDetails.bankBranch ,
-        'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
-        'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
-      });
-      print("saved to db Successfully");
+      if(paymentDetails.paymentMethod == "كاش") {
+        paymentDetails.paymentMethod = 'Cash';
+        if(paymentDetails.currency =='دولار')
+          paymentDetails.currency="USD";
+        if(paymentDetails.currency =='شيكل')
+          paymentDetails.currency="ILS";
+        if(paymentDetails.currency =='يورو')
+          paymentDetails.currency="EURO";
+        if(paymentDetails.currency =='دينار')
+          paymentDetails.currency="JD";
+      }
+      else if(paymentDetails.paymentMethod == "شيك"){
+        paymentDetails.paymentMethod = 'Check';
+      }
 
-      // Fetch all payments from the database
-      List<Map<String, dynamic>> payments = await DatabaseProvider.getConfirmedPayments();
-      print('All Payments:');
-      payments.forEach((payment) {
-        print(payment);
-      });
+      if(paymentDetails.id == null)
+      {
+        print("no id , create new payment :");
+        await DatabaseProvider.savePayment({
+          'customerName': paymentDetails.customerName,
+          'paymentMethod': paymentDetails.paymentMethod,
+          'status':paymentDetails.status,
+          'msisdn': paymentDetails.msisdn,
+          'prNumber': paymentDetails.prNumber,
+          'amount': paymentDetails.amount ,
+          'currency':  paymentDetails.currency,
+          'amountCheck':  paymentDetails.amountCheck,
+          'checkNumber':  paymentDetails.checkNumber,
+          'bankBranch': paymentDetails.bankBranch ,
+          'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
+          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
+        });
+        print("saved to db Successfully");
+      }
+      else {
+        print("id , update exist payment :");
+        final int id = paymentDetails.id!;
+        await DatabaseProvider.updatePayment(id, {
+          'customerName': paymentDetails.customerName,
+          'paymentMethod': paymentDetails.paymentMethod,
+          'status': paymentDetails.status,
+          'msisdn': paymentDetails.msisdn,
+          'prNumber': paymentDetails.prNumber,
+          'amount': paymentDetails.amount,
+          'currency': paymentDetails.currency,
+          'amountCheck': paymentDetails.amountCheck,
+          'checkNumber': paymentDetails.checkNumber,
+          'bankBranch': paymentDetails.bankBranch,
+          'dueDateCheck': paymentDetails.dueDateCheck.toString(),
+          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
+        });
+        print("Updated in db Successfully");
+      }
 
       Navigator.pop(context);
 

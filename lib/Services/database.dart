@@ -65,6 +65,16 @@ class DatabaseProvider {
     );
     return payments;
   }
+
+  static Future<Map<String, dynamic>?> getPaymentById(int id) async {
+    Database db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'payments',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
   static Future<void> updatePaymentvoucherSerialNumber(int id, String voucherSerialNumber) async {
     try {
       Database db = await database;

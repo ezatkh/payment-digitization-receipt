@@ -17,11 +17,13 @@ class Payment {
   String? currency;
   String? paymentInvoiceFor;
   String status;
+  int? id;
 
   //user
   //date
 
   void printAllFields() {
+    print("id: " + (this.id.toString()));
     print("customerName: " + (this.customerName ?? ''));
     print("msisdn: " + (this.msisdn ?? ''));
     print("prNumber: " + (this.prNumber ?? ''));
@@ -37,6 +39,7 @@ class Payment {
   }
   Payment({
     this.voucherSerialNumber = '',
+    this.id,
     required this.customerName,
     required this.paymentMethod,
     this.msisdn,
@@ -54,44 +57,22 @@ class Payment {
     printAllFields();
   }
 
-
-
-  // Method to create a Payment object from a JSON map
-  factory Payment.fromJson(Map<String, dynamic> json) {
+  factory Payment.fromMap(Map<String, dynamic> map) {
     return Payment(
-      voucherSerialNumber: json['voucherSerialNumber'],
-      customerName: json['customerName'],
-      msisdn: json['msisdn'],
-      prNumber: json['prNumber'],
-      paymentMethod: json['paymentMethod'],
-      amount: json['amount']?.toDouble(),
-      amountCheck: json['amountCheck']?.toDouble(),
-      checkNumber: json['checkNumber'],
-      bankBranch: json['bankBranch'],
-      dueDateCheck: json['dueDateCheck'] != null ? DateTime.parse(
-          json['dueDateCheck']) : null,
-      currency: json['currency'],
-      paymentInvoiceFor: json['notes'],
-      status: json['status'],
-    );
-  }
+      status: map['status'],
+      id: map['id'],
+      paymentMethod: map['paymentMethod'],
+      customerName: map['customerName'],
+      msisdn: (map['msisdn'] !=null && map.containsKey('msisdn'))?map['msisdn']: null,
+      prNumber: (map['prNumber'] !=null && map.containsKey('prNumber'))?map['prNumber']: null,
+      amount: (map['amount'] !=null && map.containsKey('amount')) ?map['amount']: null,
+      amountCheck: (map['amountCheck']!=null && map.containsKey('amountCheck'))?map['amountCheck']: null,
+      checkNumber: (map['checkNumber']!=null && map.containsKey('checkNumber'))?map['checkNumber']: null,
+      bankBranch: (map['bankBranch']!=null && map.containsKey('bankBranch'))?map['bankBranch']: null,
+      dueDateCheck: (map['dueDateCheck'] != 'null' && map['dueDateCheck'] != '') ? DateTime.parse(map['dueDateCheck']) : null,
+      currency: (map['currency'] !=null && map.containsKey('currency'))?map['currency']: null,
+      paymentInvoiceFor: (map['paymentInvoiceFor'] !=null && map.containsKey('paymentInvoiceFor'))?map['paymentInvoiceFor']: null,
 
-  // Method to convert a Payment object to a JSON map
-  Map<String, dynamic> toJson() {
-    return {
-      'voucherSerialNumber': voucherSerialNumber,
-      'customerName': customerName,
-      'msisdn': msisdn,
-      'prNumber': prNumber,
-      'paymentMethod': paymentMethod,
-      'amount': amount,
-      'amountCheck': amountCheck,
-      'checkNumber': checkNumber,
-      'bankBranch': bankBranch,
-      'dueDateCheck': dueDateCheck?.toIso8601String(),
-      'currency': currency,
-      'notes': paymentInvoiceFor,
-      'status': status,
-    };
+    );
   }
 }
