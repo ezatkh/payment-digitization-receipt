@@ -216,9 +216,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     // Simulate a network request/waiting time
     await Future.delayed(Duration(seconds: 2));
 
-//   Navigator.pop(context); // Close the CircularProgressIndicator
-
-
     try{
       if(paymentDetails.paymentMethod == "كاش") {
         paymentDetails.paymentMethod = 'Cash';
@@ -270,87 +267,91 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           'bankBranch': paymentDetails.bankBranch,
           'dueDateCheck': paymentDetails.dueDateCheck.toString(),
           'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
+
         });
+        Navigator.pop(context);
         print("Updated in db Successfully");
       }
 
       Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to PaymentHistoryScreen with Dismess the RecordPaymentScreen
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                width: 300.w,
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2), // Semi-transparent white for glass effect
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.5),
-                    width: 1.5,
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(paymentSuccessful,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontFamily: 'NotoSansUI',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        )),
-                    SizedBox(height: 16.h),
-                    Text(paymentSuccessfulBody,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontFamily: 'NotoSansUI',
-                          color: Colors.white,
-                        )),
-                    SizedBox(height: 24.h),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w),
-                        backgroundColor: Colors.white.withOpacity(0.3), // Light transparent background
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18), // Rounded corners
-                          side: BorderSide(
-                            color: Color(0xFF4CAF50), // Same green color as the text
-                            width: 1.5, // Not too thick border
-                          ),
-                        ),
-                      ),
-                      child: Text(
-                        ok,
-                        style: TextStyle(
-                          fontFamily: 'NotoSansUI',
-                          color: Color(0xFF4CAF50), // Green color for text
-                          fontSize: 16.sp,
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop(); // Dismiss the dialog
-                        Navigator.of(dialogContext).pop(); //Dismess the recordPaymentScreen
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to PaymentHistoryScreen with Dismess the confirmationPaymentScreen
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (BuildContext dialogContext) {
+    //     return Center(
+    //       child: ClipRRect(
+    //         borderRadius: BorderRadius.circular(10.r),
+    //         child: BackdropFilter(
+    //           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+    //           child: Container(
+    //             width: 300.w,
+    //             padding: EdgeInsets.all(16.w),
+    //             decoration: BoxDecoration(
+    //               color: Colors.white.withOpacity(0.2), // Semi-transparent white for glass effect
+    //               borderRadius: BorderRadius.circular(10.r),
+    //               border: Border.all(
+    //                 color: Colors.white.withOpacity(0.5),
+    //                 width: 1.5,
+    //               ),
+    //             ),
+    //             child: Column(
+    //               mainAxisSize: MainAxisSize.min,
+    //               children: <Widget>[
+    //                 Text(paymentSuccessful,
+    //                     textAlign: TextAlign.center,
+    //                     style: TextStyle(
+    //                       fontSize: 20.sp,
+    //                       fontFamily: 'NotoSansUI',
+    //                       fontWeight: FontWeight.bold,
+    //                       color: Colors.white,
+    //                     )),
+    //                 SizedBox(height: 16.h),
+    //                 Text(paymentSuccessfulBody,
+    //                     textAlign: TextAlign.center,
+    //                     style: TextStyle(
+    //                       fontSize: 16.sp,
+    //                       fontFamily: 'NotoSansUI',
+    //                       color: Colors.white,
+    //                     )),
+    //                 SizedBox(height: 24.h),
+    //                 TextButton(
+    //                   style: TextButton.styleFrom(
+    //                     padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w),
+    //                     backgroundColor: Colors.white.withOpacity(0.3), // Light transparent background
+    //                     shape: RoundedRectangleBorder(
+    //                       borderRadius: BorderRadius.circular(18), // Rounded corners
+    //                       side: BorderSide(
+    //                         color: Color(0xFF4CAF50), // Same green color as the text
+    //                         width: 1.5, // Not too thick border
+    //                       ),
+    //                     ),
+    //                   ),
+    //                   child: Text(
+    //                     ok,
+    //                     style: TextStyle(
+    //                       fontFamily: 'NotoSansUI',
+    //                       color: Color(0xFF4CAF50), // Green color for text
+    //                       fontSize: 16.sp,
+    //                       decoration: TextDecoration.none,
+    //                     ),
+    //                   ),
+    //                   onPressed: () {
+    //                     Navigator.of(dialogContext).pop(); // Dismiss the dialog
+    //                     Navigator.of(dialogContext).pop(); //Dismess the recordPaymentScreen
+    //                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to PaymentHistoryScreen with Dismess the confirmationPaymentScreen
+    //                   },
+    //                 )
+    //               ],
+    //             ),
+    //           ),
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // );
     }catch (e) {
       print('Error saving payment: $e');
       // Handle error scenario

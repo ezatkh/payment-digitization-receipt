@@ -76,10 +76,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to the RecordPaymentScreen to add a new payment
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => RecordPaymentScreen()),
-          );
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
         },
         backgroundColor: Color(0xFFC62828),
         child: Icon(Icons.add),
@@ -179,7 +176,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  Widget _buildPaymentRecordItem(Payment record) {
+  Widget _buildPaymentRecordItem(Payment record,) {
     IconData statusIcon;
     Color statusColor;
 
@@ -319,9 +316,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  // Widget _buildCustomButtons(String text,VoidCallback onPressed){
-  //
-  // }
   Widget _paymentDetailRow(String title, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),

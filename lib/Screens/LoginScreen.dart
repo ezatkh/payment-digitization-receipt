@@ -111,8 +111,7 @@ class LoginScreen extends StatelessWidget {
                                       bool isValid =
                                           validateLoginInputs(loginState);
                                       if (isValid) {
-                                        bool? loginResult = true;
-                                        //  await loginState.login();
+                                        bool? loginResult = await loginState.login();
                                         if (loginResult ?? false) {
                                           _handleLogin(
                                               context, localizationService);
