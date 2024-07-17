@@ -660,28 +660,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
   }
 
-  void _confirmPayment() {
-    print("_confirmPaymentMethod");
-    if (!_validateFields()) return;
-
-    Payment paymentDetails = _preparePaymentObject('Confirmed');
-    // Use paymentDetails as needed
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Payment confirmed."),
-        backgroundColor: Color(0xFF4CAF50),
-      ),
-    );
-
-
-      // Navigate to PaymentConfirmationScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
-      );
-
-  }
-
   Widget _buildSaveButton() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 6.h),
@@ -714,26 +692,311 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
   }
 
+  void _confirmPayment() {
+    print("_confirmPayment method started");
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AnimatedScale(
+          scale: 1.0,
+          duration: Duration(milliseconds: 300),
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            elevation: 8.0,
+            child: Container(
+              padding: EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.warning,
+                    size: 60.0,
+                    color: Color(0xFFC62828),
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    "Confirm Payment",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFC62828),
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(
+                    "Are you sure you want to confirm this payment?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  SizedBox(height: 24.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(
+                            color: Color(0xFFC62828),
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                          if (!_validateFields()) return;
+
+                          Payment paymentDetails = _preparePaymentObject('Confirmed');
+                          _agreedPayment(paymentDetails);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Payment confirmed."),
+                              backgroundColor: Color(0xFF4CAF50),
+                            ),
+                          );
+
+                          // Navigate to PaymentConfirmationScreen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Color(0xFFC62828), // Red background
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: Text("Yes"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _savePayment() {
     print("_savePayment method started");
-    if (!_validateFields()) return;
 
-     Payment paymentDetails = _preparePaymentObject('Saved');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Payment saved."),
-        backgroundColor: Color(0xFF4CAF50),
-      ),
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AnimatedScale(
+          scale: 1.0,
+          duration: Duration(milliseconds: 300),
+          child: Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            elevation: 8.0,
+            child: Container(
+              padding: EdgeInsets.all(24.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.warning,
+                    size: 60.0,
+                    color: Color(0xFFC62828),
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    "Confirm Save",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFC62828),
+                    ),
+                  ),
+                  SizedBox(height: 8.0),
+                  Text(
+                    "Are you sure you want to save this payment?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16.0,
+                    ),
+                  ),
+                  SizedBox(height: 24.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                        },
+                        child: Text(
+                          "Cancel",
+                          style: TextStyle(
+                            color: Color(0xFFC62828),
+                          ),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Close the dialog
+                          if (!_validateFields()) return;
+
+                          Payment paymentDetails = _preparePaymentObject('Saved');
+                          _agreedPayment(paymentDetails);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Payment saved."),
+                              backgroundColor: Color(0xFF4CAF50),
+                            ),
+                          );
+
+
+                          // Navigate to PaymentConfirmationScreen
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white, backgroundColor: Color(0xFFC62828),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: Text("Yes"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _agreedPayment(Payment paymentDetails) async {
+    print("_agreedPaymentMethodStarted");
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
     );
 
-    print("_savePayment method end and then navigate to confirm");
-      // Navigate to PaymentConfirmationScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
-      );
+    // Simulate a network request/waiting time
+    await Future.delayed(Duration(seconds: 2));
+
+    try{
+      if(paymentDetails.paymentMethod == "كاش") {
+        paymentDetails.paymentMethod = 'Cash';
+        if(paymentDetails.currency =='دولار')
+          paymentDetails.currency="USD";
+        if(paymentDetails.currency =='شيكل')
+          paymentDetails.currency="ILS";
+        if(paymentDetails.currency =='يورو')
+          paymentDetails.currency="EURO";
+        if(paymentDetails.currency =='دينار')
+          paymentDetails.currency="JD";
+      }
+      else if(paymentDetails.paymentMethod == "شيك"){
+        paymentDetails.paymentMethod = 'Check';
+      }
+
+      if(paymentDetails.id == null)
+      {
+        print("no id , create new payment :");
+        await DatabaseProvider.savePayment({
+          'customerName': paymentDetails.customerName,
+          'paymentMethod': paymentDetails.paymentMethod,
+          'status':paymentDetails.status,
+          'msisdn': paymentDetails.msisdn,
+          'prNumber': paymentDetails.prNumber,
+          'amount': paymentDetails.amount ,
+          'currency':  paymentDetails.currency,
+          'amountCheck':  paymentDetails.amountCheck,
+          'checkNumber':  paymentDetails.checkNumber,
+          'bankBranch': paymentDetails.bankBranch ,
+          'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
+          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
+        });
+        print("saved to db Successfully");
+      }
+      else {
+        print("id , update exist payment :");
+        final int id = paymentDetails.id!;
+        await DatabaseProvider.updatePayment(id, {
+          'customerName': paymentDetails.customerName,
+          'paymentMethod': paymentDetails.paymentMethod,
+          'status': paymentDetails.status,
+          'msisdn': paymentDetails.msisdn,
+          'prNumber': paymentDetails.prNumber,
+          'amount': paymentDetails.amount,
+          'currency': paymentDetails.currency,
+          'amountCheck': paymentDetails.amountCheck,
+          'checkNumber': paymentDetails.checkNumber,
+          'bankBranch': paymentDetails.bankBranch,
+          'dueDateCheck': paymentDetails.dueDateCheck.toString(),
+          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
+
+        });
+        Navigator.pop(context);
+        print("Updated in db Successfully");
+      }
+      print("_agreedPaymentMethodFinished");
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails))); // Navigate to view payment screen after agreed
+    }catch (e) {
+      print('Error saving payment: $e');
+      // Handle error scenario
+    }
+
 
   }
+
+
+
+
 
   Payment _preparePaymentObject(String status) {
     DateTime? parseDueDate;

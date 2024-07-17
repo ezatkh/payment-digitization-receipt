@@ -97,12 +97,15 @@
   "submitPayment": " إرسال الدفعة",
   "confirmPayment": "تأكيد الدفعة",
   "savePayment": "حفظ",
+  "viewPayment": "عرض تفاصيل الدفعة",
   "paymentMethod": "طريقة الدفع",
   "currency": "العملة",
   "notes": "الملاحظات",
   "customerName": "إسم العميل",
   "fieldsMissedMessageError": "يجب تعبئة جميع الحقول.",
   "fieldsMissedMessageSuccess": "'تم تسجيل الدفعة بنجاح",
+  "status": "الحالة",
+
 
   "noNotificationsYet": "لا توجد إشعارات بعد",
   "checkBackHereForUpdates": "تحقق هنا للحصول على التحديثات",

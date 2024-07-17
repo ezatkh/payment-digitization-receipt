@@ -1,3 +1,4 @@
+import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../Services/database.dart';
 import '../Models/Payment.dart';
 import '../Custom_Widgets/CustomButton.dart';
+import 'PaymentConfirmationScreen.dart';
 
 class PaymentHistoryScreen extends StatefulWidget {
   @override
@@ -76,7 +78,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to the RecordPaymentScreen to add a new payment
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
         },
         backgroundColor: Color(0xFFC62828),
         child: Icon(Icons.add),
@@ -176,7 +178,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  Widget _buildPaymentRecordItem(Payment record,) {
+  Widget _buildPaymentRecordItem(Payment record) {
     IconData statusIcon;
     Color statusColor;
 
@@ -238,22 +240,42 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               _paymentDetailRow('Bank/Branch', record.bankBranch.toString()),
             if (record.paymentMethod.toLowerCase() == 'check')
               _paymentDetailRow('Due Date', _formatDate(record.dueDateCheck)),
-            if (record.paymentInvoiceFor != null &&
-                record.paymentInvoiceFor!.isNotEmpty)
-              _paymentDetailRowWithMultiline(
-                  'Payment Invoice For:', record.paymentInvoiceFor.toString()),
+            if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
+              _paymentDetailRowWithMultiline('Payment Invoice For:', record.paymentInvoiceFor.toString()),
             SizedBox(height: 8.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.edit, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey :  Colors.blue),
-                    onPressed: record.status.toLowerCase() == 'confirmed' ? null : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => RecordPaymentScreen(id:record.id)),
-                      );
-                    },
+                  icon: Icon(Icons.cancel, color: record.status.toLowerCase() == 'confirmed' ? Colors.red : Colors.grey), // View icon
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PaymentCancellationScreen(),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.visibility, color: Colors.blue), // View icon
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PaymentConfirmationScreen(paymentDetails: record),
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.edit, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey : Colors.blue),
+                  onPressed: record.status.toLowerCase() == 'confirmed' ? null : () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
+                    );
+                  },
                 ),
                 IconButton(
                   icon: Icon(Icons.delete, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey : Colors.red),
@@ -285,28 +307,17 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     );
 
                     if (confirmDelete) {
-                      final int id=record.id!;
+                      final int id = record.id!;
                       await DatabaseProvider.deletePayment(id);
-                      // Optionally, you can show a message or update the UI after deletion
-                      print("Deleted from db Successfully");
                       // Update the UI to reflect the deletion
                       setState(() {
                         _paymentRecords.removeWhere((item) => item.id == id);
-
-                        // Remove the deleted item from your data source
-                        // Example: payments.removeWhere((item) => item.id == record.id);
                       });
                     }
                   },
                 ),
-
               ],
             ),
-    //         _buildCustomButtons("Delete",onPressed(){
-    //
-    // });
-
-           // _buildActionButtons(record);
           ],
           onExpansionChanged: (bool expanded) {
             // Optionally add analytics or state management hooks here
@@ -315,6 +326,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       ),
     );
   }
+
 
   Widget _paymentDetailRow(String title, String value) {
     return Padding(

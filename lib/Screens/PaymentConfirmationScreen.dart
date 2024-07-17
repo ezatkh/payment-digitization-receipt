@@ -3,12 +3,12 @@ import 'dart:ui';
 import 'package:digital_payment_app/Screens/PaymentHistoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import '../Models/Payment.dart';
-import '../Services/database.dart';
 import '../Services/LocalizationService.dart';
 import 'package:intl/intl.dart';
+import 'package:number_to_word_arabic/number_to_word_arabic.dart';
+import 'package:number_to_words_english/number_to_words_english.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
   final Payment paymentDetails;
@@ -20,15 +20,14 @@ class PaymentConfirmationScreen extends StatefulWidget {
 }
 
 class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
-
-  String paymentInvoiceFor="";
-  String amountCheck="";
-  String checkNumber="";
-  String bankBranch="";
-  String dueDateCheck="";
-  String amount="";
-  String currency="";
-  String saveTitle = '';
+  String paymentInvoiceFor = "";
+  String amountCheck = "";
+  String checkNumber = "";
+  String bankBranch = "";
+  String dueDateCheck = "";
+  String amount = "";
+  String currency = "";
+  String viewPayment = '';
   String confirmPayment = '';
   String savePayment = '';
   String confirmTitle = '';
@@ -42,16 +41,20 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   String ok = '';
   String prNumber = '';
   String msisdn = '';
+  String status = '';
+  String theSumOf = '';
+  String numberConvertBody = '';
+  String languageCode = "";
 
   @override
   void initState() {
     super.initState();
-    // Initialize the localization strings
     _initializeLocalizationStrings();
   }
 
   void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    languageCode = localizationService.selectedLanguageCode;
     paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor') ?? 'Confirm Payment';
     amountCheck = localizationService.getLocalizedString('amountCheck') ?? 'Confirm Payment';
     checkNumber = localizationService.getLocalizedString('checkNumber') ?? 'Confirm Payment';
@@ -59,14 +62,14 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     dueDateCheck = localizationService.getLocalizedString('dueDateCheck') ?? 'Confirm Payment';
     amount = localizationService.getLocalizedString('amount') ?? 'Confirm Payment';
     currency = localizationService.getLocalizedString('currency') ?? 'Confirm Payment';
-    ok = localizationService.getLocalizedString('ok') ?? 'Confirm Payment';
 
+    ok = localizationService.getLocalizedString('ok') ?? 'Confirm Payment';
+    status = localizationService.getLocalizedString('status') ?? '';
     prNumber = localizationService.getLocalizedString('PR') ?? 'Confirm Payment';
     msisdn = localizationService.getLocalizedString('MSISDN') ?? 'Confirm Payment';
+    theSumOf = localizationService.getLocalizedString('theSumOf') ?? 'Confirm Payment';
 
-    saveTitle = localizationService.getLocalizedString('saveTitle') ?? 'Confirm Payment';
-    confirmTitle = localizationService.getLocalizedString('confirmTitle') ?? 'Confirm Payment';
-
+    viewPayment = localizationService.getLocalizedString('viewPayment') ?? 'Confirm Payment';
     savePayment = localizationService.getLocalizedString('savePayment') ?? 'Save Payment';
     confirmPayment = localizationService.getLocalizedString('confirmPayment') ?? 'Confirm Payment';
 
@@ -85,7 +88,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     ScreenUtil.init(context, designSize: Size(360, 690));
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.paymentDetails.status.toLowerCase() == 'saved'?saveTitle :confirmTitle, style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
+        title: Text(viewPayment, style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
         backgroundColor: Color(0xFFC62828),
         elevation: 0,
       ),
@@ -95,8 +98,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildPaymentDetailCard(),
-            SizedBox(height: 24.h),
-            _buildConfirmationActions(widget.paymentDetails),
           ],
         ),
       ),
@@ -122,34 +123,139 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(paymentSummary, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828))),
+          _buildSummaryHeader(),
           Divider(color: Color(0xFFC62828), thickness: 1, height: 20.h),
           _detailItem(customerName, widget.paymentDetails.customerName),
+          _divider(),
+          _detailItem(status, widget.paymentDetails.status),
+          _divider(),
           _detailItem(paymentMethod, widget.paymentDetails.paymentMethod),
-          if (widget.paymentDetails.prNumber != null && widget.paymentDetails.prNumber!.isNotEmpty)
-            _detailItem(prNumber, widget.paymentDetails.prNumber.toString()),
-          if (widget.paymentDetails.msisdn != null && widget.paymentDetails.msisdn!.isNotEmpty)
-            _detailItem(msisdn, widget.paymentDetails.msisdn.toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="check" ||widget.paymentDetails.paymentMethod =="شيك")
+          _divider(),
+          (widget.paymentDetails.prNumber != null && widget.paymentDetails.prNumber!.isNotEmpty)
+              ? _detailItem(prNumber, widget.paymentDetails.prNumber.toString())
+              : _detailItem(prNumber, ''),
+          _divider(),
+          (widget.paymentDetails.msisdn != null && widget.paymentDetails.msisdn!.isNotEmpty)
+              ? _detailItem(msisdn, widget.paymentDetails.msisdn.toString())
+              : _detailItem(msisdn, ''),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
+            _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
             _detailItem(amountCheck, widget.paymentDetails.amountCheck.toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="check" ||widget.paymentDetails.paymentMethod =="شيك")
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
+            _detailNoteItem(theSumOf, (languageCode) == 'ar' ? Tafqeet.convert(widget.paymentDetails.amountCheck.toString()) : NumberToWordsEnglish.convert(widget.paymentDetails.amountCheck!.toInt())),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
+            _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
+          _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
             _detailItem(checkNumber, widget.paymentDetails.checkNumber.toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="check" ||widget.paymentDetails.paymentMethod =="شيك")
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
+          _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
             _detailItem(bankBranch, widget.paymentDetails.bankBranch.toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="check" ||widget.paymentDetails.paymentMethod =="شيك")
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
+          _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
             _detailItem(dueDateCheck, DateFormat('yyyy-MM-dd').format(widget.paymentDetails.dueDateCheck!).toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="cash" ||widget.paymentDetails.paymentMethod =="كاش")
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "check" || widget.paymentDetails.paymentMethod == "شيك")
+            _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
             _detailItem(amount, widget.paymentDetails.amount.toString()),
-          if (widget.paymentDetails.paymentMethod.toLowerCase() =="cash" ||widget.paymentDetails.paymentMethod =="كاش")
-          _detailItem(currency, widget.paymentDetails.currency.toString()),
-          if (widget.paymentDetails.paymentInvoiceFor != null && widget.paymentDetails.paymentInvoiceFor!.isNotEmpty)
-            _detailNoteItem(paymentInvoiceFor, widget.paymentDetails.paymentInvoiceFor.toString()),
-
-
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
+          _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
+            _detailNoteItem(theSumOf, (languageCode) == 'ar' ? Tafqeet.convert(widget.paymentDetails.amount.toString()) : NumberToWordsEnglish.convert(widget.paymentDetails.amount!.toInt())),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
+            _divider(),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
+            _detailItem(currency, widget.paymentDetails.currency.toString()),
+          if (widget.paymentDetails.paymentMethod.toLowerCase() == "cash" || widget.paymentDetails.paymentMethod == "كاش")
+            _divider(),
+          (widget.paymentDetails.paymentInvoiceFor != null && widget.paymentDetails.paymentInvoiceFor!.isNotEmpty)
+              ? _detailNoteItem(paymentInvoiceFor, widget.paymentDetails.paymentInvoiceFor.toString())
+              : _detailNoteItem(paymentInvoiceFor, ""),
         ],
       ),
     );
   }
+
+  Widget _buildSummaryHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          paymentSummary,
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828)),
+        ),
+        IconButton(
+          icon: Icon(Icons.more_horiz, color: Color(0xFFC62828)),
+          onPressed: () {
+            _showActionMenu(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showActionMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: _buildActionButtons(),
+          ),
+        );
+      },
+    );
+  }
+  List<Widget> _buildActionButtons() {
+    List<Widget> buttons = [];
+
+    if (widget.paymentDetails.status.toLowerCase() == 'saved') {
+      buttons.add(_actionButton('Confirm', Icons.thumb_up, () {
+        // Handle edit action
+        Navigator.pop(context);
+      }));
+      buttons.add(_actionButton('Edit', Icons.edit, () {
+        // Handle edit action
+        Navigator.pop(context);
+      }));
+      buttons.add(_actionButton('Delete', Icons.delete, () {
+        // Handle delete action
+        Navigator.pop(context);
+      }));
+    } else if (widget.paymentDetails.status.toLowerCase() == 'synced') {
+      buttons.add(_actionButton('Print', Icons.print, () {
+        // Handle print action
+        Navigator.pop(context);
+      }));
+      buttons.add(_actionButton('Send', Icons.send, () {
+        // Handle send action
+        Navigator.pop(context);
+      }));
+      buttons.add(_actionButton('Cancel', Icons.cancel, () {
+        // Handle cancel action
+        Navigator.pop(context);
+      }));
+    }
+
+    return buttons;
+  }
+
+
+
+  Widget _actionButton(String label, IconData icon, VoidCallback onPressed) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.black),
+      title: Text(label, style: TextStyle(color: Colors.black)),
+      onTap: onPressed,
+    );
+  }
+
   Widget _detailNoteItem(String label, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -162,8 +268,9 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             width: double.infinity,
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Colors.white, // Set to white
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300, width: 1), // Add border here
             ),
             child: Text(
               value,
@@ -192,183 +299,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     );
   }
 
-  Widget _buildConfirmationActions(Payment paymentDetails) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _actionButton(cancel, Color(0xFFC62828), () => Navigator.of(context).pop()),
-        _actionButton(widget.paymentDetails.status.toLowerCase() == 'saved'?savePayment :confirmPayment, Color(0xFF4CAF50), () => _confirmPayment(paymentDetails)),
-      ],
-    );
-  }
-
-  void _confirmPayment(Payment paymentDetails) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-
-    // Simulate a network request/waiting time
-    await Future.delayed(Duration(seconds: 2));
-
-    try{
-      if(paymentDetails.paymentMethod == "كاش") {
-        paymentDetails.paymentMethod = 'Cash';
-        if(paymentDetails.currency =='دولار')
-          paymentDetails.currency="USD";
-        if(paymentDetails.currency =='شيكل')
-          paymentDetails.currency="ILS";
-        if(paymentDetails.currency =='يورو')
-          paymentDetails.currency="EURO";
-        if(paymentDetails.currency =='دينار')
-          paymentDetails.currency="JD";
-      }
-      else if(paymentDetails.paymentMethod == "شيك"){
-        paymentDetails.paymentMethod = 'Check';
-      }
-
-      if(paymentDetails.id == null)
-      {
-        print("no id , create new payment :");
-        await DatabaseProvider.savePayment({
-          'customerName': paymentDetails.customerName,
-          'paymentMethod': paymentDetails.paymentMethod,
-          'status':paymentDetails.status,
-          'msisdn': paymentDetails.msisdn,
-          'prNumber': paymentDetails.prNumber,
-          'amount': paymentDetails.amount ,
-          'currency':  paymentDetails.currency,
-          'amountCheck':  paymentDetails.amountCheck,
-          'checkNumber':  paymentDetails.checkNumber,
-          'bankBranch': paymentDetails.bankBranch ,
-          'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
-          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
-        });
-        print("saved to db Successfully");
-      }
-      else {
-        print("id , update exist payment :");
-        final int id = paymentDetails.id!;
-        await DatabaseProvider.updatePayment(id, {
-          'customerName': paymentDetails.customerName,
-          'paymentMethod': paymentDetails.paymentMethod,
-          'status': paymentDetails.status,
-          'msisdn': paymentDetails.msisdn,
-          'prNumber': paymentDetails.prNumber,
-          'amount': paymentDetails.amount,
-          'currency': paymentDetails.currency,
-          'amountCheck': paymentDetails.amountCheck,
-          'checkNumber': paymentDetails.checkNumber,
-          'bankBranch': paymentDetails.bankBranch,
-          'dueDateCheck': paymentDetails.dueDateCheck.toString(),
-          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
-
-        });
-        Navigator.pop(context);
-        print("Updated in db Successfully");
-      }
-
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to PaymentHistoryScreen with Dismess the RecordPaymentScreen
-
-    // showDialog(
-    //   context: context,
-    //   barrierDismissible: false,
-    //   builder: (BuildContext dialogContext) {
-    //     return Center(
-    //       child: ClipRRect(
-    //         borderRadius: BorderRadius.circular(10.r),
-    //         child: BackdropFilter(
-    //           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-    //           child: Container(
-    //             width: 300.w,
-    //             padding: EdgeInsets.all(16.w),
-    //             decoration: BoxDecoration(
-    //               color: Colors.white.withOpacity(0.2), // Semi-transparent white for glass effect
-    //               borderRadius: BorderRadius.circular(10.r),
-    //               border: Border.all(
-    //                 color: Colors.white.withOpacity(0.5),
-    //                 width: 1.5,
-    //               ),
-    //             ),
-    //             child: Column(
-    //               mainAxisSize: MainAxisSize.min,
-    //               children: <Widget>[
-    //                 Text(paymentSuccessful,
-    //                     textAlign: TextAlign.center,
-    //                     style: TextStyle(
-    //                       fontSize: 20.sp,
-    //                       fontFamily: 'NotoSansUI',
-    //                       fontWeight: FontWeight.bold,
-    //                       color: Colors.white,
-    //                     )),
-    //                 SizedBox(height: 16.h),
-    //                 Text(paymentSuccessfulBody,
-    //                     textAlign: TextAlign.center,
-    //                     style: TextStyle(
-    //                       fontSize: 16.sp,
-    //                       fontFamily: 'NotoSansUI',
-    //                       color: Colors.white,
-    //                     )),
-    //                 SizedBox(height: 24.h),
-    //                 TextButton(
-    //                   style: TextButton.styleFrom(
-    //                     padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w),
-    //                     backgroundColor: Colors.white.withOpacity(0.3), // Light transparent background
-    //                     shape: RoundedRectangleBorder(
-    //                       borderRadius: BorderRadius.circular(18), // Rounded corners
-    //                       side: BorderSide(
-    //                         color: Color(0xFF4CAF50), // Same green color as the text
-    //                         width: 1.5, // Not too thick border
-    //                       ),
-    //                     ),
-    //                   ),
-    //                   child: Text(
-    //                     ok,
-    //                     style: TextStyle(
-    //                       fontFamily: 'NotoSansUI',
-    //                       color: Color(0xFF4CAF50), // Green color for text
-    //                       fontSize: 16.sp,
-    //                       decoration: TextDecoration.none,
-    //                     ),
-    //                   ),
-    //                   onPressed: () {
-    //                     Navigator.of(dialogContext).pop(); // Dismiss the dialog
-    //                     Navigator.of(dialogContext).pop(); //Dismess the recordPaymentScreen
-    //                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentHistoryScreen())); // Navigate to PaymentHistoryScreen with Dismess the confirmationPaymentScreen
-    //                   },
-    //                 )
-    //               ],
-    //             ),
-    //           ),
-    //         ),
-    //       ),
-    //     );
-    //   },
-    // );
-    }catch (e) {
-      print('Error saving payment: $e');
-      // Handle error scenario
-    }
-
-  }
-
-  Widget _actionButton(String text, Color color, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-        textStyle: TextStyle(decoration: TextDecoration.none, fontSize: 14.sp, fontFamily: 'NotoSansUI', color: Colors.white),
-      ),
-      child: Text(text),
-    );
+  Widget _divider() {
+    return Divider(color: Colors.grey.shade300, height: 10.h);
   }
 }

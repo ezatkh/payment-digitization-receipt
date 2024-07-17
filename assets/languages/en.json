@@ -41,7 +41,7 @@
   "account": "Account",
   "preferences": "Preferences",
   "other": "Other",
-
+  "status": "Status",
   "connectivitySyncStatus": "Connectivity & Sync Status",
   "checkingConnectivity": "Checking connectivity...",
   "connected": "Connected!",
@@ -97,6 +97,7 @@
   "submitPayment": "Submit Payment",
   "confirmPayment": "Confirm Payment",
   "savePayment": "Save",
+  "viewPayment": "View Payment Summery",
   "paymentMethod": "Payment Method",
   "currency": "Currency",
   "notes": "Notes",

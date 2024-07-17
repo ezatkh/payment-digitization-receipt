@@ -101,8 +101,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     dashboardItems = [
       DashboardItemModel(iconData: Icons.payment, title: 'recordPayment', onTap: () => _navigateTo(RecordPaymentScreen())),
       DashboardItemModel(iconData: Icons.history, title: 'paymentHistory', onTap: () => _navigateTo(PaymentHistoryScreen())),
-      DashboardItemModel(iconData: Icons.print, title: 'printReceipt', onTap: () => _navigateTo(PrintReceiptScreen())),
-      DashboardItemModel(iconData: Icons.cancel_presentation_outlined, title: 'paymentCancellation', onTap: () => _navigateTo(PaymentCancellationScreen())),
       DashboardItemModel(iconData: Icons.signal_cellular_alt, title: 'connectivityStatus', onTap: () => _navigateTo(ConnectivityStatusScreen())),
       DashboardItemModel(iconData: Icons.settings, title: 'settings', onTap: () => _navigateTo(SettingsScreen())),
     ];
@@ -171,7 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: GridView.builder(
         padding: EdgeInsets.all(10.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+          crossAxisCount: 2,
           crossAxisSpacing: 10.w,
           mainAxisSpacing: 10.h,
           childAspectRatio: 1 / 1.15,
