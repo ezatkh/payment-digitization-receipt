@@ -4,15 +4,14 @@ import '../Services/networking.dart';
 import '../Services/database.dart';
 
 class PaymentApi {
-  static const String apiUrl = 'https://example.com/api/sync'; // Replace with your API URL
+  static const String apiUrl = 'http://192.168.20.65:8080/payments/sync';
 
   static Future<void> syncConfirmedPayments() async {
     print("syncConfirmedPayments method invoked successfully *****");
     try {
-      // Retrieve all confirmed payments from the local database
       List<Map<String, dynamic>> confirmedPayments = await DatabaseProvider.getConfirmedPayments();
       Map<String, dynamic> payload;
-      int id;
+      Map<String, dynamic> header;
       double amount;
 
       // Iterate through each confirmed payment
@@ -23,7 +22,9 @@ class PaymentApi {
         else {
           amount = payment['amountCheck'];
         }
-         id = payment['id'];
+          header = {
+            "tokenID":"aaaa",
+          };
          payload = {
            "accountName":payment['customerName'],
            "msisdn": payment['msisdn'],
@@ -37,7 +38,11 @@ class PaymentApi {
            "checkDueDate": payment['dueDateCheck'],
            "forThePaymentOfTheFollowingInvoice": payment['paymentInvoiceFor']
          };
+         print("header:");
+         print(header);
 
+        print("payload:");
+        print(payload);
 
 
         // Send data to API and get response

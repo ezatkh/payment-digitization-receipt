@@ -108,13 +108,10 @@ class LoginScreen extends StatelessWidget {
                                             .getLocalizedString('login')
                                         : 'Login', // Fallback if localization is not loaded
                                     onPressed: () async {
-                                      bool isValid =
-                                          validateLoginInputs(loginState);
+                                      bool isValid = validateLoginInputs(loginState);
                                       if (isValid) {
-                                        bool? loginResult =true;
-                                        //await loginState.login();
-
-                                        if (loginResult ?? false) {
+                                        bool? loginResult =await loginState.login();
+                                        if (loginResult ) {
                                           _handleLogin(
                                               context, localizationService);
                                         } else {

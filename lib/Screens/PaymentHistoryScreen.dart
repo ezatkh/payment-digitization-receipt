@@ -9,6 +9,7 @@ import '../Services/database.dart';
 import '../Models/Payment.dart';
 import '../Custom_Widgets/CustomButton.dart';
 import 'PaymentConfirmationScreen.dart';
+import '../Services/PaymentService.dart';
 
 class PaymentHistoryScreen extends StatefulWidget {
   @override
@@ -62,6 +63,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               fontFamily: 'NotoSansUI',
             )),
         backgroundColor: Color(0xFFC62828),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.network_cell),
+            onPressed: () {
+              PaymentService paymentService= new PaymentService();
+              paymentService.syncPayments();
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
