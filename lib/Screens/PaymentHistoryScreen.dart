@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
+import 'package:digital_payment_app/Screens/PrintReceiptScreen.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,6 +29,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   String from='';
   String to='';
   String search='';
+  late StreamSubscription _syncSubscription;
+
   List<Payment> _paymentRecords = [];
   void _initializeLocalizationStrings( ) {
     final localizationService = Provider.of<LocalizationService>(
@@ -44,6 +49,14 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         // Initialize the localization strings
     print("payment after retrieve from database :");
     _initializeLocalizationStrings();
+    _syncSubscription = PaymentService.syncStream.listen((_) {
+      _fetchPayments(); // Refresh payment records
+    });
+  }
+  @override
+  void dispose() {
+    _syncSubscription.cancel();
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -65,15 +78,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               fontFamily: 'NotoSansUI',
             )),
         backgroundColor: Color(0xFFC62828),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.network_cell),
-            onPressed: () {
-              PaymentService paymentService= new PaymentService();
-              paymentService.syncPayments();
-            },
-          ),
-        ],
+
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -221,134 +226,187 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         statusColor = Color(0xFFC62828); // Default color
         break;
     }
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      child: Theme(
-        data: ThemeData(dividerColor: Colors.transparent),
-        child: ExpansionTile(
-          leading: CircleAvatar(
-            backgroundColor: Colors.white,
-            child: Icon(statusIcon, color: statusColor, size: 26),
-          ),
-          title: Text(record.customerName,
-              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
-          subtitle: Text('${record.status} ',
-              style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
-          childrenPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-          children: [
-            (record.status.toLowerCase() == 'saved')?
-            _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.lastUpdatedDate!).toString()):
-            _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.transactionDate!).toString()),
-            _paymentDetailRow('Payment Method', record.paymentMethod),
-            _paymentDetailRow('Status', record.status),
-            if (record.msisdn != null && record.msisdn!.length > 0)
-              _paymentDetailRow('MSISDN', record.msisdn.toString()),
-            if (record.prNumber != null && record.prNumber!.length > 0)
-              _paymentDetailRow('#PR', record.prNumber.toString()),
-            if (record.paymentMethod.toLowerCase() == 'cash')
-              _paymentDetailRow('Amount', record.amount.toString()),
-            if (record.paymentMethod.toLowerCase() == 'cash')
-              _paymentDetailRow('Currency', record.currency.toString()),
-            if (record.paymentMethod.toLowerCase() == 'check')
-              _paymentDetailRow('Amount', record.amountCheck.toString()),
-            if (record.paymentMethod.toLowerCase() == 'check')
-              _paymentDetailRow('Check Number', record.checkNumber.toString()),
-            if (record.paymentMethod.toLowerCase() == 'check')
-              _paymentDetailRow('Bank/Branch', record.bankBranch.toString()),
-            if (record.paymentMethod.toLowerCase() == 'check')
-              _paymentDetailRow('Due Date', _formatDate(record.dueDateCheck)),
-            if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
-              _paymentDetailRowWithMultiline('Payment Invoice For:', record.paymentInvoiceFor.toString()),
-            SizedBox(height: 8.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.cancel, color: record.status.toLowerCase() == 'confirmed' ? Colors.red : Colors.grey), // View icon
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PaymentCancellationScreen(),
-                      ),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.visibility, color: Colors.blue), // View icon
-                  onPressed: () {
-                    if (record.id != null) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
-                        ),
-                      );
-                    } else {
-                      // Handle the case when record.id is null, e.g., show an error message
-                      print('Error: record.id is null');
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.edit, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey : Colors.blue),
-                  onPressed: record.status.toLowerCase() == 'confirmed' ? null : () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: record.status.toLowerCase() == 'confirmed' ? Colors.grey : Colors.red),
-                  onPressed: record.status.toLowerCase() == 'confirmed' ? null : () async {
-                    // Show a confirmation dialog before deleting
-                    bool confirmDelete = await showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext dialogContext) {
-                        return AlertDialog(
-                          title: Text('Confirm Delete'),
-                          content: Text('Are you sure you want to delete this payment record?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop(false); // Return false
-                              },
-                            ),
-                            TextButton(
-                              child: Text('Delete'),
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop(true); // Return true
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
 
-                    if (confirmDelete) {
-                      final int id = record.id!;
-                      await DatabaseProvider.deletePayment(id);
-                      // Update the UI to reflect the deletion
-                      setState(() {
-                        _paymentRecords.removeWhere((item) => item.id == id);
-                      });
-                    }
-                  },
-                ),
-              ],
-            ),
-          ],
-          onExpansionChanged: (bool expanded) {
-            // Optionally add analytics or state management hooks here
+    return Card(
+        elevation: 2,
+        margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+    child: Theme(
+    data: ThemeData(dividerColor: Colors.transparent),
+    child: ExpansionTile(
+    leading: CircleAvatar(
+    backgroundColor: Colors.white,
+    child: Icon(statusIcon, color: statusColor, size: 26),
+    ),
+    title: Text(record.customerName,
+    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+    subtitle: Text('${record.status}',
+    style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
+    childrenPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+    children: [
+    (record.status.toLowerCase() == 'saved') ?
+    _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.lastUpdatedDate!).toString()) :
+    _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.transactionDate!).toString()),
+       if (record.status.toLowerCase() == 'synced' || record.status.toLowerCase() == 'canceled')
+       _paymentDetailRow('Voucher Serial Number', record.voucherSerialNumber),
+    _paymentDetailRow('Payment Method', record.paymentMethod),
+    _paymentDetailRow('Status', record.status),
+    if (record.msisdn != null && record.msisdn!.isNotEmpty)
+    _paymentDetailRow('MSISDN', record.msisdn.toString()),
+    if (record.prNumber != null && record.prNumber!.isNotEmpty)
+    _paymentDetailRow('#PR', record.prNumber.toString()),
+    if (record.paymentMethod.toLowerCase() == 'cash')
+    _paymentDetailRow('Amount', record.amount.toString()),
+    if (record.paymentMethod.toLowerCase() == 'cash')
+    _paymentDetailRow('Currency', record.currency.toString()),
+    if (record.paymentMethod.toLowerCase() == 'check')
+    _paymentDetailRow('Amount', record.amountCheck.toString()),
+    if (record.paymentMethod.toLowerCase() == 'check')
+    _paymentDetailRow('Check Number', record.checkNumber.toString()),
+    if (record.paymentMethod.toLowerCase() == 'check')
+    _paymentDetailRow('Bank/Branch', record.bankBranch.toString()),
+    if (record.paymentMethod.toLowerCase() == 'check')
+    _paymentDetailRow('Due Date', _formatDate(record.dueDateCheck)),
+    if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
+    _paymentDetailRowWithMultiline('Payment Invoice For:', record.paymentInvoiceFor.toString()),
+    SizedBox(height: 8.h),
+    Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Tooltip(
+        message: 'View Payment Summary',
+      child: IconButton(
+      icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
+      onPressed: () {
+      if (record.id != null) {
+      Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+      builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
+      ),
+      );
+      } else {
+      // Handle the case when record.id is null
+      print('Error: record.id is null');
+      }
+      },
+      ),
+    ),
+    // Icons to be shown based on status
+    if (record.status.toLowerCase() == 'saved') ...[
+      Tooltip(
+        message: 'Delete Payment',
+        child: IconButton(
+          icon: Icon(Icons.delete, color: Colors.red),
+          onPressed: () async {
+            // Show a confirmation dialog before deleting
+            bool confirmDelete = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext dialogContext) {
+                return AlertDialog(
+                  title: Text('Confirm Delete'),
+                  content: Text('Are you sure you want to delete this payment record?'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(false); // Return false
+                      },
+                    ),
+                    TextButton(
+                      child: Text('Delete'),
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop(true); // Return true
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+
+            if (confirmDelete) {
+              final int id = record.id!;
+              await DatabaseProvider.deletePayment(id);
+              // Update the UI to reflect the deletion
+              setState(() {
+                _paymentRecords.removeWhere((item) => item.id == id);
+              });
+            }
           },
         ),
       ),
-    );
+      Tooltip(
+        message: 'Edit Payment',
+      child: IconButton(
+      icon: Icon(Icons.edit, color: Color(0xFFA67438)),
+      onPressed: () {
+      Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
+      );
+      },
+      ),
+    ),
+
+      Tooltip(
+        message: 'Save & Confirm the payment',
+      child: IconButton(
+      icon: Icon(Icons.check_circle, color: Colors.green),
+      onPressed: () {
+      print("need confirm ");
+      },
+      ),
+    ),
+    ] else if (record.status.toLowerCase() == 'synced') ...[
+      Tooltip(
+        message: 'Cancel the payment',
+        child: IconButton(
+          icon: Icon(Icons.cancel, color: Colors.red),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PaymentCancellationScreen(),
+              ),
+            );
+          },
+        ),
+      ),
+      Tooltip(
+        message: 'print the payment',
+      child: IconButton(
+      icon: Icon(Icons.print, color: Colors.black),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PrintReceiptScreen(),
+          ),
+        );
+      },
+
+      ),
+    ),
+    Tooltip(
+      message: 'Send the payment Via whatsapp',
+      child: IconButton(
+      icon: Icon(Icons.send, color: Colors.green),
+      onPressed: () {
+      // Handle send action
+      },
+      ),
+    ),
+
+    ],
+    ],
+    ),
+    ],
+    onExpansionChanged: (bool expanded) {
+    // Optionally add analytics or state management hooks here
+    },
+    ),
+    ),);
   }
 
 
@@ -393,12 +451,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   void _fetchPayments() async {
-    //await DatabaseProvider.clearDatabase();
     print("_fetchPayments method in PaymentHistory screen started");
     List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
-
-    // Print the raw data retrieved from the database
-
 
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
@@ -406,15 +460,14 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     DateTime? lastUpdatedDate;
     String? transactionDateString ;
     DateTime? transactionDate;
+    String serialNumber="";
     setState(() {
       _paymentRecords = payments.map((payment) {
         dueDateCheckString = payment['dueDateCheck'];
         lastUpdatedDateString = payment['lastUpdatedDate'];
         transactionDateString = payment['transactionDate'];
-        print("before parse the date :");
-        print(lastUpdatedDate);
-        print(transactionDate);
-
+        if(payment['voucherSerialNumber'] != null)
+          serialNumber=payment['voucherSerialNumber'];
         if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
           try {
             dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
@@ -446,7 +499,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           transactionDate = null;
         }
 
-
         return Payment(
           id:payment['id'],
           transactionDate:transactionDate,
@@ -463,6 +515,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           dueDateCheck: dueDateCheck,
           paymentInvoiceFor: payment['paymentInvoiceFor'],
           status: payment['status'],
+          voucherSerialNumber:serialNumber
         );
       }).toList();
 

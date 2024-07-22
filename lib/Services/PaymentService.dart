@@ -1,14 +1,36 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:digital_payment_app/Services/database.dart';
-import 'package:digital_payment_app/Models/Payment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'apiConstants.dart';
 
 class PaymentService {
-  final String apiUrl = 'http://192.168.20.65:8080/payments/sync';
+  static final StreamController<void> _syncController = StreamController<void>.broadcast();
+  static Stream<void> get syncStream => _syncController.stream;
 
-  Future<void> syncPayments() async {
+  static Future<void> testNetwork() async {
+     var connectivityResult = await (Connectivity().checkConnectivity());
+     print(connectivityResult);
+     if(connectivityResult == ConnectivityResult.none){
+       print("no internet");
+     }
+      else {
+        print("connected enternet ");
+        PaymentService.syncPayments();
+     }
+     }
+
+  static void startPeriodicNetworkTest() {
+    Timer.periodic(Duration(seconds: 10), (Timer timer) async {
+      await testNetwork();
+    });
+  }
+
+  static Future<void> syncPayments() async {
+
     print("syncPayments methodse");
      SharedPreferences prefs = await SharedPreferences.getInstance();
      String? tokenID = prefs.getString('token');
@@ -39,7 +61,6 @@ class PaymentService {
       String theSumOf = payment['paymentMethod'].toLowerCase() == 'cash'
           ? convertAmountToWords(payment['amount'])
           : convertAmountToWords(payment['amountCheck']);
-//
       Map<String, String> headers = {
         'Content-Type': 'application/json',
         'tokenID': fullToken,
@@ -81,6 +102,7 @@ class PaymentService {
            await DatabaseProvider.updatePaymentvoucherSerialNumber(payment["id"], voucherSerialNumber);
           // Update payment status to 'Synced'
            await DatabaseProvider.updatePaymentStatus(payment["id"], 'Synced');
+          _syncController.add(null);
         } else {
           // Handle errors
           print('Failed to sync payment: ${response.body}');

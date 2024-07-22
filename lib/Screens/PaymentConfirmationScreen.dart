@@ -22,6 +22,7 @@ class PaymentConfirmationScreen extends StatefulWidget {
 }
 
 class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
+  String vougherNumber = "";
   String paymentInvoiceFor = "";
   String amountCheck = "";
   String checkNumber = "";
@@ -59,6 +60,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
     languageCode = localizationService.selectedLanguageCode;
+    paymentInvoiceFor = localizationService.getLocalizedString('vougherNumber') ?? 'Confirm Payment';
     paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor') ?? 'Confirm Payment';
     amountCheck = localizationService.getLocalizedString('amountCheck') ?? 'Confirm Payment';
     checkNumber = localizationService.getLocalizedString('checkNumber') ?? 'Confirm Payment';
@@ -100,7 +102,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     } catch (e) {
       print('Error fetching payment details: $e');
     }
-    print(widget.paymentDetails);
   }
 
   @override
@@ -165,7 +166,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSummaryHeader(),
+          _buildSummaryHeader(paymentDetails['status'].toLowerCase()),
           Divider(color: Color(0xFFC62828), thickness: 2, height: 20.h),
           _detailItem(transactionDate, paymentDetails['status']?.toLowerCase() == "saved"
               ? (paymentDetails['lastUpdatedDate'] != null
@@ -221,14 +222,14 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     );
   }
 
-  Widget _buildSummaryHeader() {
+  Widget _buildSummaryHeader(String paymentStatus) {
     // Determine if icons should be shown based on conditions
-    bool canEdit = true; // Replace with your condition for edit visibility
-    bool canDelete = true; // Replace with your condition for delete visibility
-    bool canConfirm = true; // Replace with your condition for confirm visibility
-    bool canCancel = true; // Replace with your condition for view visibility
-    bool canPrint = true; // Replace with your condition for view visibility
-    bool canSend = true; // Replace with your condition for view visibility
+    bool canEdit = paymentStatus == 'saved';
+    bool canDelete = paymentStatus == 'saved';
+    bool canConfirm = paymentStatus == 'saved';
+    bool canPrint = paymentStatus == 'synced';
+    bool canSend = paymentStatus == 'synced';
+    bool canCancel = paymentStatus == 'synced';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

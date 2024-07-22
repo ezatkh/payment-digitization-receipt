@@ -64,12 +64,12 @@ class DatabaseProvider {
     List<Map<String, dynamic>> payments = await db.query('payments');
 
     // Print each payment before returning
-    for (Map<String, dynamic> payment in payments) {
-      payment.forEach((key, value) {
-        print('$key: $value');
-      });
-      print('----------'); // Separator for better readability
-    }
+    // for (Map<String, dynamic> payment in payments) {
+    //   payment.forEach((key, value) {
+    //     print('$key: $value');
+    //   });
+    //   print('----------'); // Separator for better readability
+    // }
     print("printAllPayments method , database.dart finished");
     return payments;
   }

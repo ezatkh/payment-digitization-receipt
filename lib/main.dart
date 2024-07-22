@@ -4,10 +4,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'Screens/SplashScreen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-//import 'package:digital_payment_app/generated/l10n.dart;
 import 'Services/LocalizationService.dart';
+import 'Services/PaymentService.dart';
 
 void main() async {
+  PaymentService.startPeriodicNetworkTest();
   WidgetsFlutterBinding.ensureInitialized();
   LocalizationService localizeService = LocalizationService();
   print("Initializing localization...");
