@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:digital_payment_app/Services/database.dart';
 import 'package:digital_payment_app/Models/Payment.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:number_to_words_english/number_to_words_english.dart';
 
 class PaymentService {
   final String apiUrl = 'http://192.168.20.65:8080/payments/sync';
@@ -20,16 +21,32 @@ class PaymentService {
 
      // Retrieve all confirmed payments
     List<Map<String, dynamic>> confirmedPayments = await DatabaseProvider.getConfirmedPayments();
+// Assuming NumberToWordsEnglish.convert expects an int
+    String convertAmountToWords(dynamic amount) {
+      if (amount == null) {
+        return ''; // Handle the case where amount is null
+      }
+
+      // Convert to int if amount is a double
+      int amountInt = (amount is double) ? amount.toInt() : amount as int;
+
+      return NumberToWordsEnglish.convert(amountInt);
+    }
 
     // Iterate over each payment
     for (var payment in confirmedPayments) {
       // Create request headers
+      String theSumOf = payment['paymentMethod'].toLowerCase() == 'cash'
+          ? convertAmountToWords(payment['amount'])
+          : convertAmountToWords(payment['amountCheck']);
+//
       Map<String, String> headers = {
         'Content-Type': 'application/json',
         'tokenID': fullToken,
       };
       // Create request body
       Map<String, dynamic> body = {
+        'transactionDate':  payment['transactionDate'],
         'accountName':  payment['customerName'],
         'msisdn': payment['msisdn'] ,
         'pr': payment['prNumber'] ,
@@ -40,6 +57,7 @@ class PaymentService {
         'checkAmount': payment['amountCheck'] ,
         'checkBank': payment['bankBranch'] ,
         'checkDueDate': payment['dueDateCheck'] != null && payment['dueDateCheck'] != 'null' ? DateTime.parse(payment['dueDateCheck']).toIso8601String() : null,
+        'theSumOf': theSumOf
       };
       //
       print(body);

@@ -136,9 +136,9 @@
 
   "confirmTitle": "Confirm Payment",
   "saveTitle": "Save Payment",
-  "requiredFields": "Required Fields"
+  "requiredFields": "Required Fields",
 
-
+  "transactionDate": "Transaction Date"
 
 
 

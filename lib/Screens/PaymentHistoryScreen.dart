@@ -7,9 +7,10 @@ import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 import '../Services/database.dart';
 import '../Models/Payment.dart';
-import '../Custom_Widgets/CustomButton.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Services/PaymentService.dart';
+import 'package:intl/intl.dart';
+
 
 class PaymentHistoryScreen extends StatefulWidget {
   @override
@@ -37,10 +38,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   @override
   void initState() {
-    print("initalize history payment");
+
     _fetchPayments();
     super.initState();
-    // Initialize the localization strings
+        // Initialize the localization strings
+    print("payment after retrieve from database :");
     _initializeLocalizationStrings();
   }
   @override
@@ -187,6 +189,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       },
     );
   }
+  String formatDateTimeWithoutMilliseconds(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    return formatter.format(dateTime);
+  }
 
   Widget _buildPaymentRecordItem(Payment record) {
     IconData statusIcon;
@@ -232,6 +238,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
           childrenPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
           children: [
+            (record.status.toLowerCase() == 'saved')?
+            _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.lastUpdatedDate!).toString()):
+            _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.transactionDate!).toString()),
             _paymentDetailRow('Payment Method', record.paymentMethod),
             _paymentDetailRow('Status', record.status),
             if (record.msisdn != null && record.msisdn!.length > 0)
@@ -270,12 +279,17 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 IconButton(
                   icon: Icon(Icons.visibility, color: Colors.blue), // View icon
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PaymentConfirmationScreen(paymentDetails: record),
-                      ),
-                    );
+                    if (record.id != null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
+                        ),
+                      );
+                    } else {
+                      // Handle the case when record.id is null, e.g., show an error message
+                      print('Error: record.id is null');
+                    }
                   },
                 ),
                 IconButton(
@@ -377,54 +391,30 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       ),
     );
   }
-  void _fetchConfirmPayments() async {
-    //await DatabaseProvider.clearDatabase();
-
-    List<Map<String, dynamic>> payments = await DatabaseProvider.getConfirmedPayments();
-    String? dueDateCheckString ;
-    DateTime? dueDateCheck;
-    setState(() {
-      _paymentRecords = payments.map((payment) {
-        print("idddd: ${payment['id']}");
-        dueDateCheckString = payment['dueDateCheck'];
-        if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
-          try {
-            dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
-          } catch (e) {
-            print('Error parsing dueDateCheck: $dueDateCheckString');
-            dueDateCheck = null;
-          }
-        } else {
-          dueDateCheck = null;
-        }
-        return Payment(
-          customerName: payment['customerName'],
-          msisdn: payment['msisdn'],
-          prNumber: payment['prNumber'],
-          paymentMethod: payment['paymentMethod'],
-          amount: payment['amount'],
-          currency: payment['currency'],
-          amountCheck: payment['amountCheck'],
-          checkNumber: payment['checkNumber'],
-          bankBranch: payment['bankBranch'],
-          dueDateCheck: dueDateCheck,
-          paymentInvoiceFor: payment['paymentInvoiceFor'],
-          status: payment['status'],
-        );
-      }).toList();
-    });
-  }
 
   void _fetchPayments() async {
     //await DatabaseProvider.clearDatabase();
-    print("inside fetch");
+    print("_fetchPayments method in PaymentHistory screen started");
     List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
+
+    // Print the raw data retrieved from the database
+
 
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
+    String? lastUpdatedDateString ;
+    DateTime? lastUpdatedDate;
+    String? transactionDateString ;
+    DateTime? transactionDate;
     setState(() {
       _paymentRecords = payments.map((payment) {
         dueDateCheckString = payment['dueDateCheck'];
+        lastUpdatedDateString = payment['lastUpdatedDate'];
+        transactionDateString = payment['transactionDate'];
+        print("before parse the date :");
+        print(lastUpdatedDate);
+        print(transactionDate);
+
         if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
           try {
             dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
@@ -435,8 +425,32 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         } else {
           dueDateCheck = null;
         }
+        if (lastUpdatedDateString != null && lastUpdatedDateString!.isNotEmpty) {
+          try {
+            lastUpdatedDate =  DateTime.parse(lastUpdatedDateString!);
+          } catch (e) {
+            print('Error parsing dueDateCheck: $lastUpdatedDate');
+            lastUpdatedDate = null;
+          }
+        } else {
+          lastUpdatedDate = null;
+        }
+        if (transactionDateString != null && transactionDateString!.isNotEmpty) {
+          try {
+            transactionDate =  DateTime.parse(transactionDateString!);
+          } catch (e) {
+            print('Error parsing dueDateCheck: $transactionDate');
+            transactionDate = null;
+          }
+        } else {
+          transactionDate = null;
+        }
+
+
         return Payment(
           id:payment['id'],
+          transactionDate:transactionDate,
+          lastUpdatedDate:lastUpdatedDate,
           customerName: payment['customerName'],
           msisdn: payment['msisdn'],
           prNumber: payment['prNumber'],
@@ -451,7 +465,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           status: payment['status'],
         );
       }).toList();
+
     });
+    print("_fetchPayments method in PaymentHistory screen finished");
+
   }
 }
 

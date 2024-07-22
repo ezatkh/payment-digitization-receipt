@@ -18,11 +18,14 @@ class Payment {
   String? paymentInvoiceFor;
   String status;
   int? id;
-
-  //user
-  //date
+  DateTime? transactionDate;
+  DateTime? lastUpdatedDate;
 
   void printAllFields() {
+    if(this.status.toLowerCase() == 'saved')
+      print("lastUpdatedDate: " + this.lastUpdatedDate.toString() ?? '');
+    else print("transactionDate: " + this.transactionDate.toString() ?? '');
+
     print("id: " + (this.id.toString()));
     print("customerName: " + (this.customerName ?? ''));
     print("msisdn: " + (this.msisdn ?? ''));
@@ -38,6 +41,8 @@ class Payment {
     print("status: " + this.status);
   }
   Payment({
+    this.transactionDate,
+    this.lastUpdatedDate,
     this.voucherSerialNumber = '',
     this.id,
     required this.customerName,
@@ -54,13 +59,15 @@ class Payment {
     required this.status
   })
   {
-    printAllFields();
+    //printAllFields();
   }
 
   factory Payment.fromMap(Map<String, dynamic> map) {
     return Payment(
       status: map['status'],
       id: map['id'],
+      lastUpdatedDate:(map['lastUpdatedDate'] != 'null' && map['lastUpdatedDate'] != ''&&  map['lastUpdatedDate'] != null) ? DateTime.parse(map['lastUpdatedDate']) : null,
+      transactionDate:(map['transactionDate'] != 'null' && map['transactionDate'] != '' &&  map['transactionDate'] != null) ? DateTime.parse(map['transactionDate']) : null,
       paymentMethod: map['paymentMethod'],
       customerName: map['customerName'],
       msisdn: (map['msisdn'] !=null && map.containsKey('msisdn'))?map['msisdn']: null,
@@ -74,5 +81,25 @@ class Payment {
       paymentInvoiceFor: (map['paymentInvoiceFor'] !=null && map.containsKey('paymentInvoiceFor'))?map['paymentInvoiceFor']: null,
 
     );
+  }
+  Map<String, dynamic> toMap() {
+    return {
+      'voucherSerialNumber': voucherSerialNumber,
+      'customerName': customerName,
+      'msisdn': msisdn,
+      'prNumber': prNumber,
+      'paymentMethod': paymentMethod,
+      'amount': amount,
+      'amountCheck': amountCheck,
+      'checkNumber': checkNumber,
+      'bankBranch': bankBranch,
+      'dueDateCheck': dueDateCheck?.toIso8601String(),
+      'currency': currency,
+      'paymentInvoiceFor': paymentInvoiceFor,
+      'status': status,
+      'id': id,
+      'transactionDate': transactionDate?.toIso8601String(),
+      'lastUpdatedDate': lastUpdatedDate?.toIso8601String(),
+    };
   }
 }

@@ -142,14 +142,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _initializeFields() async {
+    print("_initializeFields method in record payment screen");
     if (widget.id != null) {
       int id = widget.id!; // Ensure id is not null
       Map<String, dynamic>? paymentToEdit = await DatabaseProvider.getPaymentById(id);
       if (paymentToEdit != null) {
-        //print('Payment to parse: $paymentToEdit');
 
         Payment payment = Payment.fromMap(paymentToEdit);
-       // print("from record init state payment to edit with class payment:");
+        print(" the payment to edit after parse is :${payment}");
        // payment.printAllFields();
         print("payment method from history to edit ${payment.paymentMethod}");
         if (payment.paymentMethod == "Cash") {
@@ -767,6 +767,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                           if (!_validateFields()) return;
 
                           Payment paymentDetails = _preparePaymentObject('Confirmed');
+                          // Print all keys and values
+                          // Convert the instance to a map
+                          Map<String, dynamic> paymentMap = paymentDetails.toMap();
+                          // Print all keys and values
+                          paymentMap.forEach((key, value) {
+                          print('$key: $value');
+                          });
+
                           _agreedPayment(paymentDetails);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -775,11 +783,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                             ),
                           );
 
-                          // Navigate to PaymentConfirmationScreen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
-                          );
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
@@ -799,6 +802,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         );
       },
     );
+    print("_confirmPayment method finished");
+
   }
 
   void _savePayment() {
@@ -884,12 +889,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                             ),
                           );
 
-
-                          // Navigate to PaymentConfirmationScreen
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails)),
-                          );
                         },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white, backgroundColor: Color(0xFFC62828),
@@ -910,95 +909,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
   }
 
-  void _agreedPayment(Payment paymentDetails) async {
-    print("_agreedPaymentMethodStarted");
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-
-    // Simulate a network request/waiting time
-    await Future.delayed(Duration(seconds: 2));
-
-    try{
-      if(paymentDetails.paymentMethod == "كاش") {
-        paymentDetails.paymentMethod = 'Cash';
-        if(paymentDetails.currency =='دولار')
-          paymentDetails.currency="USD";
-        if(paymentDetails.currency =='شيكل')
-          paymentDetails.currency="ILS";
-        if(paymentDetails.currency =='يورو')
-          paymentDetails.currency="EURO";
-        if(paymentDetails.currency =='دينار')
-          paymentDetails.currency="JD";
-      }
-      else if(paymentDetails.paymentMethod == "شيك"){
-        paymentDetails.paymentMethod = 'Check';
-      }
-
-      if(paymentDetails.id == null)
-      {
-        print("no id , create new payment :");
-        await DatabaseProvider.savePayment({
-          'customerName': paymentDetails.customerName,
-          'paymentMethod': paymentDetails.paymentMethod,
-          'status':paymentDetails.status,
-          'msisdn': paymentDetails.msisdn,
-          'prNumber': paymentDetails.prNumber,
-          'amount': paymentDetails.amount ,
-          'currency':  paymentDetails.currency,
-          'amountCheck':  paymentDetails.amountCheck,
-          'checkNumber':  paymentDetails.checkNumber,
-          'bankBranch': paymentDetails.bankBranch ,
-          'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
-          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
-        });
-        print("saved to db Successfully");
-      }
-      else {
-        print("id , update exist payment :");
-        final int id = paymentDetails.id!;
-        await DatabaseProvider.updatePayment(id, {
-          'customerName': paymentDetails.customerName,
-          'paymentMethod': paymentDetails.paymentMethod,
-          'status': paymentDetails.status,
-          'msisdn': paymentDetails.msisdn,
-          'prNumber': paymentDetails.prNumber,
-          'amount': paymentDetails.amount,
-          'currency': paymentDetails.currency,
-          'amountCheck': paymentDetails.amountCheck,
-          'checkNumber': paymentDetails.checkNumber,
-          'bankBranch': paymentDetails.bankBranch,
-          'dueDateCheck': paymentDetails.dueDateCheck.toString(),
-          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
-
-        });
-        Navigator.pop(context);
-        print("Updated in db Successfully");
-      }
-      print("_agreedPaymentMethodFinished");
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentDetails: paymentDetails))); // Navigate to view payment screen after agreed
-    }catch (e) {
-      print('Error saving payment: $e');
-      // Handle error scenario
-    }
-
-
-  }
-
-
-
-
-
   Payment _preparePaymentObject(String status) {
+    print("_preparePaymentObject method started");
     DateTime? parseDueDate;
     if (_selectedPaymentMethod!.toLowerCase() == 'cash' || _selectedPaymentMethod!.toLowerCase() == 'كاش') {
       if ([_customerNameController.text, _amountController.text, _selectedCurrency, _selectedPaymentMethod]
@@ -1025,29 +937,114 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       }
       if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
         if (_dueDateCheckController.text.isNotEmpty) {
-           parseDueDate = DateFormat('yyyy-MM-dd').parse(_dueDateCheckController.text);
+          parseDueDate = DateFormat('yyyy-MM-dd').parse(_dueDateCheckController.text);
           print("the date before saved to database ${parseDueDate.toString()}");
         }
       }
 
     }
 
-Payment paymentDetail= Payment(
-  customerName: _customerNameController.text,
-  msisdn: _msisdnController.text.isNotEmpty?_msisdnController.text: null,
-  prNumber: _prNumberController.text!,
-  paymentMethod: _selectedPaymentMethod!,
-  amount: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? double.tryParse(_amountController.text) : null,
-  currency: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? _selectedCurrency: null,
-  paymentInvoiceFor: _paymentInvoiceForController.text.length>0?_paymentInvoiceForController.text:null,
-  amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
-  checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'?  int.tryParse(_checkNumberController.text) : null,
-  bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
-  dueDateCheck: parseDueDate , // Formatting the date
-  id:widget.id !=null ? widget.id : null,
-  status: status,
-);
+    Payment paymentDetail= Payment(
+      customerName: _customerNameController.text,
+      msisdn: _msisdnController.text.isNotEmpty?_msisdnController.text: null,
+      prNumber: _prNumberController.text!,
+      paymentMethod: _selectedPaymentMethod!,
+      amount: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? double.tryParse(_amountController.text) : null,
+      currency: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? _selectedCurrency: null,
+      paymentInvoiceFor: _paymentInvoiceForController.text.length>0?_paymentInvoiceForController.text:null,
+      amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
+      checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'?  int.tryParse(_checkNumberController.text) : null,
+      bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
+      dueDateCheck: parseDueDate , // Formatting the date
+      id:widget.id !=null ? widget.id : null,
+      status: status,
+    );
     return paymentDetail;
+  }
+
+  void _agreedPayment(Payment paymentDetails) async {
+    print("_agreedPaymentMethodStarted");
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    // Simulate a network request/waiting time
+    await Future.delayed(Duration(seconds: 2));
+    int idPaymentStored;
+    try{
+      if(paymentDetails.paymentMethod == "كاش") {
+        paymentDetails.paymentMethod = 'Cash';
+        if(paymentDetails.currency =='دولار')
+          paymentDetails.currency="USD";
+        if(paymentDetails.currency =='شيكل')
+          paymentDetails.currency="ILS";
+        if(paymentDetails.currency =='يورو')
+          paymentDetails.currency="EURO";
+        if(paymentDetails.currency =='دينار')
+          paymentDetails.currency="JD";
+      }
+      else if(paymentDetails.paymentMethod == "شيك"){
+        paymentDetails.paymentMethod = 'Check';
+      }
+
+      if(paymentDetails.id == null)
+      {
+        print("no id , create new payment :");
+        idPaymentStored= await DatabaseProvider.savePayment({
+          'customerName': paymentDetails.customerName,
+          'paymentMethod': paymentDetails.paymentMethod,
+          'status':paymentDetails.status,
+          'msisdn': paymentDetails.msisdn,
+          'prNumber': paymentDetails.prNumber,
+          'amount': paymentDetails.amount ,
+          'currency':  paymentDetails.currency,
+          'amountCheck':  paymentDetails.amountCheck,
+          'checkNumber':  paymentDetails.checkNumber,
+          'bankBranch': paymentDetails.bankBranch ,
+          'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
+          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
+        });
+        print("saved to db Successfully");
+      }
+      else {
+        print("id , update exist payment :");
+        final int id = paymentDetails.id!;
+        idPaymentStored=id;
+        await DatabaseProvider.updatePayment(id, {
+          'customerName': paymentDetails.customerName,
+          'paymentMethod': paymentDetails.paymentMethod,
+          'status': paymentDetails.status,
+          'msisdn': paymentDetails.msisdn,
+          'prNumber': paymentDetails.prNumber,
+          'amount': paymentDetails.amount,
+          'currency': paymentDetails.currency,
+          'amountCheck': paymentDetails.amountCheck,
+          'checkNumber': paymentDetails.checkNumber,
+          'bankBranch': paymentDetails.bankBranch,
+          'dueDateCheck': paymentDetails.dueDateCheck.toString(),
+          'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
+
+        });
+        Navigator.pop(context);
+        print("Updated in db Successfully");
+
+      }
+      print("_agreedPaymentMethodFinished");
+      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentId: idPaymentStored))); // Navigate to view payment screen after agreed
+    }catch (e) {
+      print('Error saving payment: $e');
+      // Handle error scenario
+    }
+
+
   }
 
   void _clearPaymentMethodFields() {

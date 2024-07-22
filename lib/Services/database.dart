@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -53,11 +54,30 @@ class DatabaseProvider {
       )
     ''');
   }
-  // Retrieve all payments
+
   static Future<List<Map<String, dynamic>>> getAllPayments() async {
+    print("printAllPayments method , database.dart started");
+
     Database db = await database;
-    return await db.query('payments');
+
+    // Query the database to get all payments
+    List<Map<String, dynamic>> payments = await db.query('payments');
+
+    // Print each payment before returning
+    for (Map<String, dynamic> payment in payments) {
+      payment.forEach((key, value) {
+        print('$key: $value');
+      });
+      print('----------'); // Separator for better readability
+    }
+    print("printAllPayments method , database.dart finished");
+    return payments;
   }
+  // Retrieve all payments
+  // static Future<List<Map<String, dynamic>>> getAllPayments() async {
+  //   Database db = await database;
+  //   return await db.query('payments');
+  // }
 
   //Retrieve Co
   static Future<List<Map<String, dynamic>>> getConfirmedPayments() async {
@@ -128,8 +148,7 @@ class DatabaseProvider {
 
       // If the status is 'Confirmed', also update the transaction date
       if (status.toLowerCase() == 'confirmed') {
-        String currentDateTime = DateTime.now().toIso8601String();
-        await updateTransactionDate(id, currentDateTime);
+        await updateTransactionDate(id);
       }
     } catch (e) {
       print('Error updating payment status: $e');
@@ -138,7 +157,7 @@ class DatabaseProvider {
   }
 
   // Update Transaction Date
-  static Future<void> updateTransactionDate(int id, String transactionDate) async {
+  static Future<void> updateTransactionDate(int id) async {
     try {
       Database db = await database;
       Map<String, dynamic>? payment = await getPaymentById(id);
@@ -147,13 +166,14 @@ class DatabaseProvider {
 
         // Only update if the current transaction date is null
         if (currentTransactionDate == null) {
+          String now = formatDateTimeWithMilliseconds(DateTime.now());
           await db.update(
             'payments',
-            {'transactionDate': transactionDate},
+            {'transactionDate': now},
             where: 'id = ?',
             whereArgs: [id],
           );
-          print('Transaction date updated for payment with id $id');
+          print('Transaction date updated to now for payment with id $id');
         } else {
           print('Transaction date already exists for payment with id $id. Skipping update.');
         }
@@ -185,17 +205,44 @@ class DatabaseProvider {
 
   // Edit payment information
   static Future<void> updatePayment(int id, Map<String, dynamic> updatedData) async {
-    Database db = await database;
-    updatedData['lastUpdatedDate'] = DateTime.now().toIso8601String();
-    await db.update('payments', updatedData, where: 'id = ?', whereArgs: [id]);
+    print("updatePayment method in database.dart started");
+    print(updatedData);
+    updatedData['lastUpdatedDate'] = formatDateTimeWithMilliseconds(DateTime.now());
+    if(updatedData["status"].toLowerCase() == "confirmed"){
+      updatedData['transactionDate'] = formatDateTimeWithMilliseconds(DateTime.now());
+
+    }
+     Database db = await database;
+     await db.update('payments', updatedData, where: 'id = ?', whereArgs: [id]);
+    print("updatePayment method in database.dart finished");
+
   }
 
   // Save a new payment record
-  static Future<void> savePayment(Map<String, dynamic> paymentData) async {
+  static Future<int> savePayment(Map<String, dynamic> paymentData) async {
+    print("savePayment method in database.dart started");
     Database db = await database;
-    paymentData['lastUpdatedDate'] = DateTime.now().toIso8601String();
-    await db.insert('payments', paymentData);
+
+    // Check if the status is 'Confirmed' and set the transaction date
+    if (paymentData['status'] != null && paymentData['status'].toLowerCase() == 'confirmed') {
+      paymentData['transactionDate'] = formatDateTimeWithMilliseconds(DateTime.now());
+      paymentData['lastUpdatedDate'] = formatDateTimeWithMilliseconds(DateTime.now());
+    } else if (paymentData['status'] != null && paymentData['status'].toLowerCase() == 'saved') {
+      // Set the last updated date to now
+      paymentData['lastUpdatedDate'] = formatDateTimeWithMilliseconds(DateTime.now());
+    }
+
+    // Insert the payment data into the database and return the ID of the new row
+    int id = await db.insert('payments', paymentData);
+    print("the id of new payment is to return : ${id}");
+    Map<String, dynamic>? newPayment = await getPaymentById(id);
+    print("the new payment after saved to db :");
+    print(newPayment);
+    print("savePayment method in database.dart finished");
+
+    return id;
   }
+
 
   // Delete a payment by ID
   static Future<void> deletePayment(int id) async {
@@ -208,6 +255,12 @@ class DatabaseProvider {
     Database db = await database;
     await db.delete('payments');
     print('Database cleared');
+  }
+
+  static String formatDateTimeWithMilliseconds(DateTime dateTime) {
+    final DateFormat formatter = DateFormat('yyyy-MM-ddTHH:mm:ss.SSS');
+    print(formatter.format(dateTime)); // This should print the date and time without milliseconds
+    return formatter.format(dateTime);
   }
 
 }

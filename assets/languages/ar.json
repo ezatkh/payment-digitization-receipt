@@ -136,5 +136,7 @@
 
   "confirmTitle": "تأكيد الدفعة",
   "saveTitle": "حفظ الدفعة",
-  "requiredFields": "الحقول المطلوبة"
+  "requiredFields": "الحقول المطلوبة",
+
+  "transactionDate": "تاريخ الدفعة"
 }
