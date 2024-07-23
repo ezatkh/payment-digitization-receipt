@@ -1,7 +1,5 @@
 import 'dart:ui';
-
 import 'package:digital_payment_app/Models/LoginState.dart';
-import 'package:digital_payment_app/Screens/PrintSettingsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

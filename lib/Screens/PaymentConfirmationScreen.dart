@@ -9,7 +9,13 @@ import 'package:number_to_word_arabic/number_to_word_arabic.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 import '../Services/database.dart';
 import 'DashboardScreen.dart';
-import 'PaymentHistoryScreen.dart'; // Import your DashboardScreen
+import 'PaymentCancellationScreen.dart';
+import 'PaymentHistoryScreen.dart';
+import '../Custom_Widgets/CustomPopups.dart';
+import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
+
+import 'PrintSettingsScreen.dart';
+import 'SendReceiptScreen.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
   final int paymentId;
@@ -22,7 +28,7 @@ class PaymentConfirmationScreen extends StatefulWidget {
 }
 
 class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
-  String vougherNumber = "";
+  String voucherNumber = "";
   String paymentInvoiceFor = "";
   String amountCheck = "";
   String checkNumber = "";
@@ -60,7 +66,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
     languageCode = localizationService.selectedLanguageCode;
-    paymentInvoiceFor = localizationService.getLocalizedString('vougherNumber') ?? 'Confirm Payment';
+    voucherNumber = localizationService.getLocalizedString('voucherNumber') ?? 'Voucher Number';
     paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor') ?? 'Confirm Payment';
     amountCheck = localizationService.getLocalizedString('amountCheck') ?? 'Confirm Payment';
     checkNumber = localizationService.getLocalizedString('checkNumber') ?? 'Confirm Payment';
@@ -168,6 +174,11 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         children: [
           _buildSummaryHeader(paymentDetails['status'].toLowerCase()),
           Divider(color: Color(0xFFC62828), thickness: 2, height: 20.h),
+          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['paymentMethod'] == "cancelled"))
+            _detailItem(voucherNumber, paymentDetails['voucherSerialNumber'] ?? ''),
+
+          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['paymentMethod'] == "cancelled"))
+            _divider(),
           _detailItem(transactionDate, paymentDetails['status']?.toLowerCase() == "saved"
               ? (paymentDetails['lastUpdatedDate'] != null
               ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['lastUpdatedDate']))
@@ -249,39 +260,84 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             if (canSend) IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
-                // Handle view action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SendReceiptScreen(id:idToPrint),
+                  ),
+                );
               },
             ),
-            if (canPrint) IconButton(
-              icon: Icon(Icons.print, color: Colors.black),
-              onPressed: () {
-                // Handle view action
-              },
-            ),
-            if (canCancel) IconButton(
-              icon: Icon(Icons.cancel, color: Colors.red),
-              onPressed: () {
-                // Handle view action
-              },
-            ),
-            if (canEdit) IconButton(
-              icon: Icon(Icons.edit, color: Colors.orange),
-              onPressed: () {
-                // Handle edit action
-              },
-            ),
-            if (canDelete) IconButton(
-              icon: Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                // Handle delete action
-              },
-            ),
-            if (canConfirm) IconButton(
-              icon: Icon(Icons.check_circle, color: Colors.blue),
-              onPressed: () {
-                // Handle confirm action
-              },
-            ),
+            if (canPrint)
+              Tooltip(
+                message: 'Print Payment',
+                child: IconButton(
+                  icon: Icon(Icons.print, color: Colors.black),
+                  onPressed: () {
+                    if (widget.paymentId != null) {
+                      final int idToPrint = widget.paymentId!;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PrintSettingsScreen(id:idToPrint),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+            if (canCancel)
+              Tooltip(
+                message: 'Cancel Payment',
+                child: IconButton(
+                  icon: Icon(Icons.cancel, color: Colors.red),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PaymentCancellationScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            if (canEdit)
+              Tooltip(
+                message: 'Edit Payment',
+                child: IconButton(
+                  icon: Icon(Icons.edit, color: Colors.orange),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: widget.paymentId)),
+                    );
+                  },
+                ),
+              ),
+            if (canDelete)
+              Tooltip(
+                message: 'Delete Payment',
+                child: IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () {
+                    CustomPopups.showDeleteConfirmationDialog(context, () {
+                      print("Delete");
+                    });
+                  },
+                ),
+              ),
+            if (canConfirm)
+              Tooltip(
+                message: 'Save & Confirm Payment',
+                child: IconButton(
+                  icon: Icon(Icons.check_circle, color: Colors.blue),
+                  onPressed: () {
+                    CustomPopups.showConfirmDialog(context, () {
+                      print("confirm");
+                    });
+                  },
+                ),
+              ),
           ],
         ),
       ],

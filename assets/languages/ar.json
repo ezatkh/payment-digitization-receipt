@@ -55,7 +55,7 @@
 
   "printreceipt": "طباعة الإيصال",
   "filterNumber": "رقم القسيمة",
-  "voucher": "قسيمة",
+  "voucherNumber": "رقم قسيمة",
   "amount": "المبلغ",
   "sendSelected": "إرسال المحدد",
   "printSelected": "طباعة المحدد",

@@ -54,8 +54,8 @@
   "retry": "Retry",
 
   "printreceipt": "Print Receipt",
-  "filterNumber": "Voucher Number",
-  "voucher": "Voucher",
+  "filterNumber": "Filter Number",
+  "voucherNumber": "Voucher Number",
   "amount": "Amount",
   "sendSelected": "Send Selected",
   "printSelected": "Print Selected",

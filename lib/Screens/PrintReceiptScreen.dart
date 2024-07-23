@@ -190,10 +190,10 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
             IconButton(
               icon: Icon(Icons.print),
               onPressed: receipt['synced'] ? () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PrintSettingsScreen()),
-                );
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => PrintSettingsScreen()),
+                // );
               } : null,
             ),
 
@@ -363,10 +363,10 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
   }
 
   void _printSelectedReceipts() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => PrintSettingsScreen()),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => PrintSettingsScreen()),
+    // );
   }
 
   void _sendSelectedReceipts() {

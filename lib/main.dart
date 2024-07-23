@@ -1,4 +1,9 @@
 import 'package:digital_payment_app/Models/LoginState.dart';
+import 'package:digital_payment_app/Screens/DashboardScreen.dart';
+import 'package:digital_payment_app/Screens/LoginScreen.dart';
+import 'package:digital_payment_app/Screens/PaymentConfirmationScreen.dart';
+import 'package:digital_payment_app/Screens/PaymentHistoryScreen.dart';
+import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -112,6 +117,7 @@ class MyApp extends StatelessWidget {
                   : TextDirection.rtl,
               child: child!,
             );
+
           },
         );
       },

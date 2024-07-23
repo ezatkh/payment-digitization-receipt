@@ -7,6 +7,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 class SendReceiptScreen extends StatefulWidget {
+  final int id;  // Add this line
+
+  PrintSettingsScreen({required this.id});  // Update the constructor
+
   @override
   _SendReceiptScreenState createState() => _SendReceiptScreenState();
 }

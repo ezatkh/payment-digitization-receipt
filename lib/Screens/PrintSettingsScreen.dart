@@ -5,19 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:intl/intl.dart'; // If you're using this for formatting dates
+import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 import 'package:number_to_word_arabic/number_to_word_arabic.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 
+import '../Services/database.dart';
+
 
 class PrintSettingsScreen extends StatefulWidget {
+  final int id;  // Add this line
+
+  PrintSettingsScreen({required this.id});  // Update the constructor
+
   @override
   _PrintSettingsScreenState createState() => _PrintSettingsScreenState();
 }
 
 class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
+  Payment? _payment;
   int _numCopies = 1;
   bool _duplex = false;
   String _paperSize = 'A4';
@@ -79,15 +86,28 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
     languageCode = localizationService.selectedLanguageCode;
 
   }
+
+  Future<void> _loadPaymentData() async {
+    Payment? payment = await fetchPayment(widget.id);
+    setState(() {
+      _payment = payment;
+    });
+  }
   @override
   void initState() {
     super.initState();
     // Initialize the localization strings
     _initializeLocalizationStrings();
+    _loadPaymentData();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_payment == null) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     ScreenUtil.init(context, designSize: Size(360, 690));
     return Scaffold(
       appBar: _buildAppBar(printSettings),
@@ -260,23 +280,40 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
             ),
           ),
           SizedBox(height: 12.h),
-          _printLine("$date:", DateFormat('yyyy-MM-dd').format(DateTime.now())),
-          _printLine("$time:", DateFormat('HH:mm:ss').format(DateTime.now())),
-          SizedBox(height: 12.h),
+          _printLine(
+              "$date:",
+              _payment?.transactionDate != null
+                  ? DateFormat('yyyy-MM-dd HH:mm:ss').format(_payment!.transactionDate!)
+                  : 'N/A'
+          ),          SizedBox(height: 12.h),
           Divider(color: Colors.grey[800]),
-          _printLine("$customerName:", 'John Doe'),
-          _printLine('$MSISDN:', '1234567890'),
-          _printLine('$PR:', 'PR20231015'),
-          _printLine('$paymentMethod:', 'Credit Card'),
-          _printLine('$amount:', '\$12853.00'),
-          _printLine('$currency:', 'USD'),
+          _printLine("$customerName:", _payment!.customerName),
+          _printLine('MSISDN:', (_payment!.msisdn != null && _payment!.msisdn.toString().length >1) ?  _payment!.msisdn.toString() : 'N/A'),
+          _printLine('$PR:',(_payment!.prNumber != null && _payment!.prNumber.toString().length >1) ? _payment!.prNumber.toString() : 'N/A'),
+
+          _printLine('$paymentMethod:', _payment!.paymentMethod.toString()),
+          if(_payment!.paymentMethod.toString().toLowerCase() =='cash' ) ...[
+          _printLine('$amount:', _payment!.amount.toString()),
+          _printLine('$currency:', _payment!.currency.toString()),
+          ],
+          if(_payment!.paymentMethod.toString().toLowerCase() =='check' ) ...[
+            _printLine('$amount:', _payment!.amount.toString()),
+            _printLine('$amount:', _payment!.amountCheck.toString()),
+            _printLine('$amount:', _payment!.bankBranch.toString()),
+            _printLine('$amount:',_payment?.dueDateCheck != null
+                ? DateFormat('yyyy-MM-dd').format(_payment!.dueDateCheck!)
+                : 'N/A'),
+          ],
           Divider(color: Colors.grey[800]),
           Text('$theSumOf:', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp, fontWeight: FontWeight.bold)),
-          Text((languageCode)=='ar'?Tafqeet.convert('12853'):NumberToWordsEnglish.convert(12853), style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp)),
+          Text((languageCode) == 'ar' ? Tafqeet.convert((_payment!.paymentMethod.toLowerCase() == 'cash') ? _payment!.amount.toString() : _payment!.amountCheck.toString()) : NumberToWordsEnglish.convert((_payment!.paymentMethod.toLowerCase() == 'cash')? _payment!.amount!.toInt() :_payment!.amountCheck!.toInt()), style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp)),
           Divider(color: Colors.grey[800]),
+          if(_payment!.paymentInvoiceFor != null)
           Text('$notes:', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp, fontWeight: FontWeight.bold)),
-          Text('Payment for services rendered.', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp)),
-          Divider(color: Colors.grey[800]),
+          if(_payment!.paymentInvoiceFor != null)
+          Text('${_payment!.paymentInvoiceFor}:', style: TextStyle(fontFamily: 'CourierPrime', fontSize: 14.sp, fontWeight: FontWeight.bold)),
+          if(_payment!.paymentInvoiceFor != null)
+            Divider(color: Colors.grey[800]),
           Center(
             child: Text(
               thankYou,
@@ -493,6 +530,24 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 40.w),
       ),
     );
+  }
+
+  Future<Payment?> fetchPayment(int id) async {
+    try {
+      // Get the payment data from the database
+      final paymentData = await DatabaseProvider.getPaymentById(id);
+
+      if (paymentData != null) {
+        // Create a Payment instance from the fetched data
+        return Payment.fromMap(paymentData);
+      } else {
+      //  print("No payment found with id $id");
+        return null;
+      }
+    } catch (e) {
+     // print('Error fetching payment: $e');
+      return null;
+    }
   }
 
 

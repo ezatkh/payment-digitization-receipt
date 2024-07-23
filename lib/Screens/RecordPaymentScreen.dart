@@ -965,11 +965,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   void _agreedPayment(Payment paymentDetails) async {
     print("_agreedPaymentMethodStarted");
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Center(
+    showDialog( context: context,  barrierDismissible: false,  builder: (BuildContext dialogContext) {
+      return Center(
           child: CircularProgressIndicator(),
         );
       },
@@ -1032,12 +1029,11 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
 
         });
-        Navigator.pop(context);
         print("Updated in db Successfully");
 
       }
       print("_agreedPaymentMethodFinished");
-      Navigator.pop(context);
+      Navigator.pop(context); // pop the dialog
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentId: idPaymentStored))); // Navigate to view payment screen after agreed
     }catch (e) {
       print('Error saving payment: $e');

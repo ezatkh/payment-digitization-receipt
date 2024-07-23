@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'apiConstants.dart';
 
+
 class PaymentService {
   static final StreamController<void> _syncController = StreamController<void>.broadcast();
   static Stream<void> get syncStream => _syncController.stream;

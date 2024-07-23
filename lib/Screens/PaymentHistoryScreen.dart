@@ -1,7 +1,6 @@
 import 'dart:async';
-
 import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
-import 'package:digital_payment_app/Screens/PrintReceiptScreen.dart';
+import 'package:digital_payment_app/Screens/PrintSettingsScreen.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,6 +12,10 @@ import '../Models/Payment.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Services/PaymentService.dart';
 import 'package:intl/intl.dart';
+import '../Services/database.dart';
+import '../Custom_Widgets/CustomPopups.dart';
+
+
 
 
 class PaymentHistoryScreen extends StatefulWidget {
@@ -43,7 +46,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   @override
   void initState() {
-
     _fetchPayments();
     super.initState();
         // Initialize the localization strings
@@ -53,11 +55,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       _fetchPayments(); // Refresh payment records
     });
   }
+
   @override
   void dispose() {
     _syncSubscription.cancel();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690));
@@ -95,7 +99,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Navigate to the RecordPaymentScreen to add a new payment
-          Navigator.push(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
         },
         backgroundColor: Color(0xFFC62828),
         child: Icon(Icons.add),
@@ -341,7 +345,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       child: IconButton(
       icon: Icon(Icons.edit, color: Color(0xFFA67438)),
       onPressed: () {
-      Navigator.push(
+      Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
       );
@@ -350,17 +354,23 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     ),
 
       Tooltip(
-        message: 'Save & Confirm the payment',
-      child: IconButton(
-      icon: Icon(Icons.check_circle, color: Colors.green),
-      onPressed: () {
-      print("need confirm ");
-      },
+        message: 'Save & Confirm Payment',
+        child: IconButton(
+          icon: Icon(Icons.check_circle, color: Colors.green),
+          onPressed: () async {
+            CustomPopups.showConfirmDialog(context, () async {
+              if (record.id != null) {
+                final int idToConfirm = record.id!;
+                await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
+                PaymentService.syncPayments();
+              }
+            });
+          },
+        ),
       ),
-    ),
     ] else if (record.status.toLowerCase() == 'synced') ...[
       Tooltip(
-        message: 'Cancel the payment',
+        message: 'Cancel Payment',
         child: IconButton(
           icon: Icon(Icons.cancel, color: Colors.red),
           onPressed: () {
@@ -374,22 +384,24 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         ),
       ),
       Tooltip(
-        message: 'print the payment',
+        message: 'print Payment',
       child: IconButton(
       icon: Icon(Icons.print, color: Colors.black),
       onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PrintReceiptScreen(),
-          ),
-        );
+        if (record.id != null) {
+          final int idToPrint = record.id!;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PrintSettingsScreen(id:idToPrint),
+            ),
+          );
+        }
       },
-
       ),
     ),
     Tooltip(
-      message: 'Send the payment Via whatsapp',
+      message: 'Send Payment Via whatsapp',
       child: IconButton(
       icon: Icon(Icons.send, color: Colors.green),
       onPressed: () {
