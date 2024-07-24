@@ -20,7 +20,6 @@ import 'SendReceiptScreen.dart';
 class PaymentConfirmationScreen extends StatefulWidget {
   final int paymentId;
   Map<String, dynamic>? paymentDetails;
-
   PaymentConfirmationScreen({required this.paymentId});
 
   @override

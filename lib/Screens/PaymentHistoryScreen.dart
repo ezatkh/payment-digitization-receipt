@@ -357,22 +357,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         child: IconButton(
           icon: Icon(Icons.cancel, color: Colors.red),
           onPressed: () {
-            // if (record.id != null) {
-            //   final int idToCancel = record.id!;
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //       builder: (context) => PaymentCancellationScreen(),
-            //     ),
-            //   );
-            // }
-
-            // Navigator.push(
-            //   context,
-            //   MaterialPageRoute(
-            //     builder: (context) => PaymentCancellationScreen(),
-            //   ),
-            // );
+            if (record.id != null) {
+              final int idToCancel = record.id!;
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return PaymentCancellationScreen(id: idToCancel);
+                },
+              );
+            }
           },
         ),
       ),
