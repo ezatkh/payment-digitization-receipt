@@ -3,71 +3,61 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui';  // Required for ImageFilter
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
-
-
+import '../Custom_Widgets/CustomPopups.dart';
 class PaymentCancellationScreen extends StatefulWidget {
+  final int id;
+
+  PaymentCancellationScreen({required this.id});
+
   @override
   _PaymentCancellationScreenState createState() => _PaymentCancellationScreenState();
 }
 
 class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
-  final List<String> paymentIds = ['PR12345', 'PR67890', 'PR23456'];  // Example PR#s
-  String cancelPayment='';
-  String selectPaymentToCancel='';
-  String choosePayment='';
-  String reasonForCancellation='';
-  String enterTheReason='';
-  String additionalDetail='';
-  String addMoreDetail='';
-  String back='';
-  String confirmCancellation='';
-  String confirmCancellationBody='';
-  String confirm='';
-  String cancel='';
+  String cancelPayment = '';
+  String reasonForCancellation = '';
+  String enterTheReason = '';
+  String back = '';
+  String confirmCancellation = '';
+  String confirmCancellationBody = '';
+  String confirm = '';
+  String cancel = '';
 
-  void _initializeLocalizationStrings( ) {
+  void _initializeLocalizationStrings() {
     final localizationService = Provider.of<LocalizationService>(context, listen: false);
-    cancelPayment= localizationService.getLocalizedString('cancelPayment');
-    selectPaymentToCancel= localizationService.getLocalizedString('selectPaymentToCancel');
-    choosePayment= localizationService.getLocalizedString('choosePayment');
-    reasonForCancellation= localizationService.getLocalizedString('reasonForCancellation');
-    enterTheReason= localizationService.getLocalizedString('enterTheReason');
-    additionalDetail= localizationService.getLocalizedString('additionalDetail');
-    addMoreDetail= localizationService.getLocalizedString('addMoreDetail');
-    back= localizationService.getLocalizedString('back');
-    confirmCancellation= localizationService.getLocalizedString('confirmCancellation');
-    confirmCancellationBody= localizationService.getLocalizedString('confirmCancellationBody');
-    confirm= localizationService.getLocalizedString('confirm');
-    cancel= localizationService.getLocalizedString('cancel');
+    cancelPayment = localizationService.getLocalizedString('cancelPayment');
+    reasonForCancellation = localizationService.getLocalizedString('reasonForCancellation');
+    enterTheReason = localizationService.getLocalizedString('enterTheReason');
+    back = localizationService.getLocalizedString('back');
+    confirmCancellation = localizationService.getLocalizedString('confirmCancellation');
+    confirmCancellationBody = localizationService.getLocalizedString('confirmCancellationBody');
+    confirm = localizationService.getLocalizedString('confirm');
+    cancel = localizationService.getLocalizedString('cancel');
   }
+
   @override
   void initState() {
     super.initState();
-    // Initialize the localization strings
     _initializeLocalizationStrings();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF7F7F7),
       appBar: AppBar(
         elevation: 4,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(4.0),
-          child: Container(
-            color: Colors.white.withOpacity(0.2),
-            height: 1.0,
+        title: Text(
+          cancelPayment,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.sp,
+            fontFamily: 'NotoSansUI',
           ),
         ),
-        title: Text(cancelPayment,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.sp,
-              fontFamily: 'NotoSansUI',
-            )),
         backgroundColor: Color(0xFFC62828),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -76,12 +66,8 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSelectionCard(context),
-            SizedBox(height: 24.h),
             _buildInputCard(context, reasonForCancellation, enterTheReason),
-            SizedBox(height: 16.h),
-            _buildInputCard(context, additionalDetail, addMoreDetail, maxLines: 3),
-            SizedBox(height: 30.h),
+            SizedBox(height: 24.h),
             _buildActionButton(context, cancelPayment, Color(0xFFD32F2F)),
             SizedBox(height: 12.h),
             _buildActionButton(context, back, Colors.black, isOutlined: true),
@@ -91,36 +77,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
     );
   }
 
-  Widget _buildSelectionCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black54,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(selectPaymentToCancel, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-            DropdownButton<String>(
-              isExpanded: true,
-              underline: Container(height: 0),
-              items: paymentIds.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (_) {},
-              hint: Text(choosePayment),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInputCard(BuildContext context, String label, String hint, {int maxLines = 1}) {
+  Widget _buildInputCard(BuildContext context, String label, String hint, {int maxLines = 3}) {
     return Card(
       elevation: 2,
       shadowColor: Colors.black54,
@@ -150,44 +107,34 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
   Widget _buildActionButton(BuildContext context, String text, Color color, {bool isOutlined = false}) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, backgroundColor: color,
-        minimumSize: Size(double.infinity, 33.h),
+        foregroundColor: isOutlined ? color : Colors.white,
+        backgroundColor: isOutlined ? Colors.transparent : color,
+        minimumSize: Size(double.infinity, 48.h),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: isOutlined ? BorderSide(color: color) : BorderSide.none,
+        side: isOutlined ? BorderSide(color: color, width: 2) : BorderSide.none,
+        padding: EdgeInsets.symmetric(vertical: 12.h),
       ),
       onPressed: () {
         if (isOutlined) {
           Navigator.pop(context);
         } else {
-          _showConfirmationDialog(context);
+          CustomPopups.showCustomDialog(  context: context,
+            icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
+            title: 'Cancel Payment',
+            message: 'Are you sure you want to cancel this payment?',
+            deleteButtonText: 'Ok',
+            onPressButton: () {
+              // Your delete logic here
+            },);
+          //_showConfirmationDialog(context);
         }
       },
-      child: Text(text, style: TextStyle(fontSize: 18.sp)),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+      ),
     );
   }
 
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(confirmCancellation),
-          content: Text(confirmCancellationBody),
-          actions: <Widget>[
-            TextButton(
-              child: Text(cancel),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text(confirm),
-              onPressed: () {
-                // TODO: Implement the cancellation logic
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+
 }

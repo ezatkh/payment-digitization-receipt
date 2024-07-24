@@ -303,41 +303,24 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         child: IconButton(
           icon: Icon(Icons.delete, color: Colors.red),
           onPressed: () async {
-            // Show a confirmation dialog before deleting
-            bool confirmDelete = await showDialog(
+            CustomPopups.showCustomDialog(
               context: context,
-              barrierDismissible: false,
-              builder: (BuildContext dialogContext) {
-                return AlertDialog(
-                  title: Text('Confirm Delete'),
-                  content: Text('Are you sure you want to delete this payment record?'),
-                  actions: <Widget>[
-                    TextButton(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop(false); // Return false
-                      },
-                    ),
-                    TextButton(
-                      child: Text('Delete'),
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop(true); // Return true
-                      },
-                    ),
-                  ],
-                );
+              icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
+              title: 'Confirm Delete',
+              message: 'Are you sure you want to delete this payment record?',
+              deleteButtonText: 'Delete',
+              onPressButton: () async {
+                final int id = record.id!;
+                await DatabaseProvider.deletePayment(id);
+                // Update the UI to reflect the deletion
+                setState(() {
+                _paymentRecords.removeWhere((item) => item.id == id);
+                });
               },
             );
 
-            if (confirmDelete) {
-              final int id = record.id!;
-              await DatabaseProvider.deletePayment(id);
-              // Update the UI to reflect the deletion
-              setState(() {
-                _paymentRecords.removeWhere((item) => item.id == id);
-              });
-            }
           },
+
         ),
       ),
       Tooltip(
@@ -374,12 +357,22 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         child: IconButton(
           icon: Icon(Icons.cancel, color: Colors.red),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PaymentCancellationScreen(),
-              ),
-            );
+            // if (record.id != null) {
+            //   final int idToCancel = record.id!;
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => PaymentCancellationScreen(),
+            //     ),
+            //   );
+            // }
+
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => PaymentCancellationScreen(),
+            //   ),
+            // );
           },
         ),
       ),

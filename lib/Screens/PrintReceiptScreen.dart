@@ -9,9 +9,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 import 'PrintSettingsScreen.dart';
-import 'SendReceiptScreen.dart';
 
 class PrintReceiptScreen extends StatefulWidget {
+
   @override
   _PrintReceiptScreenState createState() => _PrintReceiptScreenState();
 }
@@ -369,10 +369,7 @@ class _PrintReceiptScreenState extends State<PrintReceiptScreen> {
     // );
   }
 
-  void _sendSelectedReceipts() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SendReceiptScreen()),
-    );
-  }
+  // void _sendSelectedReceipts() {
+
+  // }
 }

@@ -2,50 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomPopups {
-  static Future<void> showDeleteConfirmationDialog(BuildContext context, VoidCallback onDelete) {
-    return showDialog(
+
+  static void showCustomDialog({
+    required BuildContext context,
+    required Icon icon,
+    required String title,
+    required String message,
+    required String deleteButtonText,
+    required VoidCallback onPressButton,
+  }) {
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(
-            'Delete Confirmation',
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
           ),
-          content: Text(
-            'Are you sure you want to delete this payment?',
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: Colors.black54,
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              SizedBox(height: 20),
+              Text(
+                title,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              child: Text(
-                'Cancel',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.black,
-                ),
-              ),
+              child: Text('Cancel', style: TextStyle(color: Colors.grey)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: Text(
-                'Delete',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.red,
-                ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
               ),
+              child: Text(deleteButtonText),
               onPressed: () {
-                onDelete();
                 Navigator.of(context).pop();
+                onPressButton();
+
               },
             ),
           ],
@@ -53,6 +58,7 @@ class CustomPopups {
       },
     );
   }
+
 
   static Future<void> showConfirmDialog(BuildContext context, VoidCallback onConfirm) {
     return showDialog(

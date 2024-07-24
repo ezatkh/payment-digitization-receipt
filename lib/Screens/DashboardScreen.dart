@@ -11,7 +11,6 @@ import 'MoreScreen.dart';
 import 'NotificationsScreen.dart';
 import 'PaymentCancellationScreen.dart';
 import 'PaymentHistoryScreen.dart';
-import 'PrintReceiptScreen.dart';
 import 'ProfileScreen.dart';
 import 'RecordPaymentScreen.dart';
 import 'SettingsScreen.dart';
@@ -187,18 +186,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     case 'paymentHistory':
                       _navigateTo(PaymentHistoryScreen());
                       break;
-                    case 'printReceipt':
-                      _navigateTo(PrintReceiptScreen());
-                      break;
                     case 'connectivityStatus':
                       _navigateTo(ConnectivityStatusScreen());
                       break;
                     case 'settings':
                       _navigateTo(SettingsScreen());
                       break;
-                    case 'paymentCancellation':
-                      _navigateTo(PaymentCancellationScreen());
-                      break;
+
                     default:
                       break;
                   }
@@ -242,17 +236,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          child: _buildLogoutDialogContent(context),
-        );
-      },
-    );
-  }
 
   Widget _buildLogoutDialogContent(BuildContext context) {
     return ClipRRect(

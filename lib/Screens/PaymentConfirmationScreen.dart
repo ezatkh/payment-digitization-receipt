@@ -263,7 +263,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SendReceiptScreen(id:idToPrint),
+                    builder: (context) => SendReceiptScreen(id:widget.paymentId),
                   ),
                 );
               },
@@ -292,12 +292,15 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                 child: IconButton(
                   icon: Icon(Icons.cancel, color: Colors.red),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PaymentCancellationScreen(),
-                      ),
-                    );
+                    if (widget.paymentId != null) {
+                      final int idToCancel = widget.paymentId!;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentCancellationScreen(id :idToCancel),
+                        ),
+                      );
+                    }
                   },
                 ),
               ),
@@ -320,9 +323,14 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                 child: IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    CustomPopups.showDeleteConfirmationDialog(context, () {
-                      print("Delete");
-                    });
+                    CustomPopups.showCustomDialog(  context: context,
+                      icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
+                      title: 'Cancel Payment',
+                      message: 'Are you sure you want to cancel this payment?',
+                      deleteButtonText: 'Ok',
+                      onPressButton: () {
+                        // Your delete logic here
+                      },);
                   },
                 ),
               ),
@@ -332,12 +340,31 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                 child: IconButton(
                   icon: Icon(Icons.check_circle, color: Colors.blue),
                   onPressed: () {
-                    CustomPopups.showConfirmDialog(context, () {
-                      print("confirm");
-                    });
-                  },
+                    CustomPopups.showCustomDialog(
+                      context: context,
+                      icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
+                      title: 'Save & Confirm Payment',
+                      message: 'Are you sure you want to save & confirm this payment record?',
+                      deleteButtonText: 'Ok',
+                      onPressButton: () async {
+                        showDialog( context: context,  barrierDismissible: false,  builder: (BuildContext dialogContext) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        },
+                        );
+                        // Simulate a network request/waiting time
+                        await Future.delayed(Duration(seconds: 2));
+                        DatabaseProvider.updatePaymentStatus(widget.paymentId,'Confirmed');
+                        Navigator.pop(context); // pop the dialog
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentId: widget.paymentId))); // Navigate to view payment screen after agreed
+
+                      },
+                    );
+                    },
                 ),
               ),
+
           ],
         ),
       ],

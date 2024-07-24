@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
 import 'package:digital_payment_app/Screens/ProfileScreen.dart';
 import 'package:digital_payment_app/Services/LocalizationService.dart';
 import 'package:flutter/material.dart';
@@ -100,13 +99,11 @@ class MoreScreen extends StatelessWidget {
 
   Widget _buildMenuList(BuildContext context,LocalizationService localizationService) {
     final labelsLocalization= [
-      localizationService.getLocalizedString('notifications'),
       localizationService.getLocalizedString('paymentHistory'),
-      localizationService.getLocalizedString('paymentCancellation'),
       localizationService.getLocalizedString('aboutus'),
       localizationService.getLocalizedString('logout'),
     ];
-    final labelsItems= ['notifications','paymentHistory','paymentCancellation','aboutus','logout'];
+    final labelsItems= ['paymentHistory','aboutus','logout'];
     return ListView.separated(
       padding: EdgeInsets.all(14.w),
       itemCount: labelsLocalization.length,
@@ -136,17 +133,11 @@ class MoreScreen extends StatelessWidget {
       case 'paymentHistory':
         Navigator.of(context).push(MaterialPageRoute(builder: (_) => PaymentHistoryScreen()));
         break;
-      case 'notifications':
-        _navigateTo(context, NotificationsScreen()); // Fixed to pass context
-        break;
       case 'logout':
         _showLogoutDialog(context);
         break;
       case 'aboutus':
         _showAboutDialog(context);
-        break;
-        case 'paymentCancellation':
-          _navigateTo(context, PaymentCancellationScreen()); // Fixed to pass context
         break;
     }
   }
@@ -163,6 +154,7 @@ class MoreScreen extends StatelessWidget {
       },
     );
   }
+
   Widget contentBox(BuildContext context) {
     return Stack(
       children: <Widget>[

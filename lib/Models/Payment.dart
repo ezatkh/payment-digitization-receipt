@@ -102,4 +102,5 @@ class Payment {
       'lastUpdatedDate': lastUpdatedDate?.toIso8601String(),
     };
   }
+
 }

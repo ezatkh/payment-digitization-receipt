@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../Custom_Widgets/CustomPopups.dart';
 import '../Services/database.dart';
 import 'package:provider/provider.dart';
 import 'PaymentConfirmationScreen.dart';
@@ -694,219 +695,43 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
   void _confirmPayment() {
     print("_confirmPayment method started");
-
-    showDialog(
+    if (!_validateFields()) return;
+    Payment paymentDetails = _preparePaymentObject('Confirmed');
+    CustomPopups.showCustomDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AnimatedScale(
-          scale: 1.0,
-          duration: Duration(milliseconds: 300),
-          child: Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            elevation: 8.0,
-            child: Container(
-              padding: EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.warning,
-                    size: 60.0,
-                    color: Color(0xFFC62828),
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    "Confirm Payment",
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFC62828),
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    "Are you sure you want to confirm this payment?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  SizedBox(height: 24.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
-                        },
-                        child: Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Color(0xFFC62828),
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
-                          if (!_validateFields()) return;
+      icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
+      title: "Confirm Payment",
+      message: "Are you sure you want to confirm this payment?",
+      deleteButtonText: "Yes",
+      onPressButton: ()  {
 
-                          Payment paymentDetails = _preparePaymentObject('Confirmed');
-                          // Print all keys and values
-                          // Convert the instance to a map
-                          Map<String, dynamic> paymentMap = paymentDetails.toMap();
-                          // Print all keys and values
-                          paymentMap.forEach((key, value) {
-                          print('$key: $value');
-                          });
-
-                          _agreedPayment(paymentDetails);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Payment confirmed."),
-                              backgroundColor: Color(0xFF4CAF50),
-                            ),
-                          );
-
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Color(0xFFC62828), // Red background
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        child: Text("Yes"),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+      // Convert the instance to a map
+      Map<String, dynamic> paymentMap = paymentDetails.toMap();
+      // Print all keys and values
+      paymentMap.forEach((key, value) {
+        print('$key: $value');
+      });
+      _agreedPayment(paymentDetails);
+    },
     );
+
     print("_confirmPayment method finished");
 
   }
 
   void _savePayment() {
     print("_savePayment method started");
-
-    showDialog(
+    if (!_validateFields()) return;
+    Payment paymentDetails = _preparePaymentObject('Saved');
+    CustomPopups.showCustomDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AnimatedScale(
-          scale: 1.0,
-          duration: Duration(milliseconds: 300),
-          child: Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            elevation: 8.0,
-            child: Container(
-              padding: EdgeInsets.all(24.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.warning,
-                    size: 60.0,
-                    color: Color(0xFFC62828),
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    "Confirm Save",
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFC62828),
-                    ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    "Are you sure you want to save this payment?",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 16.0,
-                    ),
-                  ),
-                  SizedBox(height: 24.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
-                        },
-                        child: Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: Color(0xFFC62828),
-                          ),
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop(); // Close the dialog
-                          if (!_validateFields()) return;
-
-                          Payment paymentDetails = _preparePaymentObject('Saved');
+      icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
+      message: 'Are you sure you want to save this payment?',
+      deleteButtonText: 'Ok',
+      title: 'Save Payment',
+      onPressButton: ()  {
                           _agreedPayment(paymentDetails);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Payment saved."),
-                              backgroundColor: Color(0xFF4CAF50),
-                            ),
-                          );
-
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white, backgroundColor: Color(0xFFC62828),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        child: Text("Yes"),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+                        },);
   }
 
   Payment _preparePaymentObject(String status) {

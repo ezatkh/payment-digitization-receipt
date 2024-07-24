@@ -19,7 +19,7 @@ class PaymentService {
        print("no internet");
      }
       else {
-        print("connected enternet ");
+        print("connected Internet ");
         PaymentService.syncPayments();
      }
      }
