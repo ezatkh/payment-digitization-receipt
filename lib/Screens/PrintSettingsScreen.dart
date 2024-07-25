@@ -245,7 +245,8 @@ class _PrintSettingsScreenState extends State<PrintSettingsScreen> {
         ),
         label: Text(
           _isReceiptExpanded ? hideReceipt : showReceipt,
-          style: TextStyle(     fontWeight: FontWeight.bold,          fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+          style: TextStyle(     fontWeight: FontWeight.bold,
+              fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
               fontFamily: 'NotoSansUI',color: Color(0xFFC62828)),
         ),
         onPressed: () {

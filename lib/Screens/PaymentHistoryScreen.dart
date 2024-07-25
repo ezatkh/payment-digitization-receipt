@@ -78,7 +78,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         title: Text(paymentHistory,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20.sp,
+              fontSize: 18.sp,
               fontFamily: 'NotoSansUI',
             )),
         backgroundColor: Color(0xFFC62828),
@@ -261,11 +261,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     _paymentDetailRow('#PR', record.prNumber.toString()),
     if (record.paymentMethod.toLowerCase() == 'cash')
     _paymentDetailRow('Amount', record.amount.toString()),
-    if (record.paymentMethod.toLowerCase() == 'cash')
-    _paymentDetailRow('Currency', record.currency.toString()),
     if (record.paymentMethod.toLowerCase() == 'check')
     _paymentDetailRow('Amount', record.amountCheck.toString()),
-    if (record.paymentMethod.toLowerCase() == 'check')
+      _paymentDetailRow('Currency', record.currency.toString()),
+      if (record.paymentMethod.toLowerCase() == 'check')
     _paymentDetailRow('Check Number', record.checkNumber.toString()),
     if (record.paymentMethod.toLowerCase() == 'check')
     _paymentDetailRow('Bank/Branch', record.bankBranch.toString()),
@@ -345,6 +344,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               if (record.id != null) {
                 final int idToConfirm = record.id!;
                 await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
+                _fetchPayments();
                 PaymentService.syncPayments();
               }
             });

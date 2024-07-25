@@ -1,3 +1,4 @@
+import 'package:digital_payment_app/Services/PaymentService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../Custom_Widgets/CustomPopups.dart';
@@ -154,9 +155,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
        // payment.printAllFields();
         print("payment method from history to edit ${payment.paymentMethod}");
         if (payment.paymentMethod == "Cash") {
-          String currentCurrency='';
-          currentCurrency= payment.currency!.toLowerCase();
-
           setState(() {
             _selectedPaymentMethod = cash;
             int index= findCurrencyIndex(payment.currency!);
@@ -184,7 +182,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         print('No payment found with ID $id');
       }
     }
-   // _selectedPaymentMethod=methodValue;
 
     print("_selectedPaymentMethod:${_selectedPaymentMethod} ");
   }
@@ -252,19 +249,21 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                     customerName,
                     Icons.person_outline,
                     focusNode: _customerNameFocusNode,
-                      required:true
+                      required:true,
                   ),
                   _buildTextField(
                     _msisdnController,
                     MSISDN,
                     Icons.phone_android,
                     focusNode: _msisdnFocusNode,
+                      isNumeric : true
                   ),
                   _buildTextField(
                     _prNumberController,
                     PR,
                     Icons.numbers_sharp,
                     focusNode: _prNumberFocusNode,
+                      isNumeric : true
                   ),
                 ],
                 checkIfFilled: () {
@@ -284,7 +283,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                         amount,
                         Icons.attach_money,
                         focusNode: _amountFocusNode,
-                          required:true
+                          required:true,
+                          isNumeric : true
                       ),
                       _buildDropdown(currency, _currencies,required: true),
                     ],
@@ -296,14 +296,17 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                         amountCheck,
                         Icons.attach_money,
                         focusNode: _amountCheckFocusNode,
-                          required:true
+                          required:true,
+                          isNumeric : true
                       ),
+                      _buildDropdown(currency, _currencies,required: true),
                       _buildTextField(
                         _checkNumberController,
                         checkNumber,
                         Icons.receipt_long_outlined,
                         focusNode: _checkNumberFocusNode,
-                          required:true
+                          required:true,
+                          isNumeric : true
                       ),
                       _buildTextField(
                         _bankBranchController,
@@ -337,7 +340,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                     return _amountCheckController.text.isNotEmpty &&
                         _checkNumberController.text.isNotEmpty &&
                         _bankBranchController.text.isNotEmpty &&
-                        _dueDateCheckController.text.isNotEmpty;
+                        _dueDateCheckController.text.isNotEmpty && _selectedCurrency != null;
+
                   }
                   return false;
                 },
@@ -440,7 +444,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       {int maxLines = 1,
         required FocusNode focusNode,
         bool required = false,
-        bool isDate = false}) {
+        bool isDate = false,
+        bool isNumeric = false,
+      }) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 16.w),
       child: TextField(
@@ -448,6 +454,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         focusNode: focusNode,
         maxLines: maxLines,
         readOnly: isDate, // Make the field read-only if it's a date field
+        keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
           labelText: labelText + (required ? ' *' : ''), // Add '*' if required
           labelStyle: TextStyle(
@@ -564,6 +571,30 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         ),
       );
       return false;
+    }
+
+    // Validate msisdn
+    if (_msisdnController.text.isNotEmpty) {
+      if (!RegExp(r'^[0-9]+$').hasMatch(_msisdnController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("MSISDN must contain only numbers."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+    }
+    if (_prNumberController.text.isNotEmpty) {
+      if (!RegExp(r'^[0-9]+$').hasMatch(_prNumberController.text)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("PR must contain only numbers."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
     }
 
     // Validate based on selected payment method
@@ -750,7 +781,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       }
     } else if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
       if ([_customerNameController.text, _selectedPaymentMethod, _amountCheckController.text,
-        _checkNumberController.text, _bankBranchController.text, _dueDateCheckController.text]
+        _checkNumberController.text, _bankBranchController.text,_selectedCurrency, _dueDateCheckController.text]
           .any((element) => element == null || element.isEmpty)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -775,7 +806,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       prNumber: _prNumberController.text!,
       paymentMethod: _selectedPaymentMethod!,
       amount: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? double.tryParse(_amountController.text) : null,
-      currency: _selectedPaymentMethod!.toLowerCase() == 'cash' ||_selectedPaymentMethod!.toLowerCase() == 'كاش'? _selectedCurrency: null,
+      currency: _selectedCurrency,
       paymentInvoiceFor: _paymentInvoiceForController.text.length>0?_paymentInvoiceForController.text:null,
       amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
       checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'?  int.tryParse(_checkNumberController.text) : null,
@@ -798,7 +829,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
 
     // Simulate a network request/waiting time
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 3));
     int idPaymentStored;
     try{
       if(paymentDetails.paymentMethod == "كاش") {
@@ -855,7 +886,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
         });
         print("Updated in db Successfully");
-
       }
       print("_agreedPaymentMethodFinished");
       Navigator.pop(context); // pop the dialog
@@ -864,8 +894,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       print('Error saving payment: $e');
       // Handle error scenario
     }
-
-
   }
 
   void _clearPaymentMethodFields() {

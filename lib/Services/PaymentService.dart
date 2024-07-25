@@ -40,10 +40,29 @@ class PaymentService {
        print('Token not found');
        return;
      }
-     String fullToken="Barer ${tokenID}";;
+     String fullToken="Barer ${tokenID}";
 
      // Retrieve all confirmed payments
-    List<Map<String, dynamic>> confirmedPayments = await DatabaseProvider.getConfirmedPayments();
+    List<Map<String, dynamic>> ConfirmedAndCancelledPendingPayments = await DatabaseProvider.getConfirmedOrCancelledPendingPayments();
+    List<Map<String, dynamic>> confirmedPayments = [];
+    List<Map<String, dynamic>> cancelledPendingPayments = [];
+
+    // Iterate through the results and separate them based on status
+    for (var payment in ConfirmedAndCancelledPendingPayments) {
+      if (payment['status'] == 'Confirmed') {
+        confirmedPayments.add(payment);
+      } else if (payment['status'] == 'CancelledPending') {
+        cancelledPendingPayments.add(payment);
+      }
+    }
+    print("confirmed payments");
+    for(var p in confirmedPayments){
+      print(p);
+    }
+    print("cancelled payments");
+    for(var p in cancelledPendingPayments){
+      print(p);
+    }
 // Assuming NumberToWordsEnglish.convert expects an int
     String convertAmountToWords(dynamic amount) {
       if (amount == null) {
@@ -56,7 +75,6 @@ class PaymentService {
       return NumberToWordsEnglish.convert(amountInt);
     }
 
-    // Iterate over each payment
     for (var payment in confirmedPayments) {
       // Create request headers
       String theSumOf = payment['paymentMethod'].toLowerCase() == 'cash'

@@ -8,7 +8,6 @@ import 'package:intl/intl.dart';
 import 'package:number_to_word_arabic/number_to_word_arabic.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 import '../Services/database.dart';
-import 'DashboardScreen.dart';
 import 'PaymentCancellationScreen.dart';
 import 'PaymentHistoryScreen.dart';
 import '../Custom_Widgets/CustomPopups.dart';
@@ -54,11 +53,13 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   String theSumOf = '';
   String numberConvertBody = '';
   String languageCode = "";
+  late StreamSubscription _syncSubscription;
 
   @override
   void initState() {
     super.initState();
     _initializeLocalizationStrings();
+  //  syncPayments
     _fetchPaymentDetails();
   }
 
@@ -172,7 +173,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSummaryHeader(paymentDetails['status'].toLowerCase()),
-          Divider(color: Color(0xFFC62828), thickness: 2, height: 20.h),
+          Divider(color: Color(0xFFC62828), thickness: 2, height: 15.h),
           if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['paymentMethod'] == "cancelled"))
             _detailItem(voucherNumber, paymentDetails['voucherSerialNumber'] ?? ''),
 
@@ -190,43 +191,46 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           _divider(),
           _detailItem(status, paymentDetails['status'] ?? ''),
           _divider(),
-          _detailItem(paymentMethod, paymentDetails['paymentMethod'] ?? ''),
-          _divider(),
           _detailItem(prNumber, paymentDetails['prNumber']?.toString() ?? ''),
           _divider(),
           _detailItem(msisdn, paymentDetails['msisdn']?.toString() ?? ''),
+          _divider(),
+          _detailItem(paymentMethod, paymentDetails['paymentMethod'] ?? ''),
 
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "check") || (paymentDetails['paymentMethod'] == "شيك"))
+          if ((paymentDetails['paymentMethod']?.toLowerCase() == "check") || (paymentDetails['paymentMethod'] == "شيك")) ...[
             _divider(),
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "check") || (paymentDetails['paymentMethod'] == "شيك"))
             _detailItem(amountCheck, paymentDetails['amountCheck']?.toString() ?? ''),
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "check") || (paymentDetails['paymentMethod'] == "شيك"))
             _divider(),
-          if (paymentDetails['paymentMethod']?.toLowerCase() == "check" || paymentDetails['paymentMethod'] == "شيك")
+            _detailItem(currency, paymentDetails['currency']?.toString() ?? ''),
+            _divider(),
+            _detailNoteItem(
+                theSumOf,
+                languageCode == 'ar'
+                    ? Tafqeet.convert(paymentDetails['amountCheck']?.toString() ?? '')
+                    : NumberToWordsEnglish.convert(paymentDetails['amountCheck'] != null ? (paymentDetails['amountCheck'] as double).toInt() : 0)
+            ),
+            _divider(),
+            _detailItem(checkNumber, paymentDetails['checkNumber']?.toString() ?? ''),
+            _divider(),
+            _detailItem(bankBranch, paymentDetails['bankBranch']?.toString() ?? ''),
+            _divider(),
+            _detailItem(dueDateCheck, paymentDetails['dueDateCheck']?.toString() ?? ''),
+          ],
+          if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش")) ...[
+            _divider(),
+            _detailItem(amount, paymentDetails['amount']?.toString() ?? ''),
+            _divider(),
+            _detailItem(currency, paymentDetails['currency']?.toString() ?? ''),
+            _divider(),
             _detailNoteItem(
               theSumOf,
               languageCode == 'ar'
-                  ? Tafqeet.convert(paymentDetails['amountCheck']?.toString() ?? '')
-                  : NumberToWordsEnglish.convert(paymentDetails['amountCheck'] != null ? (paymentDetails['amountCheck'] as double).toInt() : 0)
-
+                  ? Tafqeet.convert(paymentDetails['amount']?.toString() ?? '')
+                  : NumberToWordsEnglish.convert(paymentDetails['amount'] != null ? (paymentDetails['amount'] as double).toInt() : 0),
             ),
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش"))
-            _divider(),
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش"))
-            _detailItem(amount, paymentDetails['amount']?.toString() ?? ''),
-    if (paymentDetails['paymentMethod']?.toLowerCase() == "cash" || paymentDetails['paymentMethod'] == "كاش")
-    _detailNoteItem(
-    theSumOf,
-    languageCode == 'ar'
-    ? Tafqeet.convert(paymentDetails['amount']?.toString() ?? '')
-        : NumberToWordsEnglish.convert(paymentDetails['amount'] != null ? (paymentDetails['amount'] as double).toInt() : 0),
-    ),
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش"))
-            _divider(),
-          if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش"))
-            _detailItem(currency, paymentDetails['currency']?.toString() ?? ''),
+          ],
           _divider(),
-            _detailNoteItem(paymentInvoiceFor, paymentDetails['paymentInvoiceFor']?.toString() ?? ''),
+          _detailNoteItem(paymentInvoiceFor, paymentDetails['paymentInvoiceFor']?.toString() ?? ''),
         ],
       ),
     );
@@ -293,11 +297,11 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   onPressed: () {
                     if (widget.paymentId != null) {
                       final int idToCancel = widget.paymentId!;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentCancellationScreen(id :idToCancel),
-                        ),
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return PaymentCancellationScreen(id: idToCancel);
+                        },
                       );
                     }
                   },
@@ -373,7 +377,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
   Widget _detailItem(String title, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -432,6 +436,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   }
 
   Widget _divider() {
-    return Divider(color: Color(0xFFCCCCCC), height: 20.h);
+    return Divider(color: Color(0xFFCCCCCC), height: 10.h);
   }
 }

@@ -49,8 +49,12 @@ class DatabaseProvider {
         currency TEXT,
         paymentInvoiceFor TEXT,
         status TEXT,
+        cancelDate TEXT,
+        cancelReason TEXT,
         lastUpdatedDate TEXT,
-        transactionDate TEXT
+        transactionDate TEXT,
+        cancellationDate TEXT
+
       )
     ''');
   }
@@ -63,32 +67,21 @@ class DatabaseProvider {
     // Query the database to get all payments
     List<Map<String, dynamic>> payments = await db.query('payments');
 
-    // Print each payment before returning
-    // for (Map<String, dynamic> payment in payments) {
-    //   payment.forEach((key, value) {
-    //     print('$key: $value');
-    //   });
-    //   print('----------'); // Separator for better readability
-    // }
     print("printAllPayments method , database.dart finished");
     return payments;
   }
-  // Retrieve all payments
-  // static Future<List<Map<String, dynamic>>> getAllPayments() async {
-  //   Database db = await database;
-  //   return await db.query('payments');
-  // }
 
-  //Retrieve Co
-  static Future<List<Map<String, dynamic>>> getConfirmedPayments() async {
+  //Retrieve ConfirmedPayments
+  static Future<List<Map<String, dynamic>>> getConfirmedOrCancelledPendingPayments() async {
     Database db = await database;
     List<Map<String, dynamic>> payments = await db.query(
       'payments',
-      where: 'status = ?',
-      whereArgs: ['Confirmed'],
+      where: 'status IN (?, ?)',
+      whereArgs: ['Confirmed', 'CancelledPending'],
     );
     return payments;
   }
+
 
   //Retrieve a specific payment
   static Future<Map<String, dynamic>?> getPaymentById(int id) async {
@@ -262,5 +255,40 @@ class DatabaseProvider {
     print(formatter.format(dateTime)); // This should print the date and time without milliseconds
     return formatter.format(dateTime);
   }
+
+  // Cancel a payment by voucherSerialNumber
+  static Future<void> cancelPayment(String voucherSerialNumber, String cancelReason,DateTime cancelDateTime) async {
+    print("cancelPayment method , database.dart started");
+    try {
+      cancelDateTime=formatDateTimeWithMilliseconds(cancelDateTime) as DateTime;
+      Map<String, String> body= {
+        "voucherSerialNumberNumber" :voucherSerialNumber,
+        "cancelPayment" :cancelReason,
+        "CancellationDate" : cancelDateTime.toString(),
+        "status":"cancelledPending"
+      };
+      print(body);
+      // Database db = await database;
+      //
+      // // Update the cancelStatus and cancelReason
+      // await db.update(
+      //   'payments',
+      //   {
+      //     'status': 'CancelledPending',
+      //     'cancelReason': cancelReason,
+      //     'cancellationDate': cancelDateTime.toString(),
+      //   },
+      //   where: 'voucherSerialNumber = ?',
+      //   whereArgs: [voucherSerialNumber],
+      // );
+      // print('Payment with voucherSerialNumber $voucherSerialNumber has been cancelled');
+    } catch (e) {
+      print('Error cancelling payment: $e');
+      throw Exception('Failed to cancel payment');
+    }
+    print("cancelPayment method , database.dart finished");
+
+  }
+
 
 }
