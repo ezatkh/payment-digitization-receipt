@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
 import 'package:digital_payment_app/Screens/PrintSettingsScreen.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
+import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -14,6 +15,10 @@ import '../Services/PaymentService.dart';
 import 'package:intl/intl.dart';
 import '../Services/database.dart';
 import '../Custom_Widgets/CustomPopups.dart';
+import 'SendReceiptScreen.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter_social_content_share/flutter_social_content_share.dart';
+
 
 
 
@@ -391,7 +396,27 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       child: IconButton(
       icon: Icon(Icons.send, color: Colors.green),
       onPressed: () {
-      // Handle send action
+        showGeneralDialog(
+          context: context,
+          barrierDismissible: true,
+          barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+          barrierColor: Colors.black45,
+          transitionDuration: Duration(milliseconds: 350),
+          pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
+            return ShareScreenOptions();
+          },
+          transitionBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: Offset(0, 1), // Start at bottom
+                end: Offset(0, 0.3), // End at top
+              ).animate(animation),
+              child: child,
+            );
+          },
+        );
+
+
       },
       ),
     ),
@@ -521,5 +546,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     print("_fetchPayments method in PaymentHistory screen finished");
 
   }
+  // shareWatsapp() async {
+  //   String? result = await FlutterSocialContentShare.shareOnWhatsapp(
+  //       "0000000", "Text Appear hear");
+  //   print(result);
+  // }
+
 }
 

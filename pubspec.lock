@@ -195,6 +195,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.9.0"
+  flutter_social_content_share:
+    dependency: "direct main"
+    description:
+      name: flutter_social_content_share
+      sha256: f67a0d6aa4e6989197018093193ee387d796b64c4648ae8863b66d5f01585197
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -213,6 +221,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  font_awesome_flutter:
+    dependency: "direct main"
+    description:
+      name: font_awesome_flutter
+      sha256: "275ff26905134bcb59417cf60ad979136f1f8257f2f449914b2c3e05bbb4cd6f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.7.0"
   http:
     dependency: "direct main"
     description:
