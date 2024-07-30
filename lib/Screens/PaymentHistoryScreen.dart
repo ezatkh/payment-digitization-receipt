@@ -12,15 +12,7 @@ import '../Services/database.dart';
 import '../Models/Payment.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Services/PaymentService.dart';
-import 'package:intl/intl.dart';
-import '../Services/database.dart';
 import '../Custom_Widgets/CustomPopups.dart';
-import 'SendReceiptScreen.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:flutter_social_content_share/flutter_social_content_share.dart';
-
-
-
 
 
 class PaymentHistoryScreen extends StatefulWidget {
@@ -97,18 +89,28 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             SizedBox(height: 20.h),
             _buildSearchButton(),
             SizedBox(height: 20.h),
-            _buildPaymentRecordsList(),
+            Container(
+              margin: EdgeInsets.only(bottom: 60.h), // Margin from the bottom button
+              child: _buildPaymentRecordsList(),
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Navigate to the RecordPaymentScreen to add a new payment
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
-        },
-        backgroundColor: Color(0xFFC62828),
-        child: Icon(Icons.add),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: FloatingActionButton(
+            onPressed: () {
+              // Navigate to the RecordPaymentScreen to add a new payment
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => RecordPaymentScreen()));
+            },
+            backgroundColor: Color(0xFFC62828),
+            child: Icon(Icons.add),
+          ),
+        ),
       ),
+
     );
   }
 
@@ -278,152 +280,137 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
     _paymentDetailRowWithMultiline('Payment Invoice For:', record.paymentInvoiceFor.toString()),
     SizedBox(height: 8.h),
-    Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Tooltip(
-        message: 'View Payment Summary',
-      child: IconButton(
-      icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
-      onPressed: () {
-      if (record.id != null) {
-      Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-      builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
-      ),
-      );
-      } else {
-      // Handle the case when record.id is null
-      print('Error: record.id is null');
-      }
-      },
-      ),
-    ),
-    // Icons to be shown based on status
-    if (record.status.toLowerCase() == 'saved') ...[
-      Tooltip(
-        message: 'Delete Payment',
-        child: IconButton(
-          icon: Icon(Icons.delete, color: Colors.red),
-          onPressed: () async {
-            CustomPopups.showCustomDialog(
-              context: context,
-              icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
-              title: 'Confirm Delete',
-              message: 'Are you sure you want to delete this payment record?',
-              deleteButtonText: 'Delete',
-              onPressButton: () async {
-                final int id = record.id!;
-                await DatabaseProvider.deletePayment(id);
-                // Update the UI to reflect the deletion
-                setState(() {
-                _paymentRecords.removeWhere((item) => item.id == id);
-                });
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Tooltip(
+            message: 'View Payment Summary',
+            child: IconButton(
+              icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
+              onPressed: () {
+                if (record.id != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
+                    ),
+                  );
+                } else {
+                  // Handle the case when record.id is null
+                  print('Error: record.id is null');
+                }
               },
-            );
-
-          },
-
-        ),
-      ),
-      Tooltip(
-        message: 'Edit Payment',
-      child: IconButton(
-      icon: Icon(Icons.edit, color: Color(0xFFA67438)),
-      onPressed: () {
-      Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
-      );
-      },
-      ),
-    ),
-
-      Tooltip(
-        message: 'Save & Confirm Payment',
-        child: IconButton(
-          icon: Icon(Icons.check_circle, color: Colors.green),
-          onPressed: () async {
-            CustomPopups.showConfirmDialog(context, () async {
-              if (record.id != null) {
-                final int idToConfirm = record.id!;
-                await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
-                _fetchPayments();
-                PaymentService.syncPayments();
-              }
-            });
-          },
-        ),
-      ),
-    ] else if (record.status.toLowerCase() == 'synced') ...[
-      Tooltip(
-        message: 'Cancel Payment',
-        child: IconButton(
-          icon: Icon(Icons.cancel, color: Colors.red),
-          onPressed: () {
-            if (record.id != null) {
-              final int idToCancel = record.id!;
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return PaymentCancellationScreen(id: idToCancel);
-                },
-              );
-            }
-          },
-        ),
-      ),
-      Tooltip(
-        message: 'print Payment',
-      child: IconButton(
-      icon: Icon(Icons.print, color: Colors.black),
-      onPressed: () {
-        if (record.id != null) {
-          final int idToPrint = record.id!;
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PrintSettingsScreen(id:idToPrint),
             ),
-          );
-        }
-      },
+          ),
+          // Icons to be shown based on status
+          if (record.status.toLowerCase() == 'saved') ...[
+            Row(
+              children: [
+                Tooltip(
+                  message: 'Delete Payment',
+                  child: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      CustomPopups.showCustomDialog(
+                        context: context,
+                        icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
+                        title: 'Confirm Delete',
+                        message: 'Are you sure you want to delete this payment record?',
+                        deleteButtonText: 'Delete',
+                        onPressButton: () async {
+                          final int id = record.id!;
+                          await DatabaseProvider.deletePayment(id);
+                          // Update the UI to reflect the deletion
+                          setState(() {
+                            _paymentRecords.removeWhere((item) => item.id == id);
+                          });
+                        },
+                      );
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: 'Edit Payment',
+                  child: IconButton(
+                    icon: Icon(Icons.edit, color: Color(0xFFA67438)),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
+                      );
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: 'Save & Confirm Payment',
+                  child: IconButton(
+                    icon: Icon(Icons.check_circle, color: Colors.green),
+                    onPressed: () async {
+                      CustomPopups.showConfirmDialog(context, () async {
+                        if (record.id != null) {
+                          final int idToConfirm = record.id!;
+                          await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
+                          _fetchPayments();
+                          PaymentService.syncPayments();
+                        }
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ] else if (record.status.toLowerCase() == 'synced') ...[
+            Row(
+              children: [
+                Tooltip(
+                  message: 'Cancel Payment',
+                  child: IconButton(
+                    icon: Icon(Icons.cancel, color: Colors.red),
+                    onPressed: () {
+                      if (record.id != null) {
+                        final int idToCancel = record.id!;
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return PaymentCancellationScreen(id: idToCancel);
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
+                Tooltip(
+                  message: 'Send Payment Via WhatsApp',
+                  child: IconButton(
+                    icon: Icon(Icons.send, color: Colors.green),
+                    onPressed: () {
+                      showGeneralDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                        barrierColor: Colors.black45,
+                        transitionDuration: Duration(milliseconds: 350),
+                        pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
+                          return ShareScreenOptions(idToShare: record.id!);
+                        },
+                        transitionBuilder: (context, animation, secondaryAnimation, child) {
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: Offset(0, 1), // Start at bottom
+                              end: Offset(0, 0.3), // End at top
+                            ).animate(animation),
+                            child: child,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
       ),
-    ),
-    Tooltip(
-      message: 'Send Payment Via whatsapp',
-      child: IconButton(
-      icon: Icon(Icons.send, color: Colors.green),
-      onPressed: () {
-        showGeneralDialog(
-          context: context,
-          barrierDismissible: true,
-          barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-          barrierColor: Colors.black45,
-          transitionDuration: Duration(milliseconds: 350),
-          pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
-            return ShareScreenOptions();
-          },
-          transitionBuilder: (context, animation, secondaryAnimation, child) {
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: Offset(0, 1), // Start at bottom
-                end: Offset(0, 0.3), // End at top
-              ).animate(animation),
-              child: child,
-            );
-          },
-        );
-
-
-      },
-      ),
-    ),
-
-    ],
-    ],
-    ),
     ],
     onExpansionChanged: (bool expanded) {
     // Optionally add analytics or state management hooks here

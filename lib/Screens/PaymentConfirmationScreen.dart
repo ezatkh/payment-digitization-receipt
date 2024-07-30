@@ -12,8 +12,7 @@ import 'PaymentCancellationScreen.dart';
 import 'PaymentHistoryScreen.dart';
 import '../Custom_Widgets/CustomPopups.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
-
-import 'PrintSettingsScreen.dart';
+import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 import 'SendReceiptScreen.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
@@ -241,7 +240,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     bool canEdit = paymentStatus == 'saved';
     bool canDelete = paymentStatus == 'saved';
     bool canConfirm = paymentStatus == 'saved';
-    bool canPrint = paymentStatus == 'synced';
     bool canSend = paymentStatus == 'synced';
     bool canCancel = paymentStatus == 'synced';
 
@@ -263,32 +261,27 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             if (canSend) IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SendReceiptScreen(id:widget.paymentId),
-                  ),
+                showGeneralDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+                  barrierColor: Colors.black45,
+                  transitionDuration: Duration(milliseconds: 350),
+                  pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
+                    return ShareScreenOptions(idToShare: widget.paymentId);
+                  },
+                  transitionBuilder: (context, animation, secondaryAnimation, child) {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: Offset(0, 1), // Start at bottom
+                        end: Offset(0, 0.3), // End at top
+                      ).animate(animation),
+                      child: child,
+                    );
+                  },
                 );
               },
             ),
-            if (canPrint)
-              Tooltip(
-                message: 'Print Payment',
-                child: IconButton(
-                  icon: Icon(Icons.print, color: Colors.black),
-                  onPressed: () {
-                    if (widget.paymentId != null) {
-                      final int idToPrint = widget.paymentId!;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PrintSettingsScreen(id:idToPrint),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
             if (canCancel)
               Tooltip(
                 message: 'Cancel Payment',

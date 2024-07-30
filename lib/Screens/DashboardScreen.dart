@@ -8,7 +8,6 @@ import '../Services/LocalizationService.dart';
 import 'ConnectivityStatusScreen.dart';
 import 'LoginScreen.dart';
 import 'MoreScreen.dart';
-import 'NotificationsScreen.dart';
 import 'PaymentHistoryScreen.dart';
 import 'ProfileScreen.dart';
 import 'RecordPaymentScreen.dart';
@@ -149,18 +148,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           height: AppBar().preferredSize.height * 2,
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            iconSize: 34,
-            icon: Icon(
-              Icons.notifications_none_outlined,
-              color: Color(0xffd21816),
-            ),
-            onPressed: () {
-              _navigateTo(NotificationsScreen());
-            },
-          ),
-        ],
       ),
       body: GridView.builder(
         padding: EdgeInsets.all(10.w),

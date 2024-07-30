@@ -469,4 +469,5 @@ class LoginScreen extends StatelessWidget {
       MaterialPageRoute(builder: (context) => DashboardScreen()),
     );
   }
+
 }
