@@ -254,11 +254,32 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 4.h), // Space between the summary and icons
         Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (canSend) IconButton(
+
+            if (canCancel)
+              Tooltip(
+                message: 'Cancel Payment',
+                child: IconButton(
+                  icon: Icon(Icons.cancel, color: Colors.red),
+                  onPressed: () {
+                    if (widget.paymentId != null) {
+                      final int idToCancel = widget.paymentId!;
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return PaymentCancellationScreen(id: idToCancel);
+                        },
+                      );
+                    }
+                  },
+                ),
+              ),
+            if (canSend)
+              Tooltip(
+                  message: 'Share Payment',
+                  child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
                 showGeneralDialog(
@@ -281,38 +302,8 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   },
                 );
               },
-            ),
-            if (canCancel)
-              Tooltip(
-                message: 'Cancel Payment',
-                child: IconButton(
-                  icon: Icon(Icons.cancel, color: Colors.red),
-                  onPressed: () {
-                    if (widget.paymentId != null) {
-                      final int idToCancel = widget.paymentId!;
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return PaymentCancellationScreen(id: idToCancel);
-                        },
-                      );
-                    }
-                  },
-                ),
-              ),
-            if (canEdit)
-              Tooltip(
-                message: 'Edit Payment',
-                child: IconButton(
-                  icon: Icon(Icons.edit, color: Colors.orange),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: widget.paymentId)),
-                    );
-                  },
-                ),
-              ),
+                  ),),
+
             if (canDelete)
               Tooltip(
                 message: 'Delete Payment',
@@ -327,6 +318,19 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                       onPressButton: () {
                         // Your delete logic here
                       },);
+                  },
+                ),
+              ),
+            if (canEdit)
+              Tooltip(
+                message: 'Edit Payment',
+                child: IconButton(
+                  icon: Icon(Icons.edit, color: Color(0xFFA67438)),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: widget.paymentId)),
+                    );
                   },
                 ),
               ),

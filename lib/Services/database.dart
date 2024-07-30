@@ -290,5 +290,42 @@ class DatabaseProvider {
 
   }
 
+  static Future<List<Map<String, dynamic>>> getPaymentsWithDateFilter(
+      DateTime? fromDate,
+      DateTime? toDate,
+      List<String>? statuses) async {
+    print("getPaymentsWithDateFilter method, database.dart");
+    print("from date: $fromDate, to date: $toDate, statuses: $statuses");
+
+    Database db = await database;
+
+    // Start with the base query
+    String query = 'SELECT * FROM payments WHERE 1=1';
+
+    // Add date filters if they are provided
+    if (fromDate != null && fromDate.toString().isNotEmpty) {
+      query += ' AND transactionDate >= "${fromDate.toIso8601String()}"';
+    }
+    if (toDate != null && toDate.toString().isNotEmpty) {
+      DateTime endOfDay = DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59);
+      query += ' AND transactionDate <= "${endOfDay.toIso8601String()}"';
+    }
+
+    // Add status filters if they are provided
+    if (statuses != null && statuses.isNotEmpty) {
+      // Escape single quotes in statuses
+      statuses = statuses.map((status) => status.replaceAll("'", "''")).toList();
+      String statusList = statuses.map((status) => "'$status'").join(', ');
+      query += ' AND status IN ($statusList)';
+    }
+
+    // Print the final query for debugging
+    print("Constructed query: $query");
+
+    // Execute the query
+    List<Map<String, dynamic>> result = await db.rawQuery(query);
+    return result;
+  }
+
 
 }

@@ -30,6 +30,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   String to='';
   String search='';
   late StreamSubscription _syncSubscription;
+  List<String> _selectedStatuses = [];
 
   List<Payment> _paymentRecords = [];
   void _initializeLocalizationStrings( ) {
@@ -86,9 +87,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         child: Column(
           children: [
             _buildDateFilterSection(),
-            SizedBox(height: 20.h),
+            SizedBox(height: 10.h),
             _buildSearchButton(),
-            SizedBox(height: 20.h),
+            SizedBox(height: 5.h),
+            _buildSelectedStatuses(),
             Container(
               margin: EdgeInsets.only(bottom: 60.h), // Margin from the bottom button
               child: _buildPaymentRecordsList(),
@@ -176,24 +178,147 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     return DateFormat('yyyy-MM-dd').format(date);
   }
 
-  Widget _buildSearchButton() {
-    return ElevatedButton.icon(
-      icon: Icon(Icons.search, color: Colors.white),
-      label: Text(search,
-          style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI')),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFFC62828),
-        minimumSize: Size(double.infinity, 40.h),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      onPressed: () async {
-        await DatabaseProvider.clearDatabase();
-        // Add any post-operation logic if needed
-      },
+  Widget _buildSelectedStatuses() {
+    return Wrap(
+      spacing: 5.0, // Horizontal spacing between chips
+      children: _selectedStatuses.map((status) {
+        return Padding(
+          padding: const EdgeInsets.only(top: 7.0), // Add margin to the top
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 7.0), // Padding inside the chip
+            decoration: BoxDecoration(
+              color: Colors.grey[200],  // Background color
+              borderRadius: BorderRadius.circular(10.0),
+              border: Border.all(
+                color: Colors.transparent, // No visible border
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  status,
+                  style: TextStyle(
+                    fontSize: 12.0,  // Font size
+                    fontWeight: FontWeight.w300,  // Font weight
+                    color: Colors.grey[600],  // Text color
+                  ),
+                ),
+                SizedBox(width: 8.0), // Space between text and delete icon
+                Padding(
+                  padding: const EdgeInsets.all(4.0), // Padding around the delete icon
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedStatuses.remove(status);
+                        _fetchPayments();
+                      });
+                    },
+                    child: Icon(
+                      Icons.close,
+                      size: 18.0,
+                      color: Colors.grey[700],  // Delete icon color
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildPaymentRecordsList() {
+  Widget _buildSearchButton() {
+    return Row(
+      children: [
+        Expanded(
+          child: ElevatedButton.icon(
+            icon: Icon(Icons.search, color: Colors.white),
+            label: Text(
+              'Search',
+              style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI'),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFFC62828),
+              minimumSize: Size(double.infinity, 40.h),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              print("from date: $_selectedFromDate : $_selectedToDate");
+              _fetchPayments();
+              // Add any post-operation logic if needed
+            },
+          ),
+        ),
+        SizedBox(width: 10.w), // Add spacing between the button and the icon
+        Container(
+          height: 40.h,
+          decoration: BoxDecoration(
+            color: Color(0xFFC62828),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: IconButton(
+            icon: Icon(Icons.filter_list, color: Colors.white),
+            onPressed: () {
+              _showFilterDialog();
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Select Statuses'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <String>['Saved', 'Confirmed', 'Synced', 'Cancel Pending', 'Cancelled']
+                    .map((String status) {
+                  return CheckboxListTile(
+                    title: Text(status),
+                    value: _selectedStatuses.contains(status),
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          _selectedStatuses.add(status);
+                        } else {
+                          _selectedStatuses.remove(status);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  child: Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  child: Text('Apply'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _fetchPayments();
+                    setState(() {}); // Update the state to reflect changes
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+    Widget _buildPaymentRecordsList() {
     return _paymentRecords.isEmpty
         ? Center(child: Text('No records found'))
         : ListView.builder(
@@ -462,7 +587,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
   void _fetchPayments() async {
     print("_fetchPayments method in PaymentHistory screen started");
-    List<Map<String, dynamic>> payments = await DatabaseProvider.getAllPayments();
+    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses);
 
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
@@ -533,11 +658,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     print("_fetchPayments method in PaymentHistory screen finished");
 
   }
-  // shareWatsapp() async {
-  //   String? result = await FlutterSocialContentShare.shareOnWhatsapp(
-  //       "0000000", "Text Appear hear");
-  //   print(result);
-  // }
+
 
 }
 
