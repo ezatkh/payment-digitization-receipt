@@ -13,7 +13,6 @@ import 'PaymentHistoryScreen.dart';
 import '../Custom_Widgets/CustomPopups.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
-import 'SendReceiptScreen.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
   final int paymentId;

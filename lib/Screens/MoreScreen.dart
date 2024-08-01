@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'DashboardScreen.dart';
 import 'LoginScreen.dart';
 import 'PaymentHistoryScreen.dart';
-import 'SendReceiptScreen.dart';
 
 
 class MoreScreen extends StatelessWidget {
