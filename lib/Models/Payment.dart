@@ -25,7 +25,7 @@ class Payment {
     if(this.status.toLowerCase() == 'saved')
       print("lastUpdatedDate: " + this.lastUpdatedDate.toString() ?? '');
     else print("transactionDate: " + this.transactionDate.toString() ?? '');
-
+    print("voucherSerialNumber: " + (this.voucherSerialNumber.toString()));
     print("id: " + (this.id.toString()));
     print("customerName: " + (this.customerName ?? ''));
     print("msisdn: " + (this.msisdn ?? ''));
@@ -66,6 +66,7 @@ class Payment {
     return Payment(
       status: map['status'],
       id: map['id'],
+      voucherSerialNumber: map['voucherSerialNumber'],
       lastUpdatedDate:(map['lastUpdatedDate'] != 'null' && map['lastUpdatedDate'] != ''&&  map['lastUpdatedDate'] != null) ? DateTime.parse(map['lastUpdatedDate']) : null,
       transactionDate:(map['transactionDate'] != 'null' && map['transactionDate'] != '' &&  map['transactionDate'] != null) ? DateTime.parse(map['transactionDate']) : null,
       paymentMethod: map['paymentMethod'],
@@ -97,10 +98,15 @@ class Payment {
       'currency': currency,
       'paymentInvoiceFor': paymentInvoiceFor,
       'status': status,
+      'voucherSerialNumber': voucherSerialNumber,
       'id': id,
       'transactionDate': transactionDate?.toIso8601String(),
       'lastUpdatedDate': lastUpdatedDate?.toIso8601String(),
     };
   }
 
+  @override
+  String toString() {
+    return 'Payment(voucherSerialNumber: $voucherSerialNumber, customerName: $customerName, msisdn: $msisdn, prNumber: $prNumber, paymentMethod: $paymentMethod, amount: $amount, amountCheck: $amountCheck, checkNumber: $checkNumber, bankBranch: $bankBranch, dueDateCheck: $dueDateCheck, currency: $currency, paymentInvoiceFor: $paymentInvoiceFor, status: $status, id: $id, transactionDate: $transactionDate, lastUpdatedDate: $lastUpdatedDate)';
+  }
 }

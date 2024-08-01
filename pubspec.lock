@@ -49,30 +49,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  cached_network_image:
-    dependency: transitive
-    description:
-      name: cached_network_image
-      sha256: "28ea9690a8207179c319965c13cd8df184d5ee721ae2ce60f398ced1219cea1f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.1"
-  cached_network_image_platform_interface:
-    dependency: transitive
-    description:
-      name: cached_network_image_platform_interface
-      sha256: "9e90e78ae72caa874a323d78fa6301b3fb8fa7ea76a8f96dc5b5bf79f283bf2f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
-  cached_network_image_web:
-    dependency: transitive
-    description:
-      name: cached_network_image_web
-      sha256: "205d6a9f1862de34b93184f22b9d2d94586b2f05c581d546695e3d8f6a805cd7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.2.0"
   characters:
     dependency: transitive
     description:
@@ -190,14 +166,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_cache_manager:
-    dependency: transitive
-    description:
-      name: flutter_cache_manager
-      sha256: "8207f27539deb83732fdda03e259349046a39a4c767269285f449ade355d54ba"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.1"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -211,14 +179,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_pdfview:
-    dependency: "direct main"
-    description:
-      name: flutter_pdfview
-      sha256: a9055bf920c7095bf08c2781db431ba23577aa5da5a056a7152dc89a18fbec6f
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.2"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -235,14 +195,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.9.0"
-  flutter_social_content_share:
-    dependency: "direct main"
-    description:
-      name: flutter_social_content_share
-      sha256: f67a0d6aa4e6989197018093193ee387d796b64c4648ae8863b66d5f01585197
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   flutter_spinkit:
     dependency: "direct main"
     description:
@@ -293,14 +245,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.0"
-  image_preview:
-    dependency: "direct main"
-    description:
-      name: image_preview
-      sha256: "98a5d9be9b57339a624f8c8a4809c117df5d528384998fb2b4f1a75f7a11f218"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.7"
   intl:
     dependency: "direct main"
     description:
@@ -389,14 +333,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.10"
-  logger:
-    dependency: "direct main"
-    description:
-      name: logger
-      sha256: "7ad7215c15420a102ec687bb320a7312afd449bac63bfb1c60d9787c27b9767f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.0"
   matcher:
     dependency: transitive
     description:
@@ -461,22 +397,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
-  octo_image:
-    dependency: transitive
-    description:
-      name: octo_image
-      sha256: "45b40f99622f11901238e18d48f5f12ea36426d8eced9f4cbf58479c7aa2430d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
-  open_file:
-    dependency: "direct main"
-    description:
-      name: open_file
-      sha256: a5a32d44acb7c899987d0999e1e3cbb0a0f1adebbf41ac813ec6d2d8faa0af20
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.2"
   path:
     dependency: transitive
     description:
@@ -549,14 +469,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.10.8"
-  pdf_render:
-    dependency: "direct main"
-    description:
-      name: pdf_render
-      sha256: "51b588a5e52e416a4f7fe5c8d9842b13edb234508d5572d574e7a7c37ea09d95"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.4.10"
   pdf_widget_wrapper:
     dependency: transitive
     description:
@@ -613,14 +525,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.2"
-  photo_view:
-    dependency: transitive
-    description:
-      name: photo_view
-      sha256: "8036802a00bae2a78fc197af8a158e3e2f7b500561ed23b4c458107685e645bb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.14.0"
   platform:
     dependency: transitive
     description:
@@ -661,22 +565,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
-  rxdart:
-    dependency: transitive
-    description:
-      name: rxdart
-      sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.27.7"
-  share:
-    dependency: "direct main"
-    description:
-      name: share
-      sha256: "97e6403f564ed1051a01534c2fc919cb6e40ea55e60a18ec23cee6e0ce19f4be"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.4"
   share_plus:
     dependency: "direct main"
     description:
@@ -693,14 +581,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.0"
-  share_whatsapp:
-    dependency: "direct main"
-    description:
-      name: share_whatsapp
-      sha256: "43aaaac14795a9e6ca2aea6cf061765c8e0f6883dad3a8be6f99eab3bd384aa5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.2"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -850,38 +730,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
-  uri_to_file:
-    dependency: "direct main"
-    description:
-      name: uri_to_file
-      sha256: cbbb38f975d22311efacc9a53cdcb806708606666d8092314b81c5cb7983b700
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
-  url_launcher:
-    dependency: "direct main"
-    description:
-      name: url_launcher
-      sha256: "6ce1e04375be4eed30548f10a315826fd933c1e493206eab82eed01f438c8d2e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.2.6"
-  url_launcher_android:
-    dependency: transitive
-    description:
-      name: url_launcher_android
-      sha256: "360a6ed2027f18b73c8d98e159dda67a61b7f2e0f6ec26e86c3ada33b0621775"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.3.1"
-  url_launcher_ios:
-    dependency: transitive
-    description:
-      name: url_launcher_ios
-      sha256: "9149d493b075ed740901f3ee844a38a00b33116c7c5c10d7fb27df8987fb51d5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.2.5"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -890,14 +738,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
-  url_launcher_macos:
-    dependency: transitive
-    description:
-      name: url_launcher_macos
-      sha256: b7244901ea3cf489c5335bdacda07264a6e960b1c1b1a9f91e4bc371d9e68234
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   url_launcher_platform_interface:
     dependency: transitive
     description:
