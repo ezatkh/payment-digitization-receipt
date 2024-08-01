@@ -280,12 +280,10 @@ class MoreScreen extends StatelessWidget {
                     context: context,
                     label: 'Logout',
                     onPressed: () {
-                    //  ShareScreenOptions.sharePdf('id');
-                      // Navigator.pushReplacement(
-                      //   context,
-                      //   MaterialPageRoute(builder: (context) => SendReceiptScreen()),
-                      // //  MaterialPageRoute(builder: (context) => LoginScreen()),
-                      // );
+                      Navigator.pushReplacement(
+                        context,
+                       MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                     },
                     backgroundColor: Color(0xFFC62828), // Ooredoo theme color
                     textColor: Colors.white,

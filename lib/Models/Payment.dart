@@ -66,7 +66,7 @@ class Payment {
     return Payment(
       status: map['status'],
       id: map['id'],
-      voucherSerialNumber: map['voucherSerialNumber'],
+      voucherSerialNumber: map['voucherSerialNumber'] ?? ''  ,
       lastUpdatedDate:(map['lastUpdatedDate'] != 'null' && map['lastUpdatedDate'] != ''&&  map['lastUpdatedDate'] != null) ? DateTime.parse(map['lastUpdatedDate']) : null,
       transactionDate:(map['transactionDate'] != 'null' && map['transactionDate'] != '' &&  map['transactionDate'] != null) ? DateTime.parse(map['transactionDate']) : null,
       paymentMethod: map['paymentMethod'],

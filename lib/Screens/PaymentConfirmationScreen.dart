@@ -282,6 +282,8 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
+                ShareScreenOptions.sharePdf(widget.paymentId);
+
                 // showGeneralDialog(
                 //   context: context,
                 //   barrierDismissible: true,

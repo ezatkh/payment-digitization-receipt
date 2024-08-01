@@ -510,25 +510,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     icon: Icon(Icons.send, color: Colors.green),
                     onPressed: () {
                       ShareScreenOptions.sharePdf(record.id!);
-                      // showGeneralDialog(
-                      //   context: context,
-                      //   barrierDismissible: true,
-                      //   barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                      //   barrierColor: Colors.black45,
-                      //   transitionDuration: Duration(milliseconds: 350),
-                      //   pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
-                      //     return ShareScreenOptions(idToShare: record.id!);
-                      //   },
-                      //   transitionBuilder: (context, animation, secondaryAnimation, child) {
-                      //     return SlideTransition(
-                      //       position: Tween<Offset>(
-                      //         begin: Offset(0, 1), // Start at bottom
-                      //         end: Offset(0, 0.3), // End at top
-                      //       ).animate(animation),
-                      //       child: child,
-                      //     );
-                      //   },
-                      // );
                     },
                   ),
                 ),

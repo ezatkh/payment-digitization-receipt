@@ -31,15 +31,59 @@ class ShareScreenOptions {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
+                    pw.Text('Ooredoo', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                    pw.SizedBox(height: 20),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Row(
+                              children: [
+                                pw.Container(
+                                  color: PdfColors.blue,
+                                  padding: pw.EdgeInsets.all(8),
+                                  child: pw.Text('INVOICE # :${payment.voucherSerialNumber}', style: pw.TextStyle(color: PdfColors.white)),
+                                ),
+                                pw.Container(
+                                  color: PdfColors.blue,
+                                  padding: pw.EdgeInsets.all(8),
+                                  child: pw.Text('Transaction Date :${payment.transactionDate}', style: pw.TextStyle(color: PdfColors.white)),
+                                ),
+                              ],
+                            ),
+                            pw.SizedBox(height: 20),
+                            pw.Row(
+                              children: [
+                                pw.Container(
+                                  color: PdfColors.blue,
+                                  padding: pw.EdgeInsets.all(8),
+                                  child: pw.Text('CUSTOMER Name: ${payment.customerName}', style: pw.TextStyle(color: PdfColors.white)),
+                                ),
+                                pw.Container(
+                                  color: PdfColors.blue,
+                                  padding: pw.EdgeInsets.all(8),
+                                  child: pw.Text('PR# :${payment.prNumber}', style: pw.TextStyle(color: PdfColors.white)),
+                                ),
+                                pw.Container(
+                                  color: PdfColors.blue,
+                                  padding: pw.EdgeInsets.all(8),
+                                  child: pw.Text('MSISDN :${payment.msisdn}', style: pw.TextStyle(color: PdfColors.white)),
+                                ),
+                              ],
+                            ),
+
+                          ],
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 20),
+
+                    //previous one
                     pw.Text('Payment Details', style: pw.TextStyle(
                         fontSize: 24, fontWeight: pw.FontWeight.bold)),
                     pw.SizedBox(height: 16),
-                    pw.Text('Transaction Date: ${payment.transactionDate
-                        ?.toIso8601String() ?? ''}'),
-                    pw.Text('Voucher Serial Number: ${payment.voucherSerialNumber}'),
-                    pw.Text('Customer Name: ${payment.customerName}'),
-                    pw.Text('MSISDN: ${payment.msisdn ?? ''}'),
-                    pw.Text('PR Number: ${payment.prNumber ?? ''}'),
                     pw.Text('Payment Method: ${payment.paymentMethod}'),
                     pw.Text('Amount: ${payment.amount?.toString() ?? ''}'),
                     pw.Text('Amount Check: ${payment.amountCheck?.toString() ??

@@ -88,7 +88,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
      }
     return index;
   }
-
   @override
   void initState() {
     print(widget.id);
@@ -146,15 +145,18 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   void _initializeFields() async {
     print("_initializeFields method in record payment screen");
     if (widget.id != null) {
+      print("the id from parameter not null ");
       int id = widget.id!; // Ensure id is not null
       Map<String, dynamic>? paymentToEdit = await DatabaseProvider.getPaymentById(id);
+      print("the paymentToEdit from db is :${paymentToEdit} ");
       if (paymentToEdit != null) {
+        print("the paymentToEdit from db not null ");
 
         Payment payment = Payment.fromMap(paymentToEdit);
         print(" the payment to edit after parse is :${payment}");
        // payment.printAllFields();
         print("payment method from history to edit ${payment.paymentMethod}");
-        if (payment.paymentMethod == "Cash") {
+
           setState(() {
             _selectedPaymentMethod = cash;
             int index= findCurrencyIndex(payment.currency!);
@@ -162,7 +164,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
                _selectedCurrency =_currencies[index];
           });
-        } else if (payment.paymentMethod == "Check") {
+          if (payment.paymentMethod == "Check") {
           setState(() {
             _selectedPaymentMethod = check;
           });
