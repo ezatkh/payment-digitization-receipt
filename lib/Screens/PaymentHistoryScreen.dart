@@ -83,7 +83,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(12.w),
         child: Column(
           children: [
             _buildDateFilterSection(),
@@ -185,7 +185,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         return Padding(
           padding: const EdgeInsets.only(top: 7.0), // Add margin to the top
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 7.0), // Padding inside the chip
+            padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0), // Padding inside the chip
             decoration: BoxDecoration(
               color: Colors.grey[200],  // Background color
               borderRadius: BorderRadius.circular(10.0),
@@ -335,6 +335,14 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     return formatter.format(dateTime);
   }
 
+  String formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  String formatTime(DateTime date) {
+    return DateFormat('HH:mm:ss').format(date);
+  }
+
   Widget _buildPaymentRecordItem(Payment record) {
     IconData statusIcon;
     Color statusColor;
@@ -365,7 +373,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
     return Card(
         elevation: 2,
-        margin: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+        margin: EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
     child: Theme(
     data: ThemeData(dividerColor: Colors.transparent),
@@ -378,12 +386,20 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
     subtitle: Text('${record.status}',
     style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
-    childrenPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+    childrenPadding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
     children: [
-    (record.status.toLowerCase() == 'saved') ?
-    _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.lastUpdatedDate!).toString()) :
-    _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.transactionDate!).toString()),
-       if (record.status.toLowerCase() == 'synced' || record.status.toLowerCase() == 'canceled')
+    if(record.status.toLowerCase() == 'saved') ...[
+    _paymentDetailRow('Transaction Date', formatDate((record.lastUpdatedDate!)).toString()),
+      _paymentDetailRow('Transaction Time', formatTime((record.lastUpdatedDate!)).toString())
+    ]
+      else ...[
+    _paymentDetailRow('Transaction Date', formatDate(record.transactionDate!).toString()),
+      _paymentDetailRow('Transaction Time', formatTime((record.transactionDate!)).toString())
+
+    ],
+      //  _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.transactionDate!).toString()),
+
+      if (record.status.toLowerCase() == 'synced' || record.status.toLowerCase() == 'canceled')
        _paymentDetailRow('Voucher Serial Number', record.voucherSerialNumber),
     _paymentDetailRow('Payment Method', record.paymentMethod),
     _paymentDetailRow('Status', record.status),

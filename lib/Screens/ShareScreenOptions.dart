@@ -103,7 +103,7 @@ class ShareScreenOptions {
       );
 
       // Get the external storage directory
-      final directory = await getExternalStorageDirectory();
+      final directory = await getApplicationDocumentsDirectory();
       final path = '${directory?.path}/payment.pdf';
       final file = File(path);
 
