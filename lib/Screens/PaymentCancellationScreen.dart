@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../Services/LocalizationService.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../Services/PaymentService.dart';
 import '../Services/database.dart';
 
@@ -33,27 +31,13 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
     return payment?['voucherSerialNumber'];
   }
 
-  void _confirmCancellationAction(BuildContext context, String voucher, String reason) async {
-    try {
-      // Get the current date and time
-      DateTime now = DateTime.now();
 
 
-
-      // Call the cancelPayment method with the formatted date string
-      await DatabaseProvider.cancelPayment(voucher, reason, now);
-      // Sync payments after cancellation
-      PaymentService.syncPayments();
-
-      // Close the dialog
-      Navigator.of(context).pop();
-    } catch (e) {
-      // Handle the error if needed
-      print('Error cancelling payment: $e');
-    }
+  Future <void> _confirmCancellationAction(BuildContext context, String voucher, String reason) async {
+    await PaymentService.cancelPayment(voucher, reason);
   }
 
-  void _handleCancellation(BuildContext context, String voucher) {
+  void _handleCancellation(BuildContext context, String voucher) async {
     final reason = _reasonController.text.trim();
     if (reason.isEmpty) {
       setState(() {
@@ -63,7 +47,8 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
       setState(() {
         _errorText = null;
       });
-      _confirmCancellationAction(context, voucher, reason);
+      await _confirmCancellationAction(context,voucher, reason);
+      Navigator.of(context).pop(true); // Return true indicating cancellation was confirmed
     }
   }
 

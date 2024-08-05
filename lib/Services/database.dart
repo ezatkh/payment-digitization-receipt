@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseProvider {
@@ -49,7 +50,6 @@ class DatabaseProvider {
         currency TEXT,
         paymentInvoiceFor TEXT,
         status TEXT,
-        cancelDate TEXT,
         cancelReason TEXT,
         lastUpdatedDate TEXT,
         transactionDate TEXT,
@@ -257,37 +257,30 @@ class DatabaseProvider {
   }
 
   // Cancel a payment by voucherSerialNumber
-  static Future<void> cancelPayment(String voucherSerialNumber, String cancelReason,DateTime cancelDateTime) async {
-    print("cancelPayment method , database.dart started");
+// Cancel a payment by voucherSerialNumber
+  static Future<void> cancelPayment(String voucherSerialNumber, String cancelReason,String formattedCancelDateTime ,String newStatus) async {
+
+    print("cancelPayment method, database.dart started");
     try {
-      cancelDateTime=formatDateTimeWithMilliseconds(cancelDateTime) as DateTime;
-      Map<String, String> body= {
-        "voucherSerialNumberNumber" :voucherSerialNumber,
-        "cancelPayment" :cancelReason,
-        "CancellationDate" : cancelDateTime.toString(),
-        "status":"cancelledPending"
-      };
-      print(body);
-      // Database db = await database;
-      //
-      // // Update the cancelStatus and cancelReason
-      // await db.update(
-      //   'payments',
-      //   {
-      //     'status': 'CancelledPending',
-      //     'cancelReason': cancelReason,
-      //     'cancellationDate': cancelDateTime.toString(),
-      //   },
-      //   where: 'voucherSerialNumber = ?',
-      //   whereArgs: [voucherSerialNumber],
-      // );
-      // print('Payment with voucherSerialNumber $voucherSerialNumber has been cancelled');
+      Database db = await database;
+
+      await db.update(
+        'payments',
+        {
+          'status': newStatus,
+          'cancelReason': cancelReason,
+          'cancellationDate': formattedCancelDateTime,
+        },
+        where: 'voucherSerialNumber = ?',
+        whereArgs: [voucherSerialNumber],
+      );
+
+     print('Payment with voucherSerialNumber $voucherSerialNumber has been cancelled');
     } catch (e) {
       print('Error cancelling payment: $e');
       throw Exception('Failed to cancel payment');
     }
-    print("cancelPayment method , database.dart finished");
-
+    print("cancelPayment method, database.dart finished");
   }
 
   static Future<List<Map<String, dynamic>>> getPaymentsWithDateFilter(

@@ -20,6 +20,8 @@ class Payment {
   int? id;
   DateTime? transactionDate;
   DateTime? lastUpdatedDate;
+  String? cancelReason;
+  DateTime? cancellationDate;
 
   void printAllFields() {
     if(this.status.toLowerCase() == 'saved')
@@ -39,6 +41,9 @@ class Payment {
     print("currency: " + (this.currency ?? ''));
     print("paymentInvoiceFor: " + (this.paymentInvoiceFor ?? ''));
     print("status: " + this.status);
+    print("cancelReason: " + (this.cancelReason ?? '')); // New field
+    print("cancellationDate: " + (this.cancellationDate?.toString() ?? '')); // New field
+
   }
   Payment({
     this.transactionDate,
@@ -56,7 +61,9 @@ class Payment {
     this.dueDateCheck,
     this.currency,
     this.paymentInvoiceFor,
-    required this.status
+    required this.status,
+    this.cancelReason= '',
+    this.cancellationDate
   })
   {
     //printAllFields();
@@ -80,6 +87,8 @@ class Payment {
       dueDateCheck: (map['dueDateCheck'] != 'null' && map['dueDateCheck'] != '') ? DateTime.parse(map['dueDateCheck']) : null,
       currency: (map['currency'] !=null && map.containsKey('currency'))?map['currency']: null,
       paymentInvoiceFor: (map['paymentInvoiceFor'] !=null && map.containsKey('paymentInvoiceFor'))?map['paymentInvoiceFor']: null,
+      cancelReason: (map['cancelReason'] != null && map.containsKey('cancelReason')) ? map['cancelReason'] : null,
+      cancellationDate:(map['cancellationDate'] != 'null' && map['cancellationDate'] != '' &&  map['cancellationDate'] != null) ? DateTime.parse(map['cancellationDate']) : null,
 
     );
   }
@@ -102,11 +111,13 @@ class Payment {
       'id': id,
       'transactionDate': transactionDate?.toIso8601String(),
       'lastUpdatedDate': lastUpdatedDate?.toIso8601String(),
+      'cancelReason': cancelReason,
+      'cancellationDate': cancellationDate?.toIso8601String(),
     };
   }
 
   @override
   String toString() {
-    return 'Payment(voucherSerialNumber: $voucherSerialNumber, customerName: $customerName, msisdn: $msisdn, prNumber: $prNumber, paymentMethod: $paymentMethod, amount: $amount, amountCheck: $amountCheck, checkNumber: $checkNumber, bankBranch: $bankBranch, dueDateCheck: $dueDateCheck, currency: $currency, paymentInvoiceFor: $paymentInvoiceFor, status: $status, id: $id, transactionDate: $transactionDate, lastUpdatedDate: $lastUpdatedDate)';
+    return 'Payment(voucherSerialNumber: $voucherSerialNumber, customerName: $customerName, msisdn: $msisdn, prNumber: $prNumber, paymentMethod: $paymentMethod, amount: $amount, amountCheck: $amountCheck, checkNumber: $checkNumber, bankBranch: $bankBranch, dueDateCheck: $dueDateCheck, currency: $currency, paymentInvoiceFor: $paymentInvoiceFor, status: $status, id: $id, transactionDate: $transactionDate, lastUpdatedDate: $lastUpdatedDate, cancelReason: $cancelReason, cancellationDate: $cancellationDate)';
   }
 }

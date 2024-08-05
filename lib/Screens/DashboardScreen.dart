@@ -1,11 +1,9 @@
 import 'dart:ui';
-import 'package:digital_payment_app/Models/LoginState.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Services/LocalizationService.dart';
-import 'ConnectivityStatusScreen.dart';
 import 'LoginScreen.dart';
 import 'MoreScreen.dart';
 import 'PaymentHistoryScreen.dart';
@@ -96,7 +94,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     dashboardItems = [
       DashboardItemModel(iconData: Icons.payment, title: 'recordPayment', onTap: () => _navigateTo(RecordPaymentScreen())),
       DashboardItemModel(iconData: Icons.history, title: 'paymentHistory', onTap: () => _navigateTo(PaymentHistoryScreen())),
-      DashboardItemModel(iconData: Icons.signal_cellular_alt, title: 'connectivityStatus', onTap: () => _navigateTo(ConnectivityStatusScreen())),
       DashboardItemModel(iconData: Icons.settings, title: 'settings', onTap: () => _navigateTo(SettingsScreen())),
     ];
   }
@@ -171,9 +168,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       break;
                     case 'paymentHistory':
                       _navigateTo(PaymentHistoryScreen());
-                      break;
-                    case 'connectivityStatus':
-                      _navigateTo(ConnectivityStatusScreen());
                       break;
                     case 'settings':
                       _navigateTo(SettingsScreen());

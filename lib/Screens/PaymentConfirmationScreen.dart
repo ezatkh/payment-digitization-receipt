@@ -39,6 +39,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   String paymentSummary = '';
   String customerName = '';
   String transactionDate = '';
+  String cancellationDate = '';
   String paymentMethod = '';
   String confirm = '';
   String cancel = '';
@@ -51,6 +52,14 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   String theSumOf = '';
   String numberConvertBody = '';
   String languageCode = "";
+  String cancelReason = "";
+
+  String saved= "";
+  String synced= "";
+  String confirmed= "";
+  String cancelled= "";
+  String cancelPending= "";
+
   late StreamSubscription _syncSubscription;
 
   @override
@@ -72,6 +81,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     dueDateCheck = localizationService.getLocalizedString('dueDateCheck') ?? 'Confirm Payment';
     amount = localizationService.getLocalizedString('amount') ?? 'Confirm Payment';
     currency = localizationService.getLocalizedString('currency') ?? 'Confirm Payment';
+    cancellationDate = localizationService.getLocalizedString('cancellationDate') ?? 'Confirm Payment';
 
     ok = localizationService.getLocalizedString('ok') ?? 'Confirm Payment';
     status = localizationService.getLocalizedString('status') ?? '';
@@ -91,8 +101,15 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     paymentSuccessful = localizationService.getLocalizedString('paymentSuccessful') ?? 'Payment Successful';
     paymentSuccessfulBody = localizationService.getLocalizedString('paymentSuccessfulBody') ?? 'Your payment was successful!';
     cancel = localizationService.getLocalizedString('cancel') ?? 'Cancel';
+    cancelReason = localizationService.getLocalizedString('cancelReason') ?? 'Confirm Payment';
 
     transactionDate = localizationService.getLocalizedString('transactionDate') ?? 'Confirm Payment';
+    saved = localizationService.getLocalizedString('saved') ?? 'Confirm Payment';
+    synced = localizationService.getLocalizedString('synced') ?? 'Confirm Payment';
+    confirmed = localizationService.getLocalizedString('confirmed') ?? 'Confirm Payment';
+    cancelled = localizationService.getLocalizedString('cancelled') ?? 'Confirm Payment';
+    cancelPending = localizationService.getLocalizedString('cancelPending') ?? 'Confirm Payment';
+
   }
 
   Future<void> _fetchPaymentDetails() async {
@@ -171,12 +188,14 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildSummaryHeader(paymentDetails['status'].toLowerCase()),
-          Divider(color: Color(0xFFC62828), thickness: 2, height: 15.h),
-          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['paymentMethod'] == "cancelled"))
-            _detailItem(voucherNumber, paymentDetails['voucherSerialNumber'] ?? ''),
 
-          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['paymentMethod'] == "cancelled"))
+          Divider(color: Color(0xFFC62828), thickness: 2, height: 15.h),
+
+          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "cancelledpending")) ...[
+            _detailItem(voucherNumber, paymentDetails['voucherSerialNumber'] ?? ''),
             _divider(),
+
+          ],
           _detailItem(transactionDate, paymentDetails['status']?.toLowerCase() == "saved"
               ? (paymentDetails['lastUpdatedDate'] != null
               ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['lastUpdatedDate']))
@@ -185,9 +204,18 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['transactionDate']))
               : '')),
           _divider(),
-          _detailItem(customerName, paymentDetails['customerName'] ?? ''),
+          if ((paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "cancelledpending"))
+            ...[
+              _detailItem(cancellationDate, paymentDetails['cancellationDate']?.toString() ?? ''),
+              _divider(),
+              _detailItem(cancelReason, paymentDetails['cancelReason']?.toString() ?? ''),
+              _divider(),
+            ],
+
+
+            _detailItem(customerName, paymentDetails['customerName'] ?? ''),
           _divider(),
-          _detailItem(status, paymentDetails['status'] ?? ''),
+          _detailItem(status,Provider.of<LocalizationService>(context, listen: false).getLocalizedString(paymentDetails['status'].toLowerCase()) ?? ''),
           _divider(),
           _detailItem(prNumber, paymentDetails['prNumber']?.toString() ?? ''),
           _divider(),
@@ -283,25 +311,6 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               onPressed: () {
                 ShareScreenOptions.sharePdf(widget.paymentId);
 
-                // showGeneralDialog(
-                //   context: context,
-                //   barrierDismissible: true,
-                //   barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-                //   barrierColor: Colors.black45,
-                //   transitionDuration: Duration(milliseconds: 350),
-                //   pageBuilder: (BuildContext buildContext, Animation animation, Animation secondaryAnimation) {
-                //     return ShareScreenOptions(idToShare: widget.paymentId);
-                //   },
-                //   transitionBuilder: (context, animation, secondaryAnimation, child) {
-                //     return SlideTransition(
-                //       position: Tween<Offset>(
-                //         begin: Offset(0, 1), // Start at bottom
-                //         end: Offset(0, 0.3), // End at top
-                //       ).animate(animation),
-                //       child: child,
-                //     );
-                //   },
-                // );
               },
                   ),),
 
@@ -382,7 +391,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -392,7 +401,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               value,
               textAlign: TextAlign.end,
               style: TextStyle(
-                fontSize: 16.sp,
+                fontSize: 14.sp,
                 color: Colors.black54,
               ),
             ),

@@ -1,10 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:digital_payment_app/Services/database.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../Models/Payment.dart';
 import 'apiConstants.dart';
 
 
@@ -25,14 +27,81 @@ class PaymentService {
      }
 
   static void startPeriodicNetworkTest() {
-    Timer.periodic(Duration(seconds: 10), (Timer timer) async {
+    Timer.periodic(Duration(seconds: 5), (Timer timer) async {
       await testNetwork();
     });
   }
 
-  static Future<void> syncPayments() async {
+  static String convertAmountToWords(dynamic amount) {
+    if (amount == null) {
+      return ''; // Handle the case where amount is null
+    }
 
-    print("syncPayments methodse");
+    // Convert to int if amount is a double
+    int amountInt = (amount is double) ? amount.toInt() : amount as int;
+
+    return NumberToWordsEnglish.convert(amountInt);
+  }
+
+  static Future <void> syncPayment(Map<String, dynamic> payment, String apiUrl, Map<String, String> headers)async {
+
+    String theSumOf = payment['paymentMethod'].toLowerCase() == 'cash'
+        ? convertAmountToWords(payment['amount'])
+        : convertAmountToWords(payment['amountCheck']);
+
+    Map<String, dynamic> body = {
+      'transactionDate': payment['transactionDate'],
+      'accountName': payment['customerName'],
+      'msisdn': payment['msisdn'],
+      'pr': payment['prNumber'],
+      'amount': payment['amount'],
+      'currency': payment['currency'],
+      'paymentMethod': payment['paymentMethod'],
+      'checkNumber': payment['checkNumber'],
+      'checkAmount': payment['amountCheck'],
+      'checkBank': payment['bankBranch'],
+      'checkDueDate': payment['dueDateCheck'] != null && payment['dueDateCheck'] != 'null'
+          ? DateTime.parse(payment['dueDateCheck']).toIso8601String()
+          : null,
+      'theSumOf': theSumOf
+    };
+    print(body);
+
+    try {
+      print("before send sync api");
+      // Make POST request
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: headers,
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 200) {
+        print("inside status code 200 of sync api");
+
+        // Parse the response
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        String? voucherSerialNumber = responseBody['voucherSerialNumber'];
+        print("voucherSerialNumber :");
+        print(voucherSerialNumber!);
+
+        // Update payment in local database
+        await DatabaseProvider.updatePaymentvoucherSerialNumber(payment["id"], voucherSerialNumber);
+
+        // Update payment status to 'Synced'
+        await DatabaseProvider.updatePaymentStatus(payment["id"], 'Synced');
+        _syncController.add(null);
+      } else {
+        // Handle errors
+        print('Failed to sync payment: ${response.body}');
+      }
+    } catch (e) {
+      // Handle exceptions
+      print('Error syncing payment: $e');
+    }
+  }
+
+  static Future<void> syncPayments() async {
      SharedPreferences prefs = await SharedPreferences.getInstance();
      String? tokenID = prefs.getString('token');
 
@@ -40,8 +109,13 @@ class PaymentService {
        print('Token not found');
        return;
      }
+
      String fullToken="Barer ${tokenID}";
 
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      'tokenID': fullToken,
+    };
      // Retrieve all confirmed payments
     List<Map<String, dynamic>> ConfirmedAndCancelledPendingPayments = await DatabaseProvider.getConfirmedOrCancelledPendingPayments();
     List<Map<String, dynamic>> confirmedPayments = [];
@@ -55,81 +129,97 @@ class PaymentService {
         cancelledPendingPayments.add(payment);
       }
     }
-    print("confirmed payments");
-    for(var p in confirmedPayments){
-      print(p);
-    }
-    print("cancelled payments");
-    for(var p in cancelledPendingPayments){
-      print(p);
-    }
 // Assuming NumberToWordsEnglish.convert expects an int
-    String convertAmountToWords(dynamic amount) {
-      if (amount == null) {
-        return ''; // Handle the case where amount is null
-      }
 
-      // Convert to int if amount is a double
-      int amountInt = (amount is double) ? amount.toInt() : amount as int;
-
-      return NumberToWordsEnglish.convert(amountInt);
-    }
 
     for (var payment in confirmedPayments) {
-      // Create request headers
-      String theSumOf = payment['paymentMethod'].toLowerCase() == 'cash'
-          ? convertAmountToWords(payment['amount'])
-          : convertAmountToWords(payment['amountCheck']);
-      Map<String, String> headers = {
-        'Content-Type': 'application/json',
-        'tokenID': fullToken,
+      PaymentService.syncPayment(payment,apiUrl,headers);
+    }
+
+
+    for(var p in cancelledPendingPayments){
+      Map<String, String> body = {
+        "voucherSerialNumber": p["voucherSerialNumber"],
+        "cancelReason": p["reason"].toString(),
+        "cancellationDate":  DateTime.parse(p["cancellationDate"]).toIso8601String(),
       };
-      // Create request body
-      Map<String, dynamic> body = {
-        'transactionDate':  payment['transactionDate'],
-        'accountName':  payment['customerName'],
-        'msisdn': payment['msisdn'] ,
-        'pr': payment['prNumber'] ,
-        'amount': payment['amount'] ,
-        'currency': payment['currency'] ,
-        'paymentMethod': payment['paymentMethod'] ,
-        'checkNumber': payment['checkNumber'] ,
-        'checkAmount': payment['amountCheck'] ,
-        'checkBank': payment['bankBranch'] ,
-        'checkDueDate': payment['dueDateCheck'] != null && payment['dueDateCheck'] != 'null' ? DateTime.parse(payment['dueDateCheck']).toIso8601String() : null,
-        'theSumOf': theSumOf
-      };
-      //
-      print(body);
       try {
-        print("before send sync api");
-        // Make POST request
-        final response = await http.post(
-          Uri.parse(apiUrl),
+        final response = await http.delete(
+          Uri.parse(apiUrlCancel),
           headers: headers,
           body: json.encode(body),
         );
         if (response.statusCode == 200) {
-          print("inside status code 200 of sync api");
-
-          // Parse the response
-          Map<String, dynamic> responseBody = json.decode(response.body);
-          String? voucherSerialNumber = responseBody['voucherSerialNumber'];
-          print("voucherSerialNumber :");
-          print(voucherSerialNumber!);
-          // Update payment in local database
-           await DatabaseProvider.updatePaymentvoucherSerialNumber(payment["id"], voucherSerialNumber);
-          // Update payment status to 'Synced'
-           await DatabaseProvider.updatePaymentStatus(payment["id"], 'Synced');
+          print("inside status code 200 of cancel api");
+          await DatabaseProvider.updatePaymentStatus(p["id"], 'Cancelled');
           _syncController.add(null);
         } else {
-          // Handle errors
-          print('Failed to sync payment: ${response.body}');
+
+          print('Failed to cancel payment: ${response.body}');
         }
       } catch (e) {
         // Handle exceptions
         print('Error syncing payment: $e');
       }
+
+    }
+  }
+
+
+  static Future <void> cancelPayment(String voucherSerial , String reason) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? tokenID = prefs.getString('token');
+
+    if (tokenID == null) {
+      print('Token not found');
+      return;
+    }
+    String fullToken="Barer ${tokenID}";
+    print("the token to user hen cancel :${fullToken}");
+
+
+    try {
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'tokenID': fullToken,
+      };
+
+       DateFormat formatter = DateFormat('yyyy-MM-ddTHH:mm:ss');
+      String cancelDateTime= formatter.format(DateTime.now());
+
+      // Create the body map with the necessary information
+      Map<String, String> body = {
+        "voucherSerialNumber": voucherSerial,
+        "cancelReason": reason,
+        "cancelTransactionDate":  cancelDateTime,
+      };
+      print(body);
+print("cancellation date : $cancelDateTime");
+      try {
+        final response = await http.delete(
+          Uri.parse(apiUrlCancel),
+          headers: headers,
+          body: json.encode(body),
+        );
+        if (response.statusCode == 200) {
+          print("inside status code 200 of cancel api");
+          await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'Cancelled');
+
+          _syncController.add(null);
+        } else {
+          await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'CancelledPending');
+          print('Failed to cancel payment: ${response.body}');
+        }
+      } catch (e) {
+        await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'CancelledPending');
+        // Handle exceptions
+        print('Error syncing payment: $e');
+      }
+
+
+    } catch (e) {
+      // Handle the error if needed
+      print('Error cancelling payment: $e');
     }
   }
 }

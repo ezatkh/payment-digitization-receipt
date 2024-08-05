@@ -138,5 +138,17 @@
   "saveTitle": "حفظ الدفعة",
   "requiredFields": "الحقول المطلوبة",
 
-  "transactionDate": "تاريخ الدفعة"
+  "transactionDate": "تاريخ الدفعة",
+  "transactionTime": "وقت الدفعة",
+
+  "cancellationDate": "تاريخ الغاء الدفعة",
+
+  "cancelReason": "سبب الإلغاء",
+
+  "saved": "محفوظ",
+  "synced": "مزامن",
+  "confirmed": "مؤكد",
+  "cancelled": "ملغى",
+  "cancelPending": "جاري الإلغاء"
+
 }

@@ -138,8 +138,15 @@
   "saveTitle": "Save Payment",
   "requiredFields": "Required Fields",
 
-  "transactionDate": "Transaction Date"
+  "transactionDate": "Transaction Date",
+  "transactionTime": "Transaction Time",
 
+  "cancellationDate": "Cancellation Date",
+  "cancelReason": "Cancel Reason",
 
-
+  "saved": "Saved",
+  "synced": "Synced",
+  "confirmed": "Confirmed",
+  "cancelPending": "Cancel Pending",
+  "cancelled": "Cancelled"
 }

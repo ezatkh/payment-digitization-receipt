@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
-import 'package:digital_payment_app/Screens/PrintSettingsScreen.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 import 'package:flutter/material.dart';
@@ -236,7 +235,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           child: ElevatedButton.icon(
             icon: Icon(Icons.search, color: Colors.white),
             label: Text(
-              'Search',
+              search,
               style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI'),
             ),
             style: ElevatedButton.styleFrom(
@@ -282,7 +281,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 children: <String>['Saved', 'Confirmed', 'Synced', 'Cancel Pending', 'Cancelled']
                     .map((String status) {
                   return CheckboxListTile(
-                    title: Text(status),
+                    title: Text(                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString(status.toLowerCase()),
+                    ),
                     value: _selectedStatuses.contains(status),
                     onChanged: (bool? value) {
                       setState(() {
@@ -298,13 +298,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               ),
               actions: [
                 TextButton(
-                  child: Text('Cancel'),
+                  child: Text(  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel')),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                 ),
                 ElevatedButton(
-                  child: Text('Apply'),
+                  child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok')),
                   onPressed: () {
                     Navigator.of(context).pop();
                     _fetchPayments();
@@ -318,6 +318,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       },
     );
   }
+
     Widget _buildPaymentRecordsList() {
     return _paymentRecords.isEmpty
         ? Center(child: Text('No records found'))
@@ -329,10 +330,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         return _buildPaymentRecordItem(_paymentRecords[index] );
       },
     );
-  }
-  String formatDateTimeWithoutMilliseconds(DateTime dateTime) {
-    final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-    return formatter.format(dateTime);
   }
 
   String formatDate(DateTime date) {
@@ -360,10 +357,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       case 'synced':
         statusIcon = Icons.check_circle;
         statusColor = Colors.green;
+
         break;
-      case 'canceled':
+      case 'cancelled':
         statusIcon = Icons.cancel;
         statusColor = Colors.red;
+
+      case 'cancelledpending':
+        statusIcon = Icons.payment;
+        statusColor = Colors.red;
+
         break;
       default:
         statusIcon = Icons.payment;
@@ -384,48 +387,52 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     ),
     title: Text(record.customerName,
     style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
-    subtitle: Text('${record.status}',
+    subtitle: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString(record.status.toLowerCase()),
     style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
     childrenPadding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
     children: [
-    if(record.status.toLowerCase() == 'saved') ...[
-    _paymentDetailRow('Transaction Date', formatDate((record.lastUpdatedDate!)).toString()),
-      _paymentDetailRow('Transaction Time', formatTime((record.lastUpdatedDate!)).toString())
+      if (record.status.toLowerCase() != 'saved')
+        _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('voucherNumber'), record.voucherSerialNumber),
+
+      if(record.status.toLowerCase() == 'saved') ...[
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('transactionDate'), formatDate((record.lastUpdatedDate!)).toString()),
+      _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('transactionTime'), formatTime((record.lastUpdatedDate!)).toString())
     ]
       else ...[
-    _paymentDetailRow('Transaction Date', formatDate(record.transactionDate!).toString()),
-      _paymentDetailRow('Transaction Time', formatTime((record.transactionDate!)).toString())
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('transactionDate'), formatDate(record.transactionDate!).toString()),
+      _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('transactionTime'), formatTime((record.transactionDate!)).toString())
 
     ],
-      //  _paymentDetailRow('Transaction Date', formatDateTimeWithoutMilliseconds(record.transactionDate!).toString()),
 
-      if (record.status.toLowerCase() == 'synced' || record.status.toLowerCase() == 'canceled')
-       _paymentDetailRow('Voucher Serial Number', record.voucherSerialNumber),
-    _paymentDetailRow('Payment Method', record.paymentMethod),
-    _paymentDetailRow('Status', record.status),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentMethod'), record.paymentMethod),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('status'), record.status),
     if (record.msisdn != null && record.msisdn!.isNotEmpty)
-    _paymentDetailRow('MSISDN', record.msisdn.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('msisdn'), record.msisdn.toString()),
     if (record.prNumber != null && record.prNumber!.isNotEmpty)
-    _paymentDetailRow('#PR', record.prNumber.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('PR'), record.prNumber.toString()),
     if (record.paymentMethod.toLowerCase() == 'cash')
-    _paymentDetailRow('Amount', record.amount.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('amount'), record.amount.toString()),
     if (record.paymentMethod.toLowerCase() == 'check')
-    _paymentDetailRow('Amount', record.amountCheck.toString()),
-      _paymentDetailRow('Currency', record.currency.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('amount'), record.amountCheck.toString()),
+      _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('currency'), record.currency.toString()),
       if (record.paymentMethod.toLowerCase() == 'check')
-    _paymentDetailRow('Check Number', record.checkNumber.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('checkNumber'), record.checkNumber.toString()),
     if (record.paymentMethod.toLowerCase() == 'check')
-    _paymentDetailRow('Bank/Branch', record.bankBranch.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('bankBranchCheck'), record.bankBranch.toString()),
     if (record.paymentMethod.toLowerCase() == 'check')
-    _paymentDetailRow('Due Date', _formatDate(record.dueDateCheck)),
-    if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
-    _paymentDetailRowWithMultiline('Payment Invoice For:', record.paymentInvoiceFor.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('dueDateCheck'), _formatDate(record.dueDateCheck)),
+      if(record.status.toLowerCase() == 'cancelledpending' || record.status.toLowerCase() == 'cancelled' ) ...[
+        _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancellationDate'), formatDate((record.cancellationDate!)).toString()),
+        _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelReason'), (record.cancelReason!)),
+      ],
+      if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
+    _paymentDetailRowWithMultiline(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentInvoiceFor'), record.paymentInvoiceFor.toString()),
     SizedBox(height: 8.h),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Tooltip(
-            message: 'View Payment Summary',
+            message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('viewPayment'),
             child: IconButton(
               icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
               onPressed: () {
@@ -491,8 +498,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                         if (record.id != null) {
                           final int idToConfirm = record.id!;
                           await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
-                          _fetchPayments();
                           PaymentService.syncPayments();
+                          _syncSubscription = PaymentService.syncStream.listen((_) {
+                            _fetchPayments(); // Refresh payment records
+                          });
+
                         }
                       });
                     },
@@ -507,19 +517,28 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   message: 'Cancel Payment',
                   child: IconButton(
                     icon: Icon(Icons.cancel, color: Colors.red),
-                    onPressed: () {
+                    onPressed: () async {
                       if (record.id != null) {
                         final int idToCancel = record.id!;
-                        showDialog(
+
+                        final bool result = await showDialog<bool>(
                           context: context,
                           builder: (BuildContext context) {
                             return PaymentCancellationScreen(id: idToCancel);
                           },
-                        );
+                        ) ?? false; // Default to false if dialog is dismissed
+
+                        if (result) {
+                          await PaymentService.syncPayments();
+                          _fetchPayments();
+                          setState(() {});
+                        }
                       }
                     },
                   ),
                 ),
+
+
                 Tooltip(
                   message: 'Send Payment Options',
                   child: IconButton(
@@ -541,7 +560,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     ),
     ),);
   }
-
 
   Widget _paymentDetailRow(String title, String value) {
     return Padding(
@@ -593,12 +611,24 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     DateTime? lastUpdatedDate;
     String? transactionDateString ;
     DateTime? transactionDate;
+    String? cancellationDateString ;
+    DateTime? cancellationDate;
     String serialNumber="";
     setState(() {
       _paymentRecords = payments.map((payment) {
         dueDateCheckString = payment['dueDateCheck'];
         lastUpdatedDateString = payment['lastUpdatedDate'];
         transactionDateString = payment['transactionDate'];
+        cancellationDateString = payment['cancellationDate'];
+
+        if(cancellationDateString != null && cancellationDateString!.isNotEmpty)
+          try {
+            cancellationDate =  DateTime.parse(cancellationDateString!);
+          } catch (e) {
+            print('Error parsing cancellationDate: $cancellationDate');
+            cancellationDate = null;
+          }
+
         if(payment['voucherSerialNumber'] != null)
           serialNumber=payment['voucherSerialNumber'];
         if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
@@ -648,7 +678,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           dueDateCheck: dueDateCheck,
           paymentInvoiceFor: payment['paymentInvoiceFor'],
           status: payment['status'],
-          voucherSerialNumber:serialNumber
+          voucherSerialNumber:serialNumber,
+            cancelReason:payment['cancelReason'],
+            cancellationDate:cancellationDate
+
+
         );
       }).toList();
 
