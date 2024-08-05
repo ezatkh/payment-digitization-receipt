@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import '../Models/Payment.dart';
 import 'apiConstants.dart';
 
 
@@ -17,11 +16,8 @@ class PaymentService {
   static Future<void> testNetwork() async {
      var connectivityResult = await (Connectivity().checkConnectivity());
      print(connectivityResult);
-     if(connectivityResult == ConnectivityResult.none){
-       print("no internet");
-     }
+     if(connectivityResult == ConnectivityResult.none){}
       else {
-        print("connected Internet ");
         PaymentService.syncPayments();
      }
      }

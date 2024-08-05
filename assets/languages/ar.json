@@ -149,6 +149,13 @@
   "synced": "مزامن",
   "confirmed": "مؤكد",
   "cancelled": "ملغى",
-  "cancelPending": "جاري الإلغاء"
+  "cancelPending": "جاري الإلغاء",
 
+  "noInternetConnection": "لا توجد اتصال بالإنترنت",
+  "noInternet": "لم يتم الكشف عن اتصال بالإنترنت. يرجى التحقق من إعدادات الشبكة الخاصة بك والمحاولة مرة أخرى.",
+  "isRequired": "مطلوب",
+  "mustContainOnlyNumber": "يجب أن يحتوي على أرقام فقط",
+  "invalidAmount": "صيغة المبلغ غير صحيحة",
+  "paymentSavedSuccess": "تم حفظ الدفعة بنجاح",
+  "paymentUpdateSuccess": "تم تعديل الدفعة بنجاح"
 }

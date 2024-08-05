@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -108,44 +109,57 @@ class LoginScreen extends StatelessWidget {
                                             .getLocalizedString('login')
                                         : 'Login', // Fallback if localization is not loaded
                                     onPressed: () async {
-                                      bool isValid = validateLoginInputs(loginState);
-                                      if (isValid) {
-                                        bool? loginResult =await loginState.login();
-                                        if (loginResult ) {
-                                          _handleLogin(
-                                              context, localizationService);
-                                        } else {
-                                          _showLoginFailedDialog(
-                                            context,
-                                            localizationService
-                                                .getLocalizedString(
-                                                    'loginFailedwrong'),
-                                            localizationService
-                                                    .isLocalizationLoaded
-                                                ? localizationService
-                                                    .getLocalizedString(
-                                                        'loginfailed')
-                                                : 'Login Failed',
-                                            localizationService
-                                                .selectedLanguageCode,
-                                          );
-                                        }
-                                      } else {
+                                      var connectivityResult = await (Connectivity().checkConnectivity());
+                                      if(connectivityResult.toString() == '[ConnectivityResult.none]'){
                                         _showLoginFailedDialog(
                                           context,
-                                          localizationService
-                                              .getLocalizedString(
-                                                  'loginFailedEmpty'),
-                                          localizationService
-                                                  .isLocalizationLoaded
-                                              ? localizationService
-                                                  .getLocalizedString(
-                                                      'loginfailed')
-                                              : 'Login Failed',
-                                          localizationService
-                                              .selectedLanguageCode,
+                                          localizationService.getLocalizedString('noInternet'),
+                                          localizationService.isLocalizationLoaded
+                                              ? localizationService.getLocalizedString('noInternetConnection')
+                                              : 'No Internet Connection',
+                                          localizationService.selectedLanguageCode,
                                         );
                                       }
+          else{
+          bool isValid = validateLoginInputs(loginState);
+          if (isValid) {
+          bool? loginResult =await loginState.login();
+          if (loginResult ) {
+          _handleLogin(
+          context, localizationService);
+          } else {
+          _showLoginFailedDialog(
+          context,
+          localizationService
+              .getLocalizedString(
+          'loginFailedwrong'),
+          localizationService
+              .isLocalizationLoaded
+          ? localizationService
+              .getLocalizedString(
+          'loginfailed')
+              : 'Login Failed',
+          localizationService
+              .selectedLanguageCode,
+          );
+          }
+          } else {
+          _showLoginFailedDialog(
+          context,
+          localizationService
+              .getLocalizedString(
+          'loginFailedEmpty'),
+          localizationService
+              .isLocalizationLoaded
+          ? localizationService
+              .getLocalizedString(
+          'loginfailed')
+              : 'Login Failed',
+          localizationService
+              .selectedLanguageCode,
+          );
+          }
+          }
                                     },
                                   ),
                                 ),

@@ -339,7 +339,7 @@ class MoreScreen extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         // BottomNavigationBarItem(icon: Icon(Icons.work_outline), label: 'Services'),
         BottomNavigationBarItem(icon: Icon(Icons.person_outline_sharp), label: 'My Account'),
-        BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'More'),
+        // BottomNavigationBarItem(icon: Icon(Icons.menu), label: 'More'),
       ],
       currentIndex: 2,
       selectedItemColor: const Color(0xFFC62828),

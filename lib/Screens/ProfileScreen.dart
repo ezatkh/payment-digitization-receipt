@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'DashboardScreen.dart';
-import 'MoreScreen.dart';
+//import 'MoreScreen.dart';
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 
@@ -41,12 +41,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _selectedIndex2 = index;
       });
-      if (index == 2) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MoreScreen()),
-        );
-      } else if (index == 1) {
+      // if (index == 2) {
+      //   Navigator.push(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => MoreScreen()),
+      //   );
+      // }
+       if (index == 1) {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ProfileScreen()),
@@ -90,10 +91,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: Icon(Icons.person_outline_sharp),
                   label: localizationService.getLocalizedString('myAccount'),
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.menu),
-                  label: localizationService.getLocalizedString('more'),
-                ),
+                // BottomNavigationBarItem(
+                //   icon: Icon(Icons.menu),
+                //   label: localizationService.getLocalizedString('more'),
+                // ),
               ],
               currentIndex: _selectedIndex2,
               selectedItemColor: Color(0xFFC62828),

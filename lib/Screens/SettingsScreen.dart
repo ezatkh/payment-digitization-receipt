@@ -1,13 +1,14 @@
 import 'dart:ui';
-
 import 'package:digital_payment_app/Screens/LanguageSettingsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import '../Custom_Widgets/CustomAboutDialogScreen.dart';
 import '../Services/LocalizationService.dart';
-import 'DashboardScreen.dart';
 import 'LoginScreen.dart';
+import 'ProfileScreen.dart';
+import '../Custom_Widgets/CustomAboutDialogScreen.dart';
+
 
 class SettingsScreen extends StatelessWidget {
   @override
@@ -99,7 +100,7 @@ class SettingsScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           PageRouteBuilder(
-                            transitionDuration: Duration(milliseconds: 400), // Adjust as necessary
+                            transitionDuration: Duration(milliseconds: 300), // Adjust as necessary
                             pageBuilder: (context, animation, secondaryAnimation) {
                               return SlideTransition(
                                 position: Tween<Offset>(
@@ -113,33 +114,46 @@ class SettingsScreen extends StatelessWidget {
                         );
                      //   _handleChangeLanguage(context,localizationService);
                       }, localizationService: localizationService),
-                      _buildSettingOption(Icons.palette, 'theme', onTap: () {
-                        // TODO: Handle Theme
+                      _buildSettingOption(Icons.print, 'printerSettings', onTap: () {
+                        // TODO: Handle Printer Settings
+                      }, localizationService: localizationService),
+                    ], localizationService),
+                    _buildSettingSection('Other', [
+                      _buildSettingOption(Icons.info_outline, 'aboutHelp', onTap: () {
+                        PageRouteBuilder(
+                          transitionDuration: Duration(milliseconds: 300), // Adjust as necessary
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: Offset(1.0, 0.0), // From right to left
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child:  CustomAboutDialogScreen(),
+                            );
+                          },
+                        );
                       }, localizationService: localizationService),
                     ], localizationService),
                     _buildSettingSection('Account', [
-                      _buildSettingOption(Icons.lock_outline, 'security', onTap: () {
-                        // TODO: Handle Security
-                      }, localizationService: localizationService),
-                      _buildSettingOption(Icons.archive_outlined, 'dataStorage', onTap: () {
-                        // TODO: Handle Data & Storage
+                      _buildSettingOption(Icons.person, 'profile', onTap: () {
+                        PageRouteBuilder(
+                          transitionDuration: Duration(milliseconds: 300), // Adjust as necessary
+                          pageBuilder: (context, animation, secondaryAnimation) {
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: Offset(1.0, 0.0), // From right to left
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: ProfileScreen(),
+                            );
+                          },
+                        );
+
                       }, localizationService: localizationService),
                       _buildSettingOption(Icons.logout, 'logout', onTap: () {
                         _showLogoutDialog(context);
                       }, localizationService: localizationService),
-                    ], localizationService),
-                    _buildSettingSection('Notifications', [
-                      _buildSettingOption(Icons.notifications_active, 'notificationSettings', onTap: () {
-                        // TODO: Handle Notifications
-                      }, localizationService: localizationService),
-                    ], localizationService),
-                    _buildSettingSection('Other', [
-                      _buildSettingOption(Icons.print, 'printerSettings', onTap: () {
-                        // TODO: Handle Printer Settings
-                      }, localizationService: localizationService),
-                      _buildSettingOption(Icons.info_outline, 'aboutHelp', onTap: () {
-                        // TODO: Handle About & Help
-                      }, localizationService: localizationService),
+
                     ], localizationService),
                   ],
                 ),
@@ -248,99 +262,3 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-// void _handleChangeLanguage(
-//     BuildContext context, LocalizationService localizationService) async {
-//   showDialog(
-//     context: context,
-//     barrierDismissible: false,
-//     builder: (BuildContext dialogContext) {
-//       return Dialog(
-//         backgroundColor: Colors.transparent,
-//         child: _buildProgressDialog(localizationService),
-//       );
-//     },
-//   );
-//
-//   await Future.delayed(const Duration(seconds: 2));
-//   Navigator.of(context).pop(); // Dismiss the progress indicator dialog
-//
-//   // Toggle language
-//   if (localizationService.selectedLanguageCode == 'en') {
-//     localizationService.selectedLanguageCode = 'ar';
-//   } else {
-//     localizationService.selectedLanguageCode = 'en';
-//   }
-//
-//   // Example navigation after language change with animation
-//   Navigator.pushReplacement(
-//     context,
-//     PageRouteBuilder(
-//       pageBuilder: (context, animation, secondaryAnimation) =>
-//           FadeTransition(
-//             opacity: animation,
-//             child: DashboardScreen(),
-//           ),
-//       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-//         return FadeTransition(
-//           opacity: animation,
-//           child: child,
-//         );
-//       },
-//       transitionDuration: Duration(milliseconds: 1500),
-//     ),
-//   );
-// }
-
-// Widget _buildProgressDialog(LocalizationService localizationService) {
-//   return Dialog(
-//     backgroundColor: Colors.transparent,
-//     child: Stack(
-//       alignment: Alignment.center,
-//       children: [
-//         BackdropFilter(
-//           filter: ImageFilter.blur(sigmaX: 7, sigmaY:7),
-//           child: Container(
-//             width: double.infinity,
-//             height: double.infinity,
-//           ),
-//         ),
-//         Container(
-//           padding: EdgeInsets.all(20.w),
-//           decoration: BoxDecoration(
-//             color: Colors.transparent,
-//             borderRadius: BorderRadius.circular(10.r),
-//           ),
-//           child: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               SpinKitFadingCircle(
-//                 itemBuilder: (BuildContext context, int index) {
-//                   return DecoratedBox(
-//                     decoration: BoxDecoration(
-//                       shape: BoxShape.circle,
-//                       color: index.isEven ? Colors.white : Colors.grey[300],
-//                     ),
-//                   );
-//                 },
-//               ),
-//               SizedBox(height: 10.h),
-//               Text(
-//                 localizationService.getLocalizedString('pleaseWait'),
-//                 style: TextStyle(
-//                   decoration: TextDecoration.none,
-//                   color: Colors.white.withOpacity(0.8), // Slightly brighter text
-//                   fontFamily: 'NotoSansUI',
-//                   fontSize: 14.sp,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ],
-//     ),
-//   );
-// }

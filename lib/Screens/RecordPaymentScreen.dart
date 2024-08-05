@@ -553,11 +553,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   bool _validateFields() {
+    String isRequired =Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired');
+    String mustContainOnlyNumber =Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired');
+
     // Validate customer name
     if (_customerNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Customer name is required."),
+          content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('customerName')} ${isRequired}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -568,7 +571,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     if (_selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Payment method is required."),
+          content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentMethod')} ${isRequired}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -580,7 +583,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if (!RegExp(r'^[0-9]+$').hasMatch(_msisdnController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("MSISDN must contain only numbers."),
+            content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('MSISDN')} ${mustContainOnlyNumber}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -591,7 +594,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if (!RegExp(r'^[0-9]+$').hasMatch(_prNumberController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("PR must contain only numbers."),
+            content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('PR')} ${mustContainOnlyNumber}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -615,7 +618,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if (double.tryParse(_amountController.text) == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Invalid amount format for cash."),
+            content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('invalidAmount')),
             backgroundColor: Colors.red,
           ),
         );
@@ -640,7 +643,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if (double.tryParse(_amountCheckController.text) == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Invalid amount format for check."),
+            content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('invalidAmount')),
             backgroundColor: Colors.red,
           ),
         );
@@ -651,7 +654,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if (!RegExp(r'^[0-9]*$').hasMatch(_checkNumberController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Check number must contain only numbers."),
+            content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('checkNumber')} ${mustContainOnlyNumber}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -727,7 +730,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _confirmPayment() {
-    print("_confirmPayment method started");
     if (!_validateFields()) return;
     Payment paymentDetails = _preparePaymentObject('Confirmed');
     CustomPopups.showCustomDialog(
@@ -821,8 +823,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _agreedPayment(Payment paymentDetails) async {
-    print("_agreedPaymentMethodStarted");
-
     showDialog( context: context,  barrierDismissible: false,  builder: (BuildContext dialogContext) {
       return Center(
           child: CircularProgressIndicator(),
@@ -866,8 +866,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
           'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
         });
-        print("saved to db Successfully");
-      }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentSavedSuccess')),
+            backgroundColor: Colors.green, // Set the background color to green
+            behavior: SnackBarBehavior.floating, // Optional: Makes the Snackbar float above the content
+            duration: Duration(seconds: 2), // Optional: Duration for how long the Snackbar will be visible
+          ),
+        );       }
       else {
         print("id , update exist payment :");
         final int id = paymentDetails.id!;
@@ -887,7 +893,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
 
         });
-        print("Updated in db Successfully");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentUpdateSuccess')),
+            backgroundColor: Colors.green, // Set the background color to green
+            behavior: SnackBarBehavior.floating, // Optional: Makes the Snackbar float above the content
+            duration: Duration(seconds: 2), // Optional: Duration for how long the Snackbar will be visible
+          ),
+        );
       }
       print("_agreedPaymentMethodFinished");
       Navigator.pop(context); // pop the dialog

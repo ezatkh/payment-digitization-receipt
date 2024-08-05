@@ -148,5 +148,13 @@
   "synced": "Synced",
   "confirmed": "Confirmed",
   "cancelPending": "Cancel Pending",
-  "cancelled": "Cancelled"
+  "cancelled": "Cancelled",
+
+  "noInternetConnection": "No Internet Connection",
+  "noInternet": "No internet connection detected. Please check your network settings and try again.",
+  "isRequired": "is Required",
+  "mustContainOnlyNumber": "must contain only numbers",
+  "invalidAmount": "Invalid amount format",
+  "paymentSavedSuccess": "Payment saved successfully",
+  "paymentUpdateSuccess": "Payment updated successfully"
 }

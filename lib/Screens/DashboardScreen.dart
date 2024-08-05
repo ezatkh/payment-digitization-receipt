@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Services/LocalizationService.dart';
 import 'LoginScreen.dart';
-import 'MoreScreen.dart';
+//import 'MoreScreen.dart';
 import 'PaymentHistoryScreen.dart';
 import 'ProfileScreen.dart';
 import 'RecordPaymentScreen.dart';
@@ -23,50 +23,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<DashboardItemModel> dashboardItems = []; // Initialize as empty list
   late SharedPreferences prefs; // SharedPreferences instance
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex2 = index;
-    });
-    if (index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => MoreScreen()),
-      );
-    }
-    else if (index ==1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) =>ProfileScreen()  ),
-      );
-    }
-    else if(index==0){
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardScreen()),
-      );
-    }
-  }
-  void _navigateTo(Widget screen) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => screen,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
 
-          return SlideTransition(
-            position: offsetAnimation,
-            child: child,
-          );
-        },
-      ),
-    );
-  }
-  // Define a list of dashboard items with icons and titles
+
   @override
   void initState() {
     print("dashboard page");
@@ -75,21 +33,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _initializeDashboardItems();
    // _checkToken();
   }
-  Future<void> _checkToken() async {
-    prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    if (token == null) {
-      // No token found, navigate to LoginScreen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    }
-  }
+
   Future<void> _initializeLocalization() async {
-    print("initLocalization inside dashboard function");
     await Provider.of<LocalizationService>(context, listen: false).initLocalization();
   }
+
   void _initializeDashboardItems() {
     dashboardItems = [
       DashboardItemModel(iconData: Icons.payment, title: 'recordPayment', onTap: () => _navigateTo(RecordPaymentScreen())),
@@ -101,6 +49,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context)  {
     ScreenUtil.init(context, designSize: Size(360, 690));
+    final screenSize = MediaQuery.of(context).size;
+    final aspectRatio = screenSize.width / (screenSize.height-180);
    // prefs = await SharedPreferences.getInstance().getString('language_code');;
     return Scaffold(
       appBar: AppBar(
@@ -149,10 +99,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: GridView.builder(
         padding: EdgeInsets.all(10.w),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: 1,
           crossAxisSpacing: 10.w,
           mainAxisSpacing: 10.h,
-          childAspectRatio: 1 / 1.15,
+          childAspectRatio:  (aspectRatio*3),
         ),
         itemCount: dashboardItems.length,
         itemBuilder: (context, index) {
@@ -195,10 +145,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: Icon(Icons.person_outline_sharp),
                 label: localizationService.getLocalizedString('myAccount'),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.menu),
-                label: localizationService.getLocalizedString('more'),
-              ),
+              // BottomNavigationBarItem(
+              //   icon: Icon(Icons.menu),
+              //   label: localizationService.getLocalizedString('more'),
+              // ),
             ],
             currentIndex: _selectedIndex2,
             selectedItemColor: Color(0xFFC62828),
@@ -216,6 +166,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex2 = index;
+    });
+    // if (index == 2) {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => MoreScreen()),
+    //   );
+    // }
+     if (index ==1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) =>ProfileScreen()  ),
+      );
+    }
+    else if(index==0){
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => DashboardScreen()),
+      );
+    }
+  }
+
+  void _navigateTo(Widget screen) {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => screen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildLogoutDialogContent(BuildContext context) {
     return ClipRRect(
@@ -284,7 +278,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-
 
   Widget _buildDialogButton({
     required BuildContext context,
