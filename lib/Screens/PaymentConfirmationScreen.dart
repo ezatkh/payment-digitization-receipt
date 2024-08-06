@@ -108,7 +108,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     synced = localizationService.getLocalizedString('synced') ?? 'Confirm Payment';
     confirmed = localizationService.getLocalizedString('confirmed') ?? 'Confirm Payment';
     cancelled = localizationService.getLocalizedString('cancelled') ?? 'Confirm Payment';
-    cancelPending = localizationService.getLocalizedString('cancelPending') ?? 'Confirm Payment';
+    cancelPending = localizationService.getLocalizedString('cancelpending') ?? 'Confirm Payment';
 
   }
 
@@ -191,7 +191,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
           Divider(color: Color(0xFFC62828), thickness: 2, height: 15.h),
 
-          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "cancelledpending")) ...[
+          if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "canceldpending")) ...[
             _detailItem(voucherNumber, paymentDetails['voucherSerialNumber'] ?? ''),
             _divider(),
 
@@ -204,7 +204,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['transactionDate']))
               : '')),
           _divider(),
-          if ((paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "cancelledpending"))
+          if ((paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "canceldpending"))
             ...[
               _detailItem(cancellationDate, paymentDetails['cancellationDate']?.toString() ?? ''),
               _divider(),
@@ -309,7 +309,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
-                ShareScreenOptions.sharePdf(widget.paymentId);
+                ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
 
               },
                   ),),

@@ -147,7 +147,7 @@
   "saved": "Saved",
   "synced": "Synced",
   "confirmed": "Confirmed",
-  "cancelPending": "Cancel Pending",
+  "cancelpending": "Cancel Pending",
   "cancelled": "Cancelled",
 
   "noInternetConnection": "No Internet Connection",
@@ -156,5 +156,12 @@
   "mustContainOnlyNumber": "must contain only numbers",
   "invalidAmount": "Invalid amount format",
   "paymentSavedSuccess": "Payment saved successfully",
-  "paymentUpdateSuccess": "Payment updated successfully"
+  "paymentUpdateSuccess": "Payment updated successfully",
+  "noRecordsFound": "No records found",
+  "sendPaymentOptions": "Send Payment Options",
+  "cancelPayment": "Cancel Payment",
+  "saveAndConfirm": "Save & Confirm Payment",
+  "editPayment": "Edit Payment",
+  "selectStatus": "Select Status"
+
 }

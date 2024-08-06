@@ -77,7 +77,7 @@ class DatabaseProvider {
     List<Map<String, dynamic>> payments = await db.query(
       'payments',
       where: 'status IN (?, ?)',
-      whereArgs: ['Confirmed', 'CancelledPending'],
+      whereArgs: ['Confirmed', 'CancelPending'],
     );
     return payments;
   }

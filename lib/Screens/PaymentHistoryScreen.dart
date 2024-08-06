@@ -275,10 +275,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Select Statuses'),
+              title: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('selectStatus')),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: <String>['Saved', 'Confirmed', 'Synced', 'Cancel Pending', 'Cancelled']
+                children: <String>['Saved', 'Confirmed', 'Synced', 'cancelPending', 'Cancelled']
                     .map((String status) {
                   return CheckboxListTile(
                     title: Text(                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString(status.toLowerCase()),
@@ -321,7 +321,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
     Widget _buildPaymentRecordsList() {
     return _paymentRecords.isEmpty
-        ? Center(child: Text('No records found'))
+        ? Center(child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noRecordsFound')))
         : ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -363,7 +363,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
         statusIcon = Icons.cancel;
         statusColor = Colors.red;
 
-      case 'cancelledpending':
+      case 'canceldpending':
         statusIcon = Icons.payment;
         statusColor = Colors.red;
 
@@ -407,7 +407,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentMethod'), record.paymentMethod),
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('status'), record.status),
     if (record.msisdn != null && record.msisdn!.isNotEmpty)
-    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('msisdn'), record.msisdn.toString()),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('MSISDN'), record.msisdn.toString()),
     if (record.prNumber != null && record.prNumber!.isNotEmpty)
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('PR'), record.prNumber.toString()),
     if (record.paymentMethod.toLowerCase() == 'cash')
@@ -421,7 +421,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('bankBranchCheck'), record.bankBranch.toString()),
     if (record.paymentMethod.toLowerCase() == 'check')
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('dueDateCheck'), _formatDate(record.dueDateCheck)),
-      if(record.status.toLowerCase() == 'cancelledpending' || record.status.toLowerCase() == 'cancelled' ) ...[
+      if(record.status.toLowerCase() == 'canceldpending' || record.status.toLowerCase() == 'cancelled' ) ...[
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancellationDate'), formatDate((record.cancellationDate!)).toString()),
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelReason'), (record.cancelReason!)),
       ],
@@ -478,7 +478,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   ),
                 ),
                 Tooltip(
-                  message: 'Edit Payment',
+                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('editPayment') ,
                   child: IconButton(
                     icon: Icon(Icons.edit, color: Color(0xFFA67438)),
                     onPressed: () {
@@ -490,7 +490,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   ),
                 ),
                 Tooltip(
-                  message: 'Save & Confirm Payment',
+                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('saveAndConfirm') ,
                   child: IconButton(
                     icon: Icon(Icons.check_circle, color: Colors.green),
                     onPressed: () async {
@@ -498,10 +498,20 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                         if (record.id != null) {
                           final int idToConfirm = record.id!;
                           await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
-                          PaymentService.syncPayments();
+                          await PaymentService.syncPayments();
+
+                          // Ensure that the syncSubscription is properly set up
                           _syncSubscription = PaymentService.syncStream.listen((_) {
                             _fetchPayments(); // Refresh payment records
+                            for(Payment p in _paymentRecords){
+                              print("name: ${p.customerName} : status : ${p.status}");
+                            }
+                            setState(() {}); // Ensure the UI is updated
                           });
+
+                          // Alternatively, if _syncSubscription is not set up, manually fetch payments
+                          // await _fetchPayments();
+                          // setState(() {});
 
                         }
                       });
@@ -514,7 +524,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             Row(
               children: [
                 Tooltip(
-                  message: 'Cancel Payment',
+                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment') ,
+
                   child: IconButton(
                     icon: Icon(Icons.cancel, color: Colors.red),
                     onPressed: () async {
@@ -540,11 +551,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
 
                 Tooltip(
-                  message: 'Send Payment Options',
+                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPaymentOptions') ,
                   child: IconButton(
                     icon: Icon(Icons.send, color: Colors.green),
                     onPressed: () {
-                      ShareScreenOptions.sharePdf(record.id!);
+                      ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!);
                     },
                   ),
                 ),

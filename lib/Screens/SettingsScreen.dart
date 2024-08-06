@@ -114,42 +114,26 @@ class SettingsScreen extends StatelessWidget {
                         );
                      //   _handleChangeLanguage(context,localizationService);
                       }, localizationService: localizationService),
-                      _buildSettingOption(Icons.print, 'printerSettings', onTap: () {
-                        // TODO: Handle Printer Settings
-                      }, localizationService: localizationService),
                     ], localizationService),
                     _buildSettingSection('Other', [
                       _buildSettingOption(Icons.info_outline, 'aboutHelp', onTap: () {
-                        PageRouteBuilder(
-                          transitionDuration: Duration(milliseconds: 300), // Adjust as necessary
-                          pageBuilder: (context, animation, secondaryAnimation) {
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: Offset(1.0, 0.0), // From right to left
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child:  CustomAboutDialogScreen(),
+                        showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (BuildContext context) {
+                            return Dialog(
+                              insetPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+                              elevation: 0,
+                              backgroundColor: Colors.transparent,
+                              child: CustomAboutDialogScreen(),
                             );
                           },
                         );
                       }, localizationService: localizationService),
+
                     ], localizationService),
                     _buildSettingSection('Account', [
-                      _buildSettingOption(Icons.person, 'profile', onTap: () {
-                        PageRouteBuilder(
-                          transitionDuration: Duration(milliseconds: 300), // Adjust as necessary
-                          pageBuilder: (context, animation, secondaryAnimation) {
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: Offset(1.0, 0.0), // From right to left
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: ProfileScreen(),
-                            );
-                          },
-                        );
-
-                      }, localizationService: localizationService),
                       _buildSettingOption(Icons.logout, 'logout', onTap: () {
                         _showLogoutDialog(context);
                       }, localizationService: localizationService),

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:digital_payment_app/Screens/ProfileScreen.dart';
-import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 import 'package:digital_payment_app/Services/LocalizationService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

@@ -98,6 +98,7 @@ class PaymentService {
   }
 
   static Future<void> syncPayments() async {
+
      SharedPreferences prefs = await SharedPreferences.getInstance();
      String? tokenID = prefs.getString('token');
 
@@ -121,7 +122,7 @@ class PaymentService {
     for (var payment in ConfirmedAndCancelledPendingPayments) {
       if (payment['status'] == 'Confirmed') {
         confirmedPayments.add(payment);
-      } else if (payment['status'] == 'CancelledPending') {
+      } else if (payment['status'] == 'CancelPending') {
         cancelledPendingPayments.add(payment);
       }
     }
@@ -131,7 +132,6 @@ class PaymentService {
     for (var payment in confirmedPayments) {
       PaymentService.syncPayment(payment,apiUrl,headers);
     }
-
 
     for(var p in cancelledPendingPayments){
       Map<String, String> body = {
@@ -159,6 +159,7 @@ class PaymentService {
       }
 
     }
+    _syncController.add(null);
   }
 
 
@@ -203,11 +204,13 @@ print("cancellation date : $cancelDateTime");
 
           _syncController.add(null);
         } else {
-          await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'CancelledPending');
+          await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'CancelPending');
+          _syncController.add(null);
           print('Failed to cancel payment: ${response.body}');
         }
       } catch (e) {
-        await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'CancelledPending');
+        await DatabaseProvider.cancelPayment(voucherSerial,reason,cancelDateTime.toString(),'CancelPending');
+        _syncController.add(null);
         // Handle exceptions
         print('Error syncing payment: $e');
       }
