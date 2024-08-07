@@ -26,7 +26,12 @@
   "systemRole": "SystemRole",
   "notifications": "Notifications",
   "aboutus": "About Us",
+  "aboutTitle": "About Payment Receipt Digitization",
+  "aboutBody": "Transitioning from physical voucher receipt books, this application brings the ease of recording and managing payments through a mobile interface. Alongside printing capabilities and advanced security measures, the app offers a seamless transition to digital processes, ensuring high performance and reliability for sales account managers.",
+
   "logout": "Log Out",
+  "logoutBody": "Are you sure you want to log out?",
+
 
   "languageSettings": "language Settings",
   "selectPreferredLanguage": "Select the preferred language",
@@ -96,7 +101,9 @@
   "PR": "PR",
   "submitPayment": "Submit Payment",
   "confirmPayment": "Confirm Payment",
+  "confirmPaymentBody": "Are you sure you want to Save & Confirm this payment ?",
   "savePayment": "Save",
+  "savePaymentBody": "Are you sure you want to Save this payment ?",
   "viewPayment": "View Payment Summery",
   "paymentMethod": "Payment Method",
   "currency": "Currency",
@@ -108,6 +115,10 @@
   "noNotificationsYet": "No Notifications Yet",
   "checkBackHereForUpdates": "check back here for updates",
   "pleaseWait": "Please Wait",
+  "delete": "Delete",
+  "deletePayment": "Delete Payment",
+  "deletePaymentBody": "Are you sure you want to delete this payment ?",
+
 
   "usd": "USD",
   "euro": "EURO",
@@ -119,7 +130,6 @@
   "checkNumber": "Check number",
   "bankBranchCheck": "Bank/Branch",
   "dueDateCheck": "Due date",
-  "creditCard": "Credit Card",
 
   "confirmPayment": "Save & Confirm",
   "paymentSummary": "payment Summary",
@@ -144,6 +154,8 @@
   "cancellationDate": "Cancellation Date",
   "cancelReason": "Cancel Reason",
 
+  "sharePayment": "Share Payment",
+
   "saved": "Saved",
   "synced": "Synced",
   "confirmed": "Confirmed",
@@ -160,8 +172,13 @@
   "noRecordsFound": "No records found",
   "sendPaymentOptions": "Send Payment Options",
   "cancelPayment": "Cancel Payment",
+  "editPayment": "edit Payment",
+
   "saveAndConfirm": "Save & Confirm Payment",
   "editPayment": "Edit Payment",
-  "selectStatus": "Select Status"
+  "selectStatus": "Select Status",
 
+  "reasonCancellation": "Reason of cancellation",
+  "enterTheReasonHere": "Enter the reason here",
+  "paymentCancelledSuccessfully": "Payment cancelled successfully"
 }

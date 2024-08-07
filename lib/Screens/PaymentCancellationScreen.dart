@@ -18,16 +18,10 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
   final TextEditingController _reasonController = TextEditingController();
   String? _errorText;
 
-  void _initializeLocalizationStrings(BuildContext context) {
-    final localizationService = Provider.of<LocalizationService>(context, listen: false);
-  }
 
   Future<String?> _fetchVoucherNumber(int id) async {
-    print("_fetchVoucherNumber method , PaymentCancellation.dart started");
     final payment = await DatabaseProvider.getPaymentById(id);
     print(payment);
-    print("_fetchVoucherNumber method , PaymentCancellation.dart finished");
-
     return payment?['voucherSerialNumber'];
   }
 
@@ -41,21 +35,39 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
     final reason = _reasonController.text.trim();
     if (reason.isEmpty) {
       setState(() {
-        _errorText = 'Reason for cancellation is required';
+        _errorText = '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('reasonCancellation')} ${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired')}';
       });
     } else {
       setState(() {
         _errorText = null;
       });
+      // Show a loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
       await _confirmCancellationAction(context,voucher, reason);
+      await Future.delayed(Duration(seconds: 1));
+      // Close the loading indicator
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentCancelledSuccessfully')),
+          backgroundColor: Colors.green, // Optional: set a background color
+          duration: Duration(seconds: 2), // Optional: set duration for how long the snackbar will be shown
+        ),
+      );
       Navigator.of(context).pop(true); // Return true indicating cancellation was confirmed
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    _initializeLocalizationStrings(context);
-
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -78,7 +90,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Cancel Payment',
+                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment'),
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 20.sp,
@@ -87,12 +99,12 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Voucher Number: $voucherNumber',
+                  '${ Provider.of<LocalizationService>(context, listen: false).getLocalizedString('voucherNumber')}: $voucherNumber',
                   style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'Reason for Cancellation',
+                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('reasonCancellation'),
                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 8.h),
@@ -100,7 +112,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                   controller: _reasonController,
                   maxLines: 3,
                   decoration: InputDecoration(
-                    hintText: 'Enter the reason...',
+                    hintText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('enterTheReasonHere'),
                     fillColor: Color(0xFFF2F2F2),
                     filled: true,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
@@ -114,8 +126,9 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
+
                       },
-                      child: Text('Cancel', style: TextStyle(fontSize: 16.sp)),
+                      child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel'), style: TextStyle(fontSize: 16.sp)),
                     ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -125,7 +138,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                       onPressed: () {
                         _handleCancellation(context, voucherNumber);
                       },
-                      child: Text('Confirm', style: TextStyle(fontSize: 16.sp)),
+                      child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'), style: TextStyle(fontSize: 16.sp)),
                     ),
                   ],
                 ),

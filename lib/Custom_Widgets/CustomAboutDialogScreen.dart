@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+
+import '../Services/LocalizationService.dart';
 
 class CustomAboutDialogScreen extends StatelessWidget {
   @override
@@ -30,16 +33,12 @@ class CustomAboutDialogScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                'About Payment Receipt Digitization',
+                Provider.of<LocalizationService>(context, listen: false).getLocalizedString('aboutTitle'),
                 style: TextStyle(fontSize: 22.sp, fontFamily: 'NotoSansUI', fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 15.h),
-              Text(
-                'Transitioning from physical voucher receipt books, this application brings the ease '
-                    'of recording and managing payments through a mobile interface. Alongside printing '
-                    'capabilities and advanced security measures, the app offers a seamless transition to '
-                    'digital processes, ensuring high performance and reliability for sales account managers.',
+              Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('aboutBody'),
                 style: TextStyle(fontSize: 14.sp, fontFamily: 'NotoSansUI'),
                 textAlign: TextAlign.center,
               ),
@@ -51,7 +50,7 @@ class CustomAboutDialogScreen extends StatelessWidget {
                     Navigator.of(context).pop();
                   },
                   child: Text(
-                    'OK',
+                    Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
                     style: TextStyle(fontFamily: 'NotoSansUI', fontSize: 18.sp, color: Color(0xFFC62828)),
                   ),
                 ),

@@ -26,7 +26,11 @@
   "systemRole": "دور النظام",
   "notifications": "الإشعارات",
   "aboutus": "حول",
+  "aboutTitle": "حول التطبيق ",
+  "aboutBody": "الانتقال من دفاتر إيصالات القسائم الورقية، يجلب هذا التطبيق سهولة تسجيل وإدارة المدفوعات عبر واجهة الهاتف المحمول. إلى جانب قدرات الطباعة والتدابير الأمنية المتقدمة، يوفر التطبيق انتقالًا سلسًا إلى العمليات الرقمية، مما يضمن أداءً عالياً وموثوقية لمديري حسابات المبيعات",
   "logout": "تسجيل خروج",
+  "logoutBody": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
+
 
   "languageSettings": "إعدادات اللغة",
   "selectPreferredLanguage": "اختر اللغة المفضلة",
@@ -95,8 +99,8 @@
   "MSISDN": "رقم الهاتف",
   "PR": "رقم الحساب",
   "submitPayment": " إرسال الدفعة",
-  "confirmPayment": "تأكيد الدفعة",
   "savePayment": "حفظ",
+  "savePaymentBody": "هل أنت متأكد أنك تريد حفظ هذه الدفعة",
   "viewPayment": "عرض تفاصيل الدفعة",
   "paymentMethod": "طريقة الدفع",
   "currency": "العملة",
@@ -123,6 +127,7 @@
   "dueDateCheck": "تاريخ الاستحقاق",
   "creditCard": "بطاقة ائتمان",
   "confirmPayment": "حفظ و تاكيد",
+  "confirmPaymentBody": "هل أنت متأكد أنك تريد حفظ وتأكيد هذه الدفعة؟",
   "paymentSummary": "ملخص الدفعة",
   "paymentSuccessful": "تمت عملية الدفع بنجاح",
   "paymentSuccessfulBody": "تم معالجة عملية الدفع بنجاح.",
@@ -145,11 +150,14 @@
 
   "cancelReason": "سبب الإلغاء",
 
-  "saved": "محفوظ",
-  "synced": "مزامن",
-  "confirmed": "مؤكد",
-  "cancelled": "ملغى",
+  "saved": "تم الحفظ",
+  "synced": "تمت المزامنة",
+  "confirmed": "تم التأكيد",
+  "cancelled": "تم الإلغاء",
   "cancelpending": "جاري الإلغاء",
+
+  "sharePayment": "مشاركة الدفعة",
+  "editPayment": "تعديل الدفعة",
 
   "noInternetConnection": "لا توجد اتصال بالإنترنت",
   "noInternet": "لم يتم الكشف عن اتصال بالإنترنت. يرجى التحقق من إعدادات الشبكة الخاصة بك والمحاولة مرة أخرى.",
@@ -159,6 +167,13 @@
   "paymentSavedSuccess": "تم حفظ الدفعة بنجاح",
   "paymentUpdateSuccess": "تم تعديل الدفعة بنجاح",
   "noRecordsFound": "لم يتم العثور على سجلات",
-  "selectStatus": "اختر الحالة"
+  "selectStatus": "اختر الحالة",
+  "delete": "حذف",
+  "deletePayment": "حذف الدفعة",
+  "deletePaymentBody": "هل أنت متأكد أنك تريد حذف هذه الدفعة؟",
+
+  "reasonCancellation": "سبب الإلغاء",
+  "enterTheReasonHere": "أدخل السبب هنا",
+  "paymentCancelledSuccessfully": "تم إلغاء الدفع بنجاح"
 
 }

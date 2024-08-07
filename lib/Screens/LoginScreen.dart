@@ -165,27 +165,7 @@ class LoginScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: TextButton(
-                                onPressed: () {
-                                  /* Forgot Password Logic */
-                                },
-                                child: Text(
-                                  localizationService.isLocalizationLoaded
-                                      ? localizationService
-                                          .getLocalizedString('forgotPassword')
-                                      : 'Forgot Password', // Fallback if localization is not loaded
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: Color(0xFFC62828),
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'NotoSansUI',
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 30),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -226,7 +206,7 @@ class LoginScreen extends StatelessWidget {
                               ],
                             ),
                             SizedBox(
-                              height: screenSize.height * 0.09,
+                              height: screenSize.height * 0.11,
                             ),
                             _buildTrademarkNotice(),
                           ],

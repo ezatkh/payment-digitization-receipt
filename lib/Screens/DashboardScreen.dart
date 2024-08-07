@@ -19,7 +19,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  int _selectedIndex2 = 0;  // Starting index
   List<DashboardItemModel> dashboardItems = []; // Initialize as empty list
   late SharedPreferences prefs; // SharedPreferences instance
 
@@ -31,7 +30,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     _initializeLocalization();
     _initializeDashboardItems();
-   // _checkToken();
   }
 
   Future<void> _initializeLocalization() async {
@@ -51,7 +49,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ScreenUtil.init(context, designSize: Size(360, 690));
     final screenSize = MediaQuery.of(context).size;
     final aspectRatio = screenSize.width / (screenSize.height-180);
-   // prefs = await SharedPreferences.getInstance().getString('language_code');;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -132,62 +129,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           );
         },
       ),
-      bottomNavigationBar: Consumer<LocalizationService>(
-        builder: (context, localizationService, _) {
-          return BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            items: <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: localizationService.getLocalizedString('home'),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_outline_sharp),
-                label: localizationService.getLocalizedString('myAccount'),
-              ),
-              // BottomNavigationBarItem(
-              //   icon: Icon(Icons.menu),
-              //   label: localizationService.getLocalizedString('more'),
-              // ),
-            ],
-            currentIndex: _selectedIndex2,
-            selectedItemColor: Color(0xFFC62828),
-            unselectedItemColor: Colors.grey,
-            showUnselectedLabels: true,
-            onTap: _onItemTapped,
-            selectedFontSize: 14,
-            unselectedFontSize: 14,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-            backgroundColor: Colors.white,
-          );
-        },
-      ),
     );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex2 = index;
-    });
-    // if (index == 2) {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => MoreScreen()),
-    //   );
-    // }
-     if (index ==1) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) =>ProfileScreen()  ),
-      );
-    }
-    else if(index==0){
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => DashboardScreen()),
-      );
-    }
   }
 
   void _navigateTo(Widget screen) {
@@ -230,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Are you sure you want to log out?',
+                Provider.of<LocalizationService>(context, listen: false).getLocalizedString('logoutBody'),
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontFamily: "NotoSansUI",
@@ -245,14 +187,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _buildDialogButton(
                     context: context,
-                    label: 'Cancel',
+                    label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel'),
                     onPressed: () => Navigator.of(context).pop(), // Close the dialog
                     backgroundColor: Colors.grey.shade300,
                     textColor: Colors.black,
                   ),
                   _buildDialogButton(
                     context: context,
-                    label: 'Logout',
+                    label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('logout'),
                     onPressed: () async {
                       // Clear user data
                       SharedPreferences prefs = await SharedPreferences.getInstance();

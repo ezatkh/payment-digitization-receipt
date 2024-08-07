@@ -188,7 +188,7 @@ class SettingsScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Are you sure you want to log out?',
+                Provider.of<LocalizationService>(context, listen: false).getLocalizedString('logoutBody'),
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontFamily: "NotoSansUI",
@@ -203,14 +203,14 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   _buildDialogButton(
                     context: context,
-                    label: 'Cancel',
+                    label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel'),
                     onPressed: () => Navigator.of(context).pop(), // Close the dialog
                     backgroundColor: Colors.grey.shade300,
                     textColor: Colors.black,
                   ),
                   _buildDialogButton(
                     context: context,
-                    label: 'Logout',
+                    label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('logout'),
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,

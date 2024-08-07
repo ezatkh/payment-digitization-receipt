@@ -261,7 +261,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             _detailNoteItem(
               theSumOf,
               languageCode == 'ar'
-                  ? Tafqeet.convert(paymentDetails['amount']?.toString() ?? '')
+                  ?  paymentDetails['amount']!= null ? Tafqeet.convert(paymentDetails['amount'].toInt().toString() )  : 'Invalid amount'
                   : NumberToWordsEnglish.convert(paymentDetails['amount'] != null ? (paymentDetails['amount'] as double).toInt() : 0),
             ),
           ],
@@ -297,7 +297,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
             if (canCancel)
               Tooltip(
-                message: 'Cancel Payment',
+                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment'),
                 child: IconButton(
                   icon: Icon(Icons.cancel, color: Colors.red),
                   onPressed: () {
@@ -315,7 +315,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               ),
             if (canSend)
               Tooltip(
-                  message: 'Share Payment',
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment'),
                   child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
@@ -331,10 +331,10 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   icon: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
                     CustomPopups.showCustomDialog(  context: context,
-                      icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
-                      title: 'Cancel Payment',
-                      message: 'Are you sure you want to cancel this payment?',
-                      deleteButtonText: 'Ok',
+                      icon: Icon(Icons.cancel, size: 60, color: Colors.red),
+                      title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
+                      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePaymentBody'),
+                      deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
                       onPressButton: () {
                         // Your delete logic here
                       },);
@@ -343,7 +343,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               ),
             if (canEdit)
               Tooltip(
-                message: 'Edit Payment',
+                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('editPayment'),
                 child: IconButton(
                   icon: Icon(Icons.edit, color: Color(0xFFA67438)),
                   onPressed: () {
@@ -356,16 +356,16 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               ),
             if (canConfirm)
               Tooltip(
-                message: 'Save & Confirm Payment',
+                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
                 child: IconButton(
                   icon: Icon(Icons.check_circle, color: Colors.blue),
                   onPressed: () {
                     CustomPopups.showCustomDialog(
                       context: context,
-                      icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
-                      title: 'Save & Confirm Payment',
-                      message: 'Are you sure you want to save & confirm this payment record?',
-                      deleteButtonText: 'Ok',
+                      icon: Icon(Icons.check_circle, size: 60.0, color: Color(0xFFC62828)),
+                      title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
+                      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPaymentBody'),
+                      deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
                       onPressButton: () async {
                         showDialog( context: context,  barrierDismissible: false,  builder: (BuildContext dialogContext) {
                           return Center(

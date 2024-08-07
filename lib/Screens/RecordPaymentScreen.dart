@@ -66,8 +66,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   String check = "";
   String requiredFields="";
   int findCurrencyIndex(String currency) {
-    print("inside findCurrencyIndex method");
-
     if (currency == null) {
       print("wrong currency or null");
       return -1;
@@ -143,7 +141,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _initializeFields() async {
-    print("_initializeFields method in record payment screen");
     if (widget.id != null) {
       print("the id from parameter not null ");
       int id = widget.id!; // Ensure id is not null
@@ -734,10 +731,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     Payment paymentDetails = _preparePaymentObject('Confirmed');
     CustomPopups.showCustomDialog(
       context: context,
-      icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
-      title: "Confirm Payment",
-      message: "Are you sure you want to confirm this payment?",
-      deleteButtonText: "Yes",
+      icon: Icon(Icons.check_circle, size: 60.0, color: Color(0xFFC62828)),
+      title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
+      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPaymentBody'),
+      deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
       onPressButton: ()  {
 
       // Convert the instance to a map
@@ -761,9 +758,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     CustomPopups.showCustomDialog(
       context: context,
       icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
-      message: 'Are you sure you want to save this payment?',
-      deleteButtonText: 'Ok',
-      title: 'Save Payment',
+      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('savePaymentBody'),
+      deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
+      title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('savePayment'),
       onPressButton: ()  {
                           _agreedPayment(paymentDetails);
                         },);

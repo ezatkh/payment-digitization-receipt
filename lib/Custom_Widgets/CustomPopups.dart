@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
+
+import '../Services/LocalizationService.dart';
 
 class CustomPopups {
 
@@ -37,7 +40,7 @@ class CustomPopups {
           ),
           actions: [
             TextButton(
-              child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+              child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel'), style: TextStyle(color: Colors.grey)),
               onPressed: () {
                 Navigator.of(context).pop();
               },

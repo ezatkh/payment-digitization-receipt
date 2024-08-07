@@ -455,16 +455,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             Row(
               children: [
                 Tooltip(
-                  message: 'Delete Payment',
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
                   child: IconButton(
                     icon: Icon(Icons.delete, color: Colors.red),
                     onPressed: () async {
                       CustomPopups.showCustomDialog(
                         context: context,
-                        icon: Icon(Icons.delete_forever, size: 60, color: Colors.red),
-                        title: 'Confirm Delete',
-                        message: 'Are you sure you want to delete this payment record?',
-                        deleteButtonText: 'Delete',
+                        icon: Icon(Icons.delete, size: 60, color: Colors.red),
+                        title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
+                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePaymentBody'),
+                        deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('delete'),
                         onPressButton: () async {
                           final int id = record.id!;
                           await DatabaseProvider.deletePayment(id);
@@ -490,26 +490,34 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   ),
                 ),
                 Tooltip(
-                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('saveAndConfirm') ,
+                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment') ,
                   child: IconButton(
                     icon: Icon(Icons.check_circle, color: Colors.green),
                     onPressed: () async {
-                      CustomPopups.showConfirmDialog(context, () async {
-                        if (record.id != null) {
-                          final int idToConfirm = record.id!;
-                          await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
-                          await PaymentService.syncPayments();
+                      CustomPopups.showCustomDialog(
+                        context: context,
+                        icon: Icon(Icons.check_circle, size: 50, color: Colors.red), // Customize your icon as needed
+                        title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
+                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPaymentBody'),
+                        deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'),
+                        onPressButton: () async {
+                          if (record.id != null) {
+                            final int idToConfirm = record.id!;
+                            await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
+                            await PaymentService.syncPayments();
 
-                          // Ensure that the syncSubscription is properly set up
-                          _syncSubscription = PaymentService.syncStream.listen((_) {
-                            _fetchPayments(); // Refresh payment records
-                            for(Payment p in _paymentRecords){
-                              print("name: ${p.customerName} : status : ${p.status}");
-                            }
-                            setState(() {}); // Ensure the UI is updated
-                          });
-                        }
-                      });
+                            // Ensure that the syncSubscription is properly set up
+                            _syncSubscription = PaymentService.syncStream.listen((_) {
+                              _fetchPayments(); // Refresh payment records
+                              for (Payment p in _paymentRecords) {
+                                print("name: ${p.customerName} : status : ${p.status}");
+                              }
+                              setState(() {}); // Ensure the UI is updated
+                            });
+                          }
+                        },
+                      );
+
                     },
                   ),
                 ),
@@ -546,7 +554,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
 
                 Tooltip(
-                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPaymentOptions') ,
+                  message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment') ,
                   child: IconButton(
                     icon: Icon(Icons.send, color: Colors.green),
                     onPressed: () {
@@ -631,7 +639,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           try {
             cancellationDate =  DateTime.parse(cancellationDateString!);
           } catch (e) {
-            print('Error parsing cancellationDate: $cancellationDate');
+            //print('Error parsing cancellationDate: $cancellationDate');
             cancellationDate = null;
           }
 
@@ -641,7 +649,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           try {
             dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
           } catch (e) {
-            print('Error parsing dueDateCheck: $dueDateCheckString');
+            //print('Error parsing dueDateCheck: $dueDateCheckString');
             dueDateCheck = null;
           }
         } else {
@@ -651,7 +659,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           try {
             lastUpdatedDate =  DateTime.parse(lastUpdatedDateString!);
           } catch (e) {
-            print('Error parsing dueDateCheck: $lastUpdatedDate');
+            //print('Error parsing dueDateCheck: $lastUpdatedDate');
             lastUpdatedDate = null;
           }
         } else {
@@ -661,7 +669,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           try {
             transactionDate =  DateTime.parse(transactionDateString!);
           } catch (e) {
-            print('Error parsing dueDateCheck: $transactionDate');
+            //print('Error parsing dueDateCheck: $transactionDate');
             transactionDate = null;
           }
         } else {
