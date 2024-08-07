@@ -508,11 +508,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                             }
                             setState(() {}); // Ensure the UI is updated
                           });
-
-                          // Alternatively, if _syncSubscription is not set up, manually fetch payments
-                          // await _fetchPayments();
-                          // setState(() {});
-
                         }
                       });
                     },

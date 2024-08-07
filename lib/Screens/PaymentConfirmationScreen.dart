@@ -7,6 +7,7 @@ import '../Services/LocalizationService.dart';
 import 'package:intl/intl.dart';
 import 'package:number_to_word_arabic/number_to_word_arabic.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
+import '../Services/PaymentService.dart';
 import '../Services/database.dart';
 import 'PaymentCancellationScreen.dart';
 import 'PaymentHistoryScreen.dart';
@@ -17,6 +18,7 @@ import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 class PaymentConfirmationScreen extends StatefulWidget {
   final int paymentId;
   Map<String, dynamic>? paymentDetails;
+  late StreamSubscription _syncSubscription;
   PaymentConfirmationScreen({required this.paymentId});
 
   @override
@@ -67,7 +69,15 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     super.initState();
     _initializeLocalizationStrings();
   //  syncPayments
-    _fetchPaymentDetails();
+    _syncSubscription = PaymentService.syncStream.listen((_) {
+      _fetchPaymentDetails();
+    });
+  }
+
+  @override
+  void dispose() {
+    _syncSubscription.cancel();
+    super.dispose();
   }
 
   void _initializeLocalizationStrings() {
