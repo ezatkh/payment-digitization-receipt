@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import '../Models/Currency.dart';
 import '../Services/LocalizationService.dart';
 import 'package:intl/intl.dart';
 import 'package:number_to_word_arabic/number_to_word_arabic.dart';
@@ -63,12 +64,12 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   String cancelPending= "";
 
   late StreamSubscription _syncSubscription;
+  String? AppearedCurrency;
 
   @override
   void initState() {
     super.initState();
     _initializeLocalizationStrings();
-  //  syncPayments
     _syncSubscription = PaymentService.syncStream.listen((_) {
       _fetchPaymentDetails();
     });
@@ -125,6 +126,13 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   Future<void> _fetchPaymentDetails() async {
     try {
       widget.paymentDetails = await DatabaseProvider.getPaymentById(widget.paymentId);
+      String currencyId = widget.paymentDetails!['currency']?.toString() ?? '';
+      // Fetch the currency by ID
+      Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(currencyId);
+      setState(() {
+        AppearedCurrency = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
+
+      });
       if (widget.paymentDetails != null) {
         setState(() {});
       } else {
@@ -237,7 +245,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             _divider(),
             _detailItem(amountCheck, paymentDetails['amountCheck']?.toString() ?? ''),
             _divider(),
-            _detailItem(currency, paymentDetails['currency']?.toString() ?? ''),
+            _detailItem(currency, AppearedCurrency!),
             _divider(),
             _detailNoteItem(
                 theSumOf,
@@ -256,7 +264,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             _divider(),
             _detailItem(amount, paymentDetails['amount']?.toString() ?? ''),
             _divider(),
-            _detailItem(currency, paymentDetails['currency']?.toString() ?? ''),
+            _detailItem(currency, AppearedCurrency!),
             _divider(),
             _detailNoteItem(
               theSumOf,

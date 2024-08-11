@@ -46,7 +46,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     _fetchPayments();
     super.initState();
         // Initialize the localization strings
-    print("payment after retrieve from database :");
     _initializeLocalizationStrings();
     _syncSubscription = PaymentService.syncStream.listen((_) {
       _fetchPayments(); // Refresh payment records

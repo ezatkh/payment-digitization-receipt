@@ -90,7 +90,18 @@ class LoginState with ChangeNotifier {
     try {
       availableBiometrics = await auth.getAvailableBiometrics();
       if (availableBiometrics.isNotEmpty) {
-        print("Available biometrics: empty");
+        try{
+         await auth.authenticate(
+            localizedReason: 'Please authenticate to access this feature',
+            options: AuthenticationOptions(
+              biometricOnly: true,
+            ),
+          );
+        }
+        catch (e) {
+          // Handle errors, such as device not supporting biometrics
+          print(e);
+        }
         for (BiometricType type in availableBiometrics) {
           if (type == BiometricType.face) {
             print("Face ID is available.");

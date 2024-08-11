@@ -8,6 +8,7 @@ import '../Custom_Widgets/CustomButton.dart';
 import '../Custom_Widgets/CustomTextField.dart';
 import '../Custom_Widgets/LogoWidget.dart';
 import '../Models/LoginState.dart';
+import '../Services/LOV_Sync.dart';
 import '../Services/LocalizationService.dart';
 import '../Services/secure_storage.dart';
 import 'DashboardScreen.dart';
@@ -127,6 +128,7 @@ class LoginScreen extends StatelessWidget {
           bool? loginResult =await loginState.login(loginState.username,loginState.password);
           if (loginResult ) {
             await saveCredentials(loginState.username,loginState.password);
+            await LOVCompareService.compareAndSyncCurrencies();
           _handleLogin(
           context, localizationService);
 
@@ -187,7 +189,8 @@ class LoginScreen extends StatelessWidget {
                                         if (username != null && password != null) {
                                           bool loginSuccessful = await loginState.login(username, password);
                                           if (loginSuccessful) {
-                                            print("Login successful!");
+                                            LOVCompareService.compareAndSyncCurrencies();
+                                            _handleLogin(context, localizationService);
                                           } else {
                                             print("Login failed.");
                                           }

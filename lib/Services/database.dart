@@ -381,6 +381,11 @@ class DatabaseProvider {
     print("updateCurrency method in database.dart finished");
   }
 
+  static Future<void> clearAllCurrencies() async {
+    final db = await database;
+    await db.delete('currencies'); // Replace 'currencies' with your actual table name
+  }
+
   // Delete a currency record by ID
   static Future<void> deleteCurrency(String id) async {
     print("deleteCurrency method in database.dart started");
