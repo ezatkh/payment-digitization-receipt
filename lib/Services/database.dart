@@ -56,6 +56,24 @@ class DatabaseProvider {
         cancellationDate TEXT
 
       )
+      
+      
+    ''');
+
+    await db.execute('''
+      CREATE TABLE currencies (
+        id TEXT PRIMARY KEY,
+        arabicName TEXT,
+        englishName TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE banks(
+        id TEXT PRIMARY KEY,
+        arabicName TEXT,
+        englishName TEXT
+      )
     ''');
   }
 
@@ -287,8 +305,8 @@ class DatabaseProvider {
       DateTime? fromDate,
       DateTime? toDate,
       List<String>? statuses) async {
-    print("getPaymentsWithDateFilter method, database.dart");
-    print("from date: $fromDate, to date: $toDate, statuses: $statuses");
+    //print("getPaymentsWithDateFilter method, database.dart");
+    //print("from date: $fromDate, to date: $toDate, statuses: $statuses");
 
     Database db = await database;
 
@@ -312,13 +330,108 @@ class DatabaseProvider {
       query += ' AND status IN ($statusList)';
     }
 
-    // Print the final query for debugging
-    print("Constructed query: $query");
 
     // Execute the query
     List<Map<String, dynamic>> result = await db.rawQuery(query);
     return result;
   }
 
+  // CRUD operations for the currencies table
+
+  // Insert a currency record
+  static Future<void> insertCurrency(Map<String, dynamic> currencyData) async {
+    print("insertCurrency method in database.dart started");
+    Database db = await database;
+    await db.insert('currencies', currencyData, conflictAlgorithm: ConflictAlgorithm.replace);
+    print("insertCurrency method in database.dart finished");
+  }
+
+  // Retrieve all currency records
+  static Future<List<Map<String, dynamic>>> getAllCurrencies() async {
+    print("getAllCurrencies method in database.dart started");
+    Database db = await database;
+    List<Map<String, dynamic>> currencies = await db.query('currencies');
+    print("getAllCurrencies method in database.dart finished");
+    return currencies;
+  }
+
+  // Retrieve a specific currency by ID
+  static Future<Map<String, dynamic>?> getCurrencyById(String id) async {
+    print("getCurrencyById method in database.dart started");
+    Database db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'currencies',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print("getCurrencyById method in database.dart finished");
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  // Update a currency record
+  static Future<void> updateCurrency(String id, Map<String, dynamic> updatedData) async {
+    print("updateCurrency method in database.dart started");
+    Database db = await database;
+    await db.update(
+      'currencies',
+      updatedData,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    print("updateCurrency method in database.dart finished");
+  }
+
+  // Delete a currency record by ID
+  static Future<void> deleteCurrency(String id) async {
+    print("deleteCurrency method in database.dart started");
+    Database db = await database;
+    await db.delete('currencies', where: 'id = ?', whereArgs: [id]);
+    print("deleteCurrency method in database.dart finished");
+  }
+
+  // Clear the currencies table
+  static Future<void> clearCurrencies() async {
+    print("clearCurrencies method in database.dart started");
+    Database db = await database;
+    await db.delete('currencies');
+    print('Currencies table cleared');
+    print("clearCurrencies method in database.dart finished");
+  }
+
+  //crud operations for bank
+  static Future<void> insertBank(Map<String, dynamic> bankData) async {
+    Database db = await database;
+    await db.insert('banks', bankData, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllBanks() async {
+    Database db = await database;
+    return await db.query('banks');
+  }
+
+  static Future<Map<String, dynamic>?> getBankById(String id) async {
+    Database db = await database;
+    List<Map<String, dynamic>> result = await db.query(
+      'banks',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  static Future<void> updateBank(String id, Map<String, dynamic> updatedData) async {
+    Database db = await database;
+    await db.update(
+      'banks',
+      updatedData,
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  static Future<void> deleteBank(String id) async {
+    Database db = await database;
+    await db.delete('banks', where: 'id = ?', whereArgs: [id]);
+  }
 
 }

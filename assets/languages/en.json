@@ -34,7 +34,7 @@
 
 
   "languageSettings": "language Settings",
-  "selectPreferredLanguage": "Select the preferred language",
+  "selectPreferredLanguage": "Select your preferred language",
   "arabic": "Arabic",
   "english": "English",
   "theme": "Theme",
@@ -180,5 +180,15 @@
 
   "reasonCancellation": "Reason of cancellation",
   "enterTheReasonHere": "Enter the reason here",
-  "paymentCancelledSuccessfully": "Payment cancelled successfully"
+  "paymentCancelledSuccessfully": "Payment cancelled successfully",
+
+  "checoutPdf": "Check out this PDF",
+  "receiptVoucher": "Receipt Voucher(copy)",
+  "customersDetail": "Customers Detail",
+  "mobileNumber": "Mobile Number",
+  "paymentDetail": "paymentDetail",
+  "additionalDetails": "Additional Detail",
+  "checkoutPdf": "Checkout Pdf",
+  "userid": "User Id",
+  "footerPdf": "Please keep the receipt as proof of payment"
 }

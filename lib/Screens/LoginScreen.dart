@@ -9,6 +9,7 @@ import '../Custom_Widgets/CustomTextField.dart';
 import '../Custom_Widgets/LogoWidget.dart';
 import '../Models/LoginState.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/secure_storage.dart';
 import 'DashboardScreen.dart';
 import 'dart:async';
 
@@ -123,10 +124,12 @@ class LoginScreen extends StatelessWidget {
           else{
           bool isValid = validateLoginInputs(loginState);
           if (isValid) {
-          bool? loginResult =await loginState.login();
+          bool? loginResult =await loginState.login(loginState.username,loginState.password);
           if (loginResult ) {
+            await saveCredentials(loginState.username,loginState.password);
           _handleLogin(
           context, localizationService);
+
           } else {
           _showLoginFailedDialog(
           context,
@@ -177,8 +180,22 @@ class LoginScreen extends StatelessWidget {
                                       bool authenticated = await loginState
                                           .getAvailableBiometricsTypes();
                                       if (authenticated == true) {
-                                        print(
-                                            "authenticated successfully from screen");
+                                        Map<String, String?> credentials = await getCredentials();
+                                        String? username = credentials['username'];
+                                        String? password = credentials['password'];
+
+                                        if (username != null && password != null) {
+                                          bool loginSuccessful = await loginState.login(username, password);
+                                          if (loginSuccessful) {
+                                            print("Login successful!");
+                                          } else {
+                                            print("Login failed.");
+                                          }
+                                        } else {
+                                          print("No credentials found.");
+                                        }
+
+                                        print("authenticated successfully from screen");
                                       } else {
                                         print(
                                             "authenticated failed from screen");

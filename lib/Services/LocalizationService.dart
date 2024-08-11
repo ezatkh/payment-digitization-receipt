@@ -65,4 +65,14 @@ class LocalizationService extends ChangeNotifier {
     }
     return localizedString;
   }
+
+  Future<Map<String, dynamic>> loadLocalizedStrings(String languageCode) async {
+    try {
+      String jsonString = await rootBundle.loadString('assets/languages/$languageCode.json');
+      return json.decode(jsonString);
+    } catch (e) {
+      print("Error loading localized strings for $languageCode: $e");
+      return {};
+    }
+  }
 }

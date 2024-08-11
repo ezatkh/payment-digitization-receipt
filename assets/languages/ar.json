@@ -174,6 +174,17 @@
 
   "reasonCancellation": "سبب الإلغاء",
   "enterTheReasonHere": "أدخل السبب هنا",
-  "paymentCancelledSuccessfully": "تم إلغاء الدفع بنجاح"
+  "paymentCancelledSuccessfully": "تم إلغاء الدفع بنجاح",
+
+  "checoutPdf": "تحقق من ملف PDF هذا",
+  "receiptVoucher": "'سند قبض (نسخة)'",
+  "customersDetail": "بيانات المشترك",
+  "mobileNumber": "رقم الهاتف",
+  "paymentDetail": "تفاصيل الدفعة",
+  "additionalDetails": "تفاصيل إضافية",
+  "checkoutPdf": "تحقق من ملف PDF",
+  "userid": "رمز المستخدم",
+  "footerPdf": "الرجاء الإحتفاظ بالسند لإثبات الدفع"
+
 
 }

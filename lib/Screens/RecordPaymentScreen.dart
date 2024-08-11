@@ -828,7 +828,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
 
     // Simulate a network request/waiting time
-    await Future.delayed(Duration(seconds: 3));
+    await Future.delayed(Duration(seconds: 2));
     int idPaymentStored;
     try{
       if(paymentDetails.paymentMethod == "كاش") {

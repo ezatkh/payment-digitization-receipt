@@ -1,7 +1,11 @@
 import 'dart:typed_data';
+import 'package:digital_payment_app/Models/LoginState.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/Payment.dart';
+import '../Services/LocalizationService.dart';
 import '../Services/database.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -9,13 +13,18 @@ import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-String reverseText(String text) {
-  return text.split('').reversed.join('');
-}
-
 class ShareScreenOptions {
-  static Future<void> sharePdf(int id, String languageCode) async {
+
+  static Future<void> sharePdf(BuildContext context, int id, String languageCode) async {
+
     try {
+      // Get the current localization service without changing the app's locale
+      final localizationService = Provider.of<LocalizationService>(context, listen: false);
+
+      // Temporarily load the localization for the selected language code
+      final currentLanguageCode = localizationService.selectedLanguageCode;
+      localizationService.changeLanguage(languageCode);
+
       // Fetch payment details from the database
       final paymentMap = await DatabaseProvider.getPaymentById(id);
       if (paymentMap == null) {
@@ -32,161 +41,176 @@ class ShareScreenOptions {
       final amiriFont = pw.Font.ttf(await rootBundle.load('assets/fonts/Amiri-Regular.ttf'));
 
       final isEnglish = languageCode == 'en';
-      final font =  isEnglish? notoSansFont : amiriFont;
-
-
-      // Load the logo image
-      final ByteData logoData = await rootBundle.load('assets/images/logo_ooredoo.png');
-      final Uint8List logoBytes = logoData.buffer.asUint8List();
-      final logoImage = pw.MemoryImage(logoBytes);
+      final font = isEnglish ? notoSansFont : amiriFont;
 
       // Generate PDF content with payment details
       final pdf = pw.Document();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? usernameLogin = prefs.getString('usernameLogin');
+
+      final List<Map<String, String>> customerDetails = [
+        {'title': localizationService.getLocalizedString('customerName'), 'value': payment.customerName},
+        {'title': localizationService.getLocalizedString('mobileNumber'), 'value': payment.msisdn!},
+        {'title': localizationService.getLocalizedString('transactionDate'), 'value': payment.transactionDate.toString()},
+        {'title': localizationService.getLocalizedString('voucherNumber'), 'value': payment.voucherSerialNumber},
+      ];
+      String receiptVoucher = localizationService.getLocalizedString('receiptVoucher');
+      String customersDetail = localizationService.getLocalizedString('customersDetail');
+      String additionalDetails = localizationService.getLocalizedString('additionalDetails');
+      List<Map<String, String>> paymentDetails=[];
+
+      final Map<String, Map<String, String>> currencyMap = {
+        "usd": {"en": "USD", "ar": "دولار"},
+        "euro": {"en": "Euro", "ar": "يورو"},
+        "ils": {"en": "ILS", "ar": "شيقل"},
+        "jd": {"en": "JOD", "ar": "دينار"},
+      };
+      String getCurrencyString(String currencyCode, bool isEnglish) {
+        return isEnglish
+            ? currencyMap[currencyCode]!['en'] ?? currencyCode
+            : currencyMap[currencyCode]!['ar'] ?? currencyCode;
+      }
+    //  print(getCurrencyString(payment.currency!,isEnglish));
+      if(payment.paymentMethod.toLowerCase() == 'cash' || payment.paymentMethod.toLowerCase() == 'كاش')
+        paymentDetails = [
+        {'title': localizationService.getLocalizedString('paymentMethod'), 'value': payment.paymentMethod},
+   //     {'title': localizationService.getLocalizedString('currency'), 'value': getCurrencyString(payment.currency!,isEnglish)},
+        {'title': localizationService.getLocalizedString('amount'), 'value': payment.amount.toString()},
+      ];
+      else if(payment.paymentMethod.toLowerCase() == 'check' || payment.paymentMethod.toLowerCase() == 'شيك')
+        paymentDetails = [
+          {'title': localizationService.getLocalizedString('paymentMethod'), 'value': payment.paymentMethod},
+          {'title': localizationService.getLocalizedString('amountCheck'), 'value': payment.amountCheck.toString()},
+          {'title': localizationService.getLocalizedString('checkNumber'), 'value': payment.checkNumber.toString()},
+          {'title': localizationService.getLocalizedString('bankBranchCheck'), 'value': payment.bankBranch.toString()},
+          {'title': localizationService.getLocalizedString('dueDateCheck'), 'value': payment.dueDateCheck.toString()},
+        //  {'title': localizationService.getLocalizedString('currency'), 'value': getCurrencyString(payment.currency!.toLowerCase(),isEnglish)},
+        ];
+      final List<Map<String, String>> additionalDetail= [
+        {'title': localizationService.getLocalizedString('userid'), 'value': usernameLogin!},
+       ];
+
+      String paymentDetail = localizationService.getLocalizedString('paymentDetail');
+      String footerPdf = localizationService.getLocalizedString('footerPdf');
 
       pdf.addPage(
         pw.Page(
-          build: (pw.Context context) => pw.Center(
-            child: pw.Directionality(
+          build: (pw.Context context) {
+            return pw.Directionality(
               textDirection: isEnglish ? pw.TextDirection.ltr : pw.TextDirection.rtl,
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text(
-                            isEnglish ? 'Payment Details' : 'تفاصيل الدفعة',
-                            style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, font: font),
-                          ),
-                          pw.Text(
-                            isEnglish ? 'Ooredoo Details' : 'أوريدو',
-                            style: pw.TextStyle(fontSize: 18, font: font),
-                          ),
-                        ],
+              child: pw.Container(
+                color: PdfColors.white,
+                padding: pw.EdgeInsets.all(10),
+                child: pw.Column(
+                  children: [
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(color: PdfColors.grey),
+                        color: PdfColors.white,
                       ),
-                      pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.end,
-                        children: [
-                          pw.Container(
-                            width: 100,
-                            height: 100,
-                            child: pw.Image(logoImage),
-                          ),
-                          pw.Text(
-                            isEnglish
-                                ? 'INVOICE #: ${payment.voucherSerialNumber}'
-                                : 'رقم الفاتورة: ${payment.voucherSerialNumber}',
-                            style: pw.TextStyle(font: font),
-                          ),
-                          pw.Text(
-                            isEnglish
-                                ? 'TRANSACTION DATE: ${payment.transactionDate}'
-                                : 'تاريخ المعاملة: ${payment.transactionDate}',
-                            style: pw.TextStyle(font: font),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  pw.SizedBox(height: 20),
-                  pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.start,
-                    children: [
-                      pw.Expanded(
-                        child: pw.Container(
-                          padding: pw.EdgeInsets.all(6),
-                          decoration: pw.BoxDecoration(
-                            border: pw.Border.all(color: PdfColors.grey),
-                            borderRadius: pw.BorderRadius.circular(4),
-                          ),
-                          child: pw.Text(
-                            isEnglish ? 'CUSTOMER Name: ${payment.customerName}' : 'اسم العميل: ${payment.customerName}',
-                            style: pw.TextStyle(color: PdfColors.black, font: font),
-                          ),
+                      child: pw.Text(
+                        'Ooredoo',
+                        style: pw.TextStyle(
+                          color: PdfColors.black,
+                          fontSize: 40,
+                          fontWeight: pw.FontWeight.bold,
                         ),
                       ),
-                      pw.SizedBox(width: 6),
-                      pw.Expanded(
-                        child: pw.Container(
-                          padding: pw.EdgeInsets.all(6),
-                          decoration: pw.BoxDecoration(
-                            border: pw.Border.all(color: PdfColors.grey),
-                            borderRadius: pw.BorderRadius.circular(4),
-                          ),
-                          child: pw.Text(
-                            isEnglish ? 'PR #: ${payment.prNumber}' : 'رقم الطلب: ${payment.prNumber}',
-                            style: pw.TextStyle(color: PdfColors.black, font: font),
-                          ),
+                    ),
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.black,
+                        border: pw.Border.all(color: PdfColors.black),
+                      ),
+                      child: pw.Text(
+                        receiptVoucher,
+                        style: pw.TextStyle(
+                          color: PdfColors.white,
+                          fontSize: 24,
+                          fontWeight: pw.FontWeight.bold,
+                          font: font,
                         ),
                       ),
-                      pw.SizedBox(width: 6),
-                      pw.Expanded(
-                        child: pw.Container(
-                          padding: pw.EdgeInsets.all(6),
-                          decoration: pw.BoxDecoration(
-                            border: pw.Border.all(color: PdfColors.grey),
-                            borderRadius: pw.BorderRadius.circular(4),
-                          ),
-                          child: pw.Text(
-                            isEnglish ? 'MSISDN: ${payment.msisdn}' : 'رقم الهاتف: ${payment.msisdn}',
-                            style: pw.TextStyle(color: PdfColors.black, font: font),
-                          ),
+                    ),
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey300,
+                        border: pw.Border.all(color: PdfColors.black),
+                      ),
+                      child: pw.Text(
+                        customersDetail,
+                        style: pw.TextStyle(
+                          fontSize: 22,
+                          fontWeight: pw.FontWeight.bold,
+                          font: font,
                         ),
                       ),
-                    ],
-                  ),
-                  pw.SizedBox(height: 20),
-                  pw.Text(
-                    isEnglish ? 'Payment Details' : 'تفاصيل الدفع',
-                    style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, font: font),
-                  ),
-                  pw.SizedBox(height: 16),
-                  pw.Text(
-                    isEnglish ? 'Payment Method: ${payment.paymentMethod}' : 'طريقة الدفع: ${payment.paymentMethod}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.Text(
-                    isEnglish ? 'Amount: ${payment.amount?.toString() ?? ''}' : 'المبلغ: ${payment.paymentMethod.toLowerCase() == 'cash' ? payment.amount?.toString() : payment.amountCheck?.toString()?? ''}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.Text(
-                    isEnglish ? 'Currency: ${payment.currency ?? ''}' : 'العملة: ${payment.currency ?? ''}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.Text(
-                    isEnglish ? 'Check Number: ${payment.checkNumber?.toString() ?? ''}' : 'رقم الشيك: ${payment.checkNumber?.toString() ?? ''}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.Text(
-                    isEnglish ? 'Bank Branch: ${payment.bankBranch ?? ''}' : 'فرع البنك: ${payment.bankBranch ?? ''}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.Text(
-                    isEnglish ? 'Due Date Check: ${payment.dueDateCheck?.toIso8601String() ?? ''}' : 'تاريخ استحقاق الشيك: ${payment.dueDateCheck?.toIso8601String() ?? ''}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.Text(
-                    isEnglish ? 'Payment Invoice For: ${payment.paymentInvoiceFor ?? ''}' : 'فاتورة الدفع لـ: ${payment.paymentInvoiceFor ?? ''}',
-                    style: pw.TextStyle(font: font),
-                  ),
-                  pw.SizedBox(height: 20),
-                  pw.Text(
-                    isEnglish ? 'Thank you for your business!' : 'شكرا لتعاملكم معنا!',
-                    style: pw.TextStyle(fontSize: 18, font: font),
-                  ),
-                ],
+                    ),
+                    _buildInfoTableDynamic(customerDetails, notoSansFont, amiriFont, isEnglish),
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey300,
+                        border: pw.Border.all(color: PdfColors.black),
+                      ),
+                      child: pw.Text(
+                        paymentDetail,
+                        style: pw.TextStyle(
+                          fontSize: 22,
+                          fontWeight: pw.FontWeight.bold,
+                          font: font,
+                        ),
+                      ),
+                    ),
+                    _buildInfoTableDynamic(paymentDetails, notoSansFont, amiriFont, isEnglish),
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey300,
+                        border: pw.Border.all(color: PdfColors.black),
+                      ),
+                      child: pw.Text(
+                        additionalDetails,
+                        style: pw.TextStyle(
+                          fontSize: 22,
+                          fontWeight: pw.FontWeight.bold,
+                          font: font,
+                        ),
+                      ),
+                    ),
+                    _buildInfoTableDynamic(additionalDetail, notoSansFont, amiriFont, isEnglish),
+                    pw.Container(
+                      alignment: pw.Alignment.center,
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.white,
+                        border: pw.Border.all(color: PdfColors.black),
+                      ),
+                      child: pw.Text(
+                        footerPdf,
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                          font: font,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       );
 
+      // Restore the original language code
+      localizationService.changeLanguage(currentLanguageCode);
+
       // Get the external storage directory
       final directory = await getApplicationDocumentsDirectory();
-      final path = '${directory?.path}/payment.pdf';
+      final path = '${directory.path}/payment.pdf';
       final file = File(path);
 
       // Write the PDF file
@@ -195,7 +219,7 @@ class ShareScreenOptions {
       // Share the PDF file
       await Share.shareFiles(
         [file.path],
-        text: 'Check out this PDF',
+        text: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('checkoutPdf'),
         mimeTypes: ['application/pdf'],
       );
     } catch (e) {
@@ -204,6 +228,85 @@ class ShareScreenOptions {
     }
   }
 
+  // Build info table with dynamic localization
+  static pw.Widget _buildInfoTableDynamic(List<Map<String, String>> rowData, pw.Font fontEnglish, pw.Font fontArabic, bool isEnglish) {
+    return pw.Table(
+      border: pw.TableBorder.all(),
+      columnWidths: {
+        0: pw.FlexColumnWidth(2), // Adjust as needed
+        1: pw.FlexColumnWidth(3), // Adjust as needed
+      },
+      children: rowData.map((row) => _buildTableRowDynamic(row['title']!, row['value']!, fontEnglish, fontArabic, isEnglish)).toList().cast<pw.TableRow>(),
+    );
+  }
+
+  static pw.TableRow _buildTableRowDynamic(String title, String value, pw.Font fontEnglish, pw.Font fontArabic, bool isEnglish) {
+    // Function to determine if the text is Arabic
+    bool isArabic(String text) {
+      final arabicCharRegExp = RegExp(r'[\u0600-\u06FF]');
+      return arabicCharRegExp.hasMatch(text);
+    }
+
+    // Determine the font and text direction based on the content language
+    final fontForTitle = isArabic(title) ? fontArabic : fontEnglish;
+    final fontForValue = isArabic(value) ? fontArabic : fontEnglish;
+    final textDirectionForValue = isArabic(value) ? pw.TextDirection.rtl : pw.TextDirection.ltr;
+
+    return pw.TableRow(
+      children: isEnglish
+          ? [
+        pw.Container(
+          padding: pw.EdgeInsets.all(6),
+          alignment: pw.Alignment.centerLeft,
+          child: pw.Text(
+            title,
+            style: pw.TextStyle(font: fontForTitle, fontSize: 14),
+            textDirection: isArabic(title) ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+          ),
+        ),
+        pw.Container(
+          padding: pw.EdgeInsets.all(6),
+          alignment: pw.Alignment.centerRight,
+          child: pw.Directionality(
+            textDirection: textDirectionForValue,
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(font: fontForValue, fontSize: 14),
+            ),
+          ),
+        ),
+      ]
+          : [
+        pw.Container(
+          padding: pw.EdgeInsets.all(6),
+          alignment: pw.Alignment.centerLeft,
+          child: pw.Directionality(
+            textDirection: textDirectionForValue,
+            child: pw.Text(
+              value,
+              style: pw.TextStyle(font: fontForValue, fontSize: 14),
+            ),
+          ),
+        ),
+        pw.Container(
+          padding: pw.EdgeInsets.all(6),
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text(
+            title,
+            style: pw.TextStyle(font: fontForTitle, fontSize: 14),
+            textDirection: isArabic(title) ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+          ),
+        ),
+      ],
+    );
+  }
+
+  static void showLanguageSelectionAndShare(BuildContext context, int id) {
+    _showLanguageSelectionDialog(context, (String languageCode) {
+      sharePdf(context, id, languageCode);
+    });
+  }
+  // Language selection dialog
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
     showDialog(
       context: context,
@@ -216,6 +319,7 @@ class ShareScreenOptions {
           child: Container(
             padding: EdgeInsets.all(16.0),
             decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12.0),
               boxShadow: [
                 BoxShadow(
@@ -230,13 +334,13 @@ class ShareScreenOptions {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Select Language',
+                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('selectPreferredLanguage'),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
-                _buildLanguageOption(context, 'English', 'en', onLanguageSelected),
+                _buildLanguageOption(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString('english'), 'en', onLanguageSelected),
                 SizedBox(height: 8),
-                _buildLanguageOption(context, 'Arabic', 'ar', onLanguageSelected),
+                _buildLanguageOption(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString('arabic'), 'ar', onLanguageSelected),
               ],
             ),
           ),
@@ -250,9 +354,6 @@ class ShareScreenOptions {
       onTap: () {
         onLanguageSelected(code);
         Navigator.of(context).pop();
-      },
-      onHover: (isHovered) {
-        // You can add additional actions when the item is hovered if needed
       },
       child: AnimatedContainer(
         duration: Duration(milliseconds: 300),
@@ -283,10 +384,5 @@ class ShareScreenOptions {
         ),
       ),
     );
-  }
-  static void showLanguageSelectionAndShare(BuildContext context, int id) {
-    _showLanguageSelectionDialog(context, (String languageCode) {
-      sharePdf(id, languageCode);
-    });
   }
 }

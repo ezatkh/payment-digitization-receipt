@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Services/networking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
@@ -8,11 +9,9 @@ import 'package:flutter/material.dart';
 class LoginState with ChangeNotifier {
   String _username = '';
   String _password = '';
+  String _usernameLogin = '';
   bool _rememberMe = false;
-  bool _hasInternetConnection =
-      true; // You should check internet connectivity and set this flag accordingly
-  final LocalAuthentication auth = LocalAuthentication();
-
+  final FlutterSecureStorage storage = FlutterSecureStorage();
   bool _isLoading = false;
   bool _isLoginSuccessful = false;
 
@@ -25,12 +24,19 @@ class LoginState with ChangeNotifier {
   }
 
   String get username => _username;
+  String get usernameLogin => _usernameLogin;
   String get password => _password;
   bool get rememberMe => _rememberMe;
-  bool get hasInternetConnection => _hasInternetConnection;
+
+  void setUsernameLogin(String username) {
+    _usernameLogin = username;
+    print("UsernameLogin set to: $_usernameLogin");
+    notifyListeners();
+  }
 
   void setUsername(String username) {
     _username = username;
+    print("Username set to: $_username");
     notifyListeners();
   }
 
@@ -46,15 +52,11 @@ class LoginState with ChangeNotifier {
     }
   }
 
-  void checkInternetConnection() {
-    _hasInternetConnection = true;
-    notifyListeners();
-  }
 
-  Future<bool> login() async {
+  Future<bool> login(String username, String password) async {
     Map<String, dynamic> map = {
-      "username": _username,
-      "password": _password,
+      "username": username,
+      "password": password,
     };
     print("Attempting login with username, password: $map");
 
@@ -64,13 +66,13 @@ class LoginState with ChangeNotifier {
     try {
       print("before send api");
       var userData = await helper.getData();
-      print("Login response data: $userData");
-
       if (userData.containsKey('token')) {
         String token = userData['token'].toString().substring(6);
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('usernameLogin', username);
         await prefs.setString('token', token);
         print("Token stored successfully: $token");
+
         return true;
       } else {
         print("Token not found in the response");
@@ -83,21 +85,24 @@ class LoginState with ChangeNotifier {
   }
 
   Future<bool> getAvailableBiometricsTypes() async {
-    late List<BiometricType> availableBiometrics;
+    final LocalAuthentication auth = LocalAuthentication();
+    List<BiometricType> availableBiometrics;
     try {
       availableBiometrics = await auth.getAvailableBiometrics();
       if (availableBiometrics.isNotEmpty) {
-        print("Available biometrics: ");
+        print("Available biometrics: empty");
         for (BiometricType type in availableBiometrics) {
           if (type == BiometricType.face) {
             print("Face ID is available.");
-            bool authResult = await authWithFaceId();
+            bool authResult = await authWithFaceId(auth);
             return authResult;
           } else if (type == BiometricType.fingerprint) {
             print("Touch ID is available.");
+            // Consider adding biometric authentication for fingerprint as well
             return false;
           } else if (type == BiometricType.iris) {
             print("Iris authentication is available.");
+            // Consider adding biometric authentication for iris as well
             return false;
           }
         }
@@ -106,13 +111,13 @@ class LoginState with ChangeNotifier {
       }
       return false;
     } on PlatformException catch (e) {
-      availableBiometrics = <BiometricType>[];
-      print(e);
+      print('PlatformException: ${e.message}');
       return false;
     }
   }
 
-  Future<bool> authWithFaceId() async {
+
+  Future<bool> authWithFaceId(LocalAuthentication auth) async {
     bool authenticated = false;
     try {
       authenticated = await auth.authenticate(
@@ -135,31 +140,7 @@ class LoginState with ChangeNotifier {
     return false;
   }
 
-  // Future<bool> authenticate(context) async {
-  //   try {
-  //     bool didAuthenticate = await auth.authenticate(
-  //       localizedReason: 'Please authenticate to proceed',
-  //       options: const AuthenticationOptions(
-  //         biometricOnly: true,
-  //       ),
-  //     );
 
-  //     if (didAuthenticate) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Authenticated successfully')),
-  //       );
-  //       return true;
-  //     } else {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Authentication failed')),
-  //       );
-  //       return false;
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error during authentication: $e')),
-  //     );
-  //   }
-  //   return false;
-  // }
+
 }
+//bool isLoginSuccessful = await login();

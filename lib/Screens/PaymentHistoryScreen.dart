@@ -244,7 +244,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () async {
-              print("from date: $_selectedFromDate : $_selectedToDate");
+              //print("from date: $_selectedFromDate : $_selectedToDate");
               _fetchPayments();
               // Add any post-operation logic if needed
             },
@@ -616,7 +616,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   void _fetchPayments() async {
-    print("_fetchPayments method in PaymentHistory screen started");
+    //print("_fetchPayments method in PaymentHistory screen started");
     List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses);
 
     String? dueDateCheckString ;
@@ -701,7 +701,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       }).toList();
 
     });
-    print("_fetchPayments method in PaymentHistory screen finished");
+    //print("_fetchPayments method in PaymentHistory screen finished");
 
   }
 

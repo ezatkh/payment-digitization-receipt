@@ -319,7 +319,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
-                ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
+          //      ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
 
               },
                   ),),
@@ -374,8 +374,9 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                         },
                         );
                         // Simulate a network request/waiting time
-                        await Future.delayed(Duration(seconds: 2));
+                        await Future.delayed(Duration(seconds: 1));
                         DatabaseProvider.updatePaymentStatus(widget.paymentId,'Confirmed');
+
                         Navigator.pop(context); // pop the dialog
                         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentId: widget.paymentId))); // Navigate to view payment screen after agreed
 

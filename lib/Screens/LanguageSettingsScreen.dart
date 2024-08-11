@@ -98,7 +98,7 @@ class LanguageSettingsScreen extends StatelessWidget {
     );
 
     // Delay language update until after loading indicator is dismissed
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(Duration(seconds: 2), () {
       Navigator.of(context).pop(); // Close the dialog
       Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode = languageCode;
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen())); // Navigate to DashboardPage
