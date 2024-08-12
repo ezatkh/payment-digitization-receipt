@@ -19,7 +19,6 @@ import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 class PaymentConfirmationScreen extends StatefulWidget {
   final int paymentId;
   Map<String, dynamic>? paymentDetails;
-  late StreamSubscription _syncSubscription;
   PaymentConfirmationScreen({required this.paymentId});
 
   @override
@@ -255,7 +254,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
           _divider(),
           _detailItem(msisdn, paymentDetails['msisdn']?.toString() ?? ''),
           _divider(),
-          _detailItem(paymentMethod, paymentDetails['paymentMethod'] ?? ''),
+          _detailItem(paymentMethod, Provider.of<LocalizationService>(context, listen: false).getLocalizedString(paymentDetails['paymentMethod'].toLowerCase()) ?? ''),
 
           if ((paymentDetails['paymentMethod']?.toLowerCase() == "check") || (paymentDetails['paymentMethod'] == "شيك")) ...[
             _divider(),
@@ -274,7 +273,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             _divider(),
             _detailItem(bankBranch,AppearedBank ?? ''),
             _divider(),
-            _detailItem(dueDateCheck, paymentDetails['dueDateCheck']?.toString() ?? ''),
+            _detailItem(dueDateCheck, DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['dueDateCheck'])) ?? ''),
           ],
           if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش")) ...[
             _divider(),
@@ -343,24 +342,55 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
-              //  ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
+                ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
               },
                   ),),
 
             if (canDelete)
               Tooltip(
-                message: 'Delete Payment',
+                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
                 child: IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
                     CustomPopups.showCustomDialog(  context: context,
-                      icon: Icon(Icons.cancel, size: 60, color: Colors.red),
+                      icon: Icon(Icons.delete, size: 60, color: Colors.red),
                       title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
                       message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePaymentBody'),
                       deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
-                      onPressButton: () {
-                        // Your delete logic here
-                      },);
+                      onPressButton: () async {
+                        // Show the loading dialog
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext dialogContext) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                        );
+
+                        try {
+                          // Perform the delete operation
+                          await DatabaseProvider.deletePayment(widget.paymentId);
+
+                          // Ensure the loading dialog is shown for at least 1 second
+                          await Future.delayed(Duration(seconds: 1));
+                        } catch (error) {
+                          // Handle any errors here if needed
+                          print('Error deleting payment: $error');
+                        } finally {
+                          // Close the loading dialog
+                          Navigator.pop(context); // pop the dialog
+
+                          // Pop the current screen
+                          Navigator.of(context).pop();
+
+                          // Push the HistoryScreen
+                          Navigator.of(context).push(MaterialPageRoute(builder: (context) => PaymentHistoryScreen()));
+                        }
+                      },
+
+                    );
                   },
                 ),
               ),
@@ -397,11 +427,8 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                         },
                         );
                         // Simulate a network request/waiting time
-                        await Future.delayed(Duration(seconds: 1));
-                        DatabaseProvider.updatePaymentStatus(widget.paymentId,'Confirmed');
-
+                        await DatabaseProvider.updatePaymentStatus(widget.paymentId,'Confirmed');
                         Navigator.pop(context); // pop the dialog
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PaymentConfirmationScreen(paymentId: widget.paymentId))); // Navigate to view payment screen after agreed
 
                       },
                     );

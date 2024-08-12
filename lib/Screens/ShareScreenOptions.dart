@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:digital_payment_app/Models/LoginState.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,14 +17,12 @@ import 'package:flutter/services.dart' show rootBundle;
 class ShareScreenOptions {
 
   static Future<void> sharePdf(BuildContext context, int id, String languageCode) async {
-
     try {
+
       // Get the current localization service without changing the app's locale
       final localizationService = Provider.of<LocalizationService>(context, listen: false);
-
-      // Temporarily load the localization for the selected language code
-      final currentLanguageCode = localizationService.selectedLanguageCode;
-      localizationService.changeLanguage(languageCode);
+      // Fetch localized strings for the specified language code
+      final localizedStrings = await localizationService.getLocalizedStringsForLanguage(languageCode);
 
       // Fetch payment details from the database
       final paymentMap = await DatabaseProvider.getPaymentById(id);
@@ -31,10 +30,14 @@ class ShareScreenOptions {
         print('No payment details found for ID $id');
         return;
       }
-      print(paymentMap.toString());
+
 
       // Create a Payment instance from the fetched map
       final payment = Payment.fromMap(paymentMap);
+      final currency = await DatabaseProvider.getCurrencyById(payment.currency!); // Implement this method
+      final bank = await DatabaseProvider.getBankById(payment.bankBranch!); // Implement this method
+      print(currency);
+      print(bank);
 
       // Load fonts
       final notoSansFont = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
@@ -42,59 +45,56 @@ class ShareScreenOptions {
 
       final isEnglish = languageCode == 'en';
       final font = isEnglish ? notoSansFont : amiriFont;
+      // Calculate dimensions based on DPI
+      final dpi = 203;
+      final mmToPt = 2.83464567; // Conversion factor from mm to pt (72 pt per inch)
+
 
       // Generate PDF content with payment details
       final pdf = pw.Document();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? usernameLogin = prefs.getString('usernameLogin');
-
       final List<Map<String, String>> customerDetails = [
-        {'title': localizationService.getLocalizedString('customerName'), 'value': payment.customerName},
-        {'title': localizationService.getLocalizedString('mobileNumber'), 'value': payment.msisdn!},
-        {'title': localizationService.getLocalizedString('transactionDate'), 'value': payment.transactionDate.toString()},
-        {'title': localizationService.getLocalizedString('voucherNumber'), 'value': payment.voucherSerialNumber},
+        {'title': localizedStrings['customerName'], 'value': payment.customerName},
+        if (payment.msisdn != null && payment.msisdn.toString().length>0)
+        {'title': localizedStrings['mobileNumber'], 'value': payment.msisdn.toString()},
+        {'title': localizedStrings['transactionDate'], 'value': payment.transactionDate.toString()},
+        {'title': localizedStrings['voucherNumber'], 'value': payment.voucherSerialNumber},
       ];
-      String receiptVoucher = localizationService.getLocalizedString('receiptVoucher');
-      String customersDetail = localizationService.getLocalizedString('customersDetail');
-      String additionalDetails = localizationService.getLocalizedString('additionalDetails');
+
+      String receiptVoucher = localizedStrings['receiptVoucher'];
+      String customersDetail = localizedStrings['customersDetail'];
+      String additionalDetails = localizedStrings['additionalDetails'];
+
       List<Map<String, String>> paymentDetails=[];
 
-      final Map<String, Map<String, String>> currencyMap = {
-        "usd": {"en": "USD", "ar": "دولار"},
-        "euro": {"en": "Euro", "ar": "يورو"},
-        "ils": {"en": "ILS", "ar": "شيقل"},
-        "jd": {"en": "JOD", "ar": "دينار"},
-      };
-      String getCurrencyString(String currencyCode, bool isEnglish) {
-        return isEnglish
-            ? currencyMap[currencyCode]!['en'] ?? currencyCode
-            : currencyMap[currencyCode]!['ar'] ?? currencyCode;
-      }
-    //  print(getCurrencyString(payment.currency!,isEnglish));
       if(payment.paymentMethod.toLowerCase() == 'cash' || payment.paymentMethod.toLowerCase() == 'كاش')
         paymentDetails = [
-        {'title': localizationService.getLocalizedString('paymentMethod'), 'value': payment.paymentMethod},
-   //     {'title': localizationService.getLocalizedString('currency'), 'value': getCurrencyString(payment.currency!,isEnglish)},
-        {'title': localizationService.getLocalizedString('amount'), 'value': payment.amount.toString()},
-      ];
+          {'title': localizedStrings['paymentMethod'], 'value': payment.paymentMethod},
+          {'title': localizedStrings['amount'], 'value': payment.amount.toString()},
+          {'title': localizedStrings['currency'], 'value': languageCode =='ar' ? currency!["arabicName"] ?? '' : currency!["englishName"]},
+        ];
       else if(payment.paymentMethod.toLowerCase() == 'check' || payment.paymentMethod.toLowerCase() == 'شيك')
         paymentDetails = [
-          {'title': localizationService.getLocalizedString('paymentMethod'), 'value': payment.paymentMethod},
-          {'title': localizationService.getLocalizedString('amountCheck'), 'value': payment.amountCheck.toString()},
-          {'title': localizationService.getLocalizedString('checkNumber'), 'value': payment.checkNumber.toString()},
-          {'title': localizationService.getLocalizedString('bankBranchCheck'), 'value': payment.bankBranch.toString()},
-          {'title': localizationService.getLocalizedString('dueDateCheck'), 'value': payment.dueDateCheck.toString()},
-        //  {'title': localizationService.getLocalizedString('currency'), 'value': getCurrencyString(payment.currency!.toLowerCase(),isEnglish)},
+          {'title': localizedStrings['paymentMethod'], 'value': localizedStrings[payment.paymentMethod.toLowerCase()]},
+          {'title': localizedStrings['amountCheck'], 'value': payment.amountCheck.toString()},
+          {'title': localizedStrings['currency'], 'value': languageCode =='ar' ? currency!["arabicName"] ?? '' : currency!["englishName"]},
+          {'title': localizedStrings['checkNumber'], 'value': payment.checkNumber.toString()},
+          {'title': localizedStrings['bankBranchCheck'], 'value': languageCode =='ar' ? bank!["arabicName"] ?? '' : bank!["englishName"]},
+          {'title': localizedStrings['dueDateCheck'], 'value': payment.dueDateCheck != null
+              ? DateFormat('yyyy-MM-dd').format(payment.dueDateCheck!)
+              : ''},
         ];
       final List<Map<String, String>> additionalDetail= [
-        {'title': localizationService.getLocalizedString('userid'), 'value': usernameLogin!},
+        {'title': localizedStrings['userid'], 'value': usernameLogin!},
        ];
 
-      String paymentDetail = localizationService.getLocalizedString('paymentDetail');
-      String footerPdf = localizationService.getLocalizedString('footerPdf');
+      String paymentDetail = localizedStrings['paymentDetail'];
+      String footerPdf = localizedStrings['footerPdf'];
 
       pdf.addPage(
         pw.Page(
+         // pageFormat: PdfPageFormat(72 * mmToPt, 50 * mmToPt, marginAll: 5 * mmToPt),
           build: (pw.Context context) {
             return pw.Directionality(
               textDirection: isEnglish ? pw.TextDirection.ltr : pw.TextDirection.rtl,
@@ -204,9 +204,6 @@ class ShareScreenOptions {
           },
         ),
       );
-
-      // Restore the original language code
-      localizationService.changeLanguage(currentLanguageCode);
 
       // Get the external storage directory
       final directory = await getApplicationDocumentsDirectory();

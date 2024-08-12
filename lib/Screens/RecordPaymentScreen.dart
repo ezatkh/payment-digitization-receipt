@@ -977,6 +977,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if(paymentDetails.id == null)
       {
         print("no id , create new payment :");
+        print(paymentDetails.paymentMethod);
         idPaymentStored= await DatabaseProvider.savePayment({
           'customerName': paymentDetails.customerName,
           'paymentMethod': paymentDetails.paymentMethod,
@@ -1003,6 +1004,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         print("id , update exist payment :");
         final int id = paymentDetails.id!;
         idPaymentStored=id;
+        print(paymentDetails.paymentMethod);
         await DatabaseProvider.updatePayment(id, {
           'customerName': paymentDetails.customerName,
           'paymentMethod': paymentDetails.paymentMethod,

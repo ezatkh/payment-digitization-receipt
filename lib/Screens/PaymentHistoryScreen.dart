@@ -408,7 +408,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     ],
 
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentMethod'), record.paymentMethod),
-    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('status'), record.status),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('status'), Provider.of<LocalizationService>(context, listen: false).getLocalizedString(record.status.toLowerCase())),
     if (record.msisdn != null && record.msisdn!.isNotEmpty)
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('MSISDN'), record.msisdn.toString()),
     if (record.prNumber != null && record.prNumber!.isNotEmpty)
