@@ -42,6 +42,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   String paymentSummary = '';
   String customerName = '';
   String transactionDate = '';
+  String transactionTime = '';
   String cancellationDate = '';
   String paymentMethod = '';
   String confirm = '';
@@ -65,6 +66,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
   late StreamSubscription _syncSubscription;
   String? AppearedCurrency;
+  String? AppearedBank;
 
   @override
   void initState() {
@@ -115,6 +117,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     cancelReason = localizationService.getLocalizedString('cancelReason') ?? 'Confirm Payment';
 
     transactionDate = localizationService.getLocalizedString('transactionDate') ?? 'Confirm Payment';
+    transactionTime = localizationService.getLocalizedString('transactionTime') ?? 'Confirm Payment';
     saved = localizationService.getLocalizedString('saved') ?? 'Confirm Payment';
     synced = localizationService.getLocalizedString('synced') ?? 'Confirm Payment';
     confirmed = localizationService.getLocalizedString('confirmed') ?? 'Confirm Payment';
@@ -131,7 +134,12 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(currencyId);
       setState(() {
         AppearedCurrency = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
+      });
 
+      String bankId = widget.paymentDetails!['bankBranch']?.toString() ?? '';
+      Map<String, dynamic>? bank = await DatabaseProvider.getBankById(bankId);
+      setState(() {
+        AppearedBank = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? bank!["arabicName"] :  bank!["englishName"];
       });
       if (widget.paymentDetails != null) {
         setState(() {});
@@ -222,6 +230,14 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
               ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['transactionDate']))
               : '')),
           _divider(),
+          _detailItem(transactionTime, paymentDetails['status']?.toLowerCase() == "saved"
+              ? (paymentDetails['lastUpdatedDate'] != null
+              ? DateFormat('HH:mm:ss').format(DateTime.parse(paymentDetails['lastUpdatedDate']))
+              : '')
+              : (paymentDetails['transactionDate'] != null
+              ? DateFormat('HH:mm:ss').format(DateTime.parse(paymentDetails['transactionDate']))
+              : '')),
+          _divider(),
           if ((paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "canceldpending"))
             ...[
               _detailItem(cancellationDate, paymentDetails['cancellationDate']?.toString() ?? ''),
@@ -250,13 +266,13 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
             _detailNoteItem(
                 theSumOf,
                 languageCode == 'ar'
-                    ? Tafqeet.convert(paymentDetails['amountCheck']?.toString() ?? '')
+                    ? Tafqeet.convert(paymentDetails['amountCheck']?.toInt().toString() ?? '')
                     : NumberToWordsEnglish.convert(paymentDetails['amountCheck'] != null ? (paymentDetails['amountCheck'] as double).toInt() : 0)
             ),
             _divider(),
             _detailItem(checkNumber, paymentDetails['checkNumber']?.toString() ?? ''),
             _divider(),
-            _detailItem(bankBranch, paymentDetails['bankBranch']?.toString() ?? ''),
+            _detailItem(bankBranch,AppearedBank ?? ''),
             _divider(),
             _detailItem(dueDateCheck, paymentDetails['dueDateCheck']?.toString() ?? ''),
           ],
@@ -327,8 +343,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   child:IconButton(
               icon: Icon(Icons.send, color: Colors.green),
               onPressed: () {
-          //      ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
-
+              //  ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
               },
                   ),),
 
@@ -436,8 +451,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Text(
+        Text(
               title,
               style: TextStyle(
                 fontSize: 16.sp,
@@ -445,8 +459,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                 color: Colors.black,
               ),
             ),
-          ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 20),
           Expanded(
             child: Text(
               value,

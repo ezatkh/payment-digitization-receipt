@@ -129,7 +129,9 @@ class LoginScreen extends StatelessWidget {
           if (loginResult ) {
             await saveCredentials(loginState.username,loginState.password);
             await LOVCompareService.compareAndSyncCurrencies();
-          _handleLogin(
+            await LOVCompareService.compareAndSyncBanks();
+
+            _handleLogin(
           context, localizationService);
 
           } else {

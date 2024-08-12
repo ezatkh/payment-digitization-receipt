@@ -24,7 +24,6 @@ class LovApiService {
     final response = await networkHelper.getData();
 
     if (response != null) {
-      // Map the filtered list to your desired object
     } else {
       throw Exception('Failed to load $listName');
     }
@@ -38,6 +37,6 @@ class LovApiService {
 
   // Fetch all banks from the backend
   static Future<List<Bank>> fetchBanks() async {
-    return fetchList<Bank>('BANK', (json) => Bank.fromMap(json));
+    return fetchList<Bank>('BANKS', (json) => Bank.fromMapArabic(json));
   }
 }

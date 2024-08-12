@@ -109,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return DashboardItem(
                 iconData: dashboardItems[index].iconData,
                 title: localizationService.getLocalizedString(dashboardItems[index].title),
-                onTap: () {
+                onTap: () async {
                   switch (dashboardItems[index].title) {
                     case 'recordPayment':
                       _navigateTo(RecordPaymentScreen());

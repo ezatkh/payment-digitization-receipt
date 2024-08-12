@@ -439,4 +439,9 @@ class DatabaseProvider {
     await db.delete('banks', where: 'id = ?', whereArgs: [id]);
   }
 
+  static Future<void> clearAllBanks() async {
+    Database db = await database;
+    await db.delete('banks');
+  }
+
 }

@@ -1,7 +1,7 @@
-import 'package:digital_payment_app/Services/PaymentService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../Custom_Widgets/CustomPopups.dart';
+import '../Models/Bank.dart';
 import '../Models/Currency.dart';
 import '../Services/database.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +26,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _amountCheckController = TextEditingController();
   final TextEditingController _checkNumberController = TextEditingController();
-  final TextEditingController _bankBranchController = TextEditingController();
   final TextEditingController _dueDateCheckController = TextEditingController();
   final TextEditingController _paymentInvoiceForController = TextEditingController();
   final FocusNode _customerNameFocusNode = FocusNode();
@@ -35,7 +34,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   final FocusNode _amountFocusNode = FocusNode();
   final FocusNode _amountCheckFocusNode = FocusNode();
   final FocusNode _checkNumberFocusNode = FocusNode();
-  final FocusNode _bankBranchFocusNode = FocusNode();
   final FocusNode _dueDateCheckFocusNode = FocusNode();
   final FocusNode _paymentInvoiceForNode = FocusNode();
   String? _selectedPaymentMethod;
@@ -45,6 +43,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
   String? _selectedCurrencyDB;
   List<Currency> _currenciesDB = [];
+
+  String? _selectedBankDB;
+  List<Bank> _banksDB = [];
 
   String recordPayment = "";
   String customerDetails = "";
@@ -68,28 +69,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   String check = "";
   String requiredFields="";
 
-  // int findCurrencyIndex(String currency) {
-  //   if (currency == null) {
-  //     print("wrong currency or null");
-  //     return -1;
-  //   }
-  //   print("currency : ${currency}");
-  //   int index=0;
-  //
-  //   if(currency == "دولار" || currency == "USD")
-  //     index =0;
-  //   else if(currency == "يورو" || currency == "EURO")
-  //     index =1;
-  //   else if(currency == "شيكل" || currency == "ILS")
-  //     index =2;
-  //   else if(currency == "دينار" || currency == "JD")
-  //     index =3;
-  //    else {
-  //      index= _currencies.indexOf(currency.toLowerCase());
-  //    }
-  //   return index;
-  // }
-
   Future<void> _loadCurrencies() async {
     try {
       // Fetch the currency data from the database
@@ -107,6 +86,24 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
   }
 
+  Future<void> _loadBanks() async {
+    try {
+      // Fetch the bank data from the database
+      List<Map<String, dynamic>> bankMaps = await DatabaseProvider.getAllBanks();
+
+      // Convert the list of maps to a list of Bank objects
+      List<Bank> banks = bankMaps.map((map) => Bank.fromMap(map)).toList();
+
+      // Store the list of banks in the state
+      setState(() {
+        _banksDB = banks;
+      });
+
+    } catch (e) {
+      print('Error loading banks: $e');
+    }
+  }
+
 
   @override
   void initState() {
@@ -115,14 +112,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     _initializeLocalizationStrings();
     _initializeFields();
     _loadCurrencies();
+    _loadBanks();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
     );
     _buttonScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
-//
   }
   void _initializeLocalizationStrings(){
     final localizationService =
@@ -164,23 +161,18 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       Map<String, dynamic>? paymentToEdit = await DatabaseProvider.getPaymentById(id);
       print("the paymentToEdit from db is :${paymentToEdit} ");
       if (paymentToEdit != null) {
-        print("the paymentToEdit from db not null ");
-
         Payment payment = Payment.fromMap(paymentToEdit);
         print(" the payment to edit after parse is :${payment}");
-       // payment.printAllFields();
-        print("payment method from history to edit ${payment.paymentMethod}");
-
           setState(() {
             _selectedPaymentMethod = cash;
-            // int index= findCurrencyIndex(payment.currency!);
-            // print("the returned index is : ${index}");
-            //
-            //    _selectedCurrencys =_currencies[index];
+            _selectedCurrencyDB=payment.currency;
+
           });
           if (payment.paymentMethod == "Check") {
           setState(() {
             _selectedPaymentMethod = check;
+            _selectedCurrencyDB=payment.currency;
+            _selectedBankDB=payment.bankBranch;
           });
         }
 
@@ -190,7 +182,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         _amountController.text = payment.amount.toString()?? '';
         _amountCheckController.text = payment.amountCheck.toString()?? '';
         _checkNumberController.text = payment.checkNumber.toString()?? '';
-        _bankBranchController.text = payment.bankBranch?? '';
         _paymentInvoiceForController.text = payment.paymentInvoiceFor?? '';
         _dueDateCheckController.text = payment.dueDateCheck.toString()?? '';
 
@@ -210,7 +201,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     _amountController.dispose();
     _amountCheckController.dispose();
     _checkNumberController.dispose();
-    _bankBranchController.dispose();
     _dueDateCheckController.dispose();
     _paymentInvoiceForController.dispose();
 
@@ -221,7 +211,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     _amountFocusNode.dispose();
     _amountCheckFocusNode.dispose();
     _checkNumberFocusNode.dispose();
-    _bankBranchFocusNode.dispose();
     _dueDateCheckFocusNode.dispose();
     _paymentInvoiceForNode.dispose();
     super.dispose();
@@ -302,7 +291,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                           required:true,
                           isNumeric : true
                       ),
-                      _buildDropdownDynamic(currency, _currenciesDB,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, required: true),
+                      _buildDropdownCurrencyDynamic(currency, _currenciesDB,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, required: true),
                     ],
 
                   if (_selectedPaymentMethod == check)
@@ -317,7 +306,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                       ),
                       _currenciesDB.isEmpty
                           ? Center(child: CircularProgressIndicator()):
-                      _buildDropdownDynamic(currency, _currenciesDB,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, required: true),
+                      _buildDropdownCurrencyDynamic(currency, _currenciesDB,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, required: true),
                       _buildTextField(
                         _checkNumberController,
                         checkNumber,
@@ -326,13 +315,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                           required:true,
                           isNumeric : true
                       ),
-                      _buildTextField(
-                        _bankBranchController,
-                        bankBranchCheck,
-                        Icons.account_balance_outlined,
-                        focusNode: _bankBranchFocusNode,
-                          required:true
-                      ),
+                      _buildDropdownBankDynamic(bankBranchCheck, _banksDB,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, required: true),
                       _buildTextField(
                         _dueDateCheckController,
                         dueDateCheck,
@@ -357,8 +340,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                   } else if (_selectedPaymentMethod == check) {
                     return _amountCheckController.text.isNotEmpty &&
                         _checkNumberController.text.isNotEmpty &&
-                        _bankBranchController.text.isNotEmpty &&
-                        _dueDateCheckController.text.isNotEmpty && _selectedCurrencyDB != null;
+                        _dueDateCheckController.text.isNotEmpty && _selectedCurrencyDB != null && _selectedBankDB != null;
 
                   }
                   return false;
@@ -565,10 +547,19 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     );
   }
 
-  Widget _buildDropdownDynamic(String label, List<Currency> items,String languageCode, {bool required = false}) {
+  Widget _buildDropdownCurrencyDynamic(String label, List<Currency> items, String languageCode, {bool required = false}) {
+    // Find the Currency object with the id matching _selectedCurrencyDB
+    Currency? initialCurrency;
+    if (_selectedCurrencyDB != null) {
+      initialCurrency = items.firstWhere(
+            (currency) => currency.id == _selectedCurrencyDB,
+      );
+    }
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
       child: DropdownButtonFormField<Currency>(
+        value: initialCurrency, // Set the initial value
         decoration: InputDecoration(
           labelText: label + (required ? ' *' : ''),
           labelStyle: TextStyle(
@@ -604,14 +595,13 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         onChanged: (Currency? newValue) {
           setState(() {
             _selectedCurrencyDB = newValue?.id;
-            print(_selectedCurrencyDB);
           });
         },
         items: items.map<DropdownMenuItem<Currency>>((Currency currency) {
           return DropdownMenuItem<Currency>(
             value: currency,
             child: Text(
-              languageCode == 'ar'? currency.arabicName! : currency!.englishName! ,
+              languageCode == 'ar' ? currency.arabicName! : currency.englishName!,
               style: TextStyle(
                 fontSize: 12.sp,
               ),
@@ -621,6 +611,72 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       ),
     );
   }
+
+  Widget _buildDropdownBankDynamic(String label, List<Bank> items, String languageCode, {bool required = false}) {
+    // Find the Bank object with the id matching _selectedBankDB
+    Bank? initialBank;
+    if (_selectedBankDB != null) {
+      initialBank = items.firstWhere(
+            (bank) => bank.id == _selectedBankDB,
+      );
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      child: DropdownButtonFormField<Bank>(
+        value: initialBank, // Set the initial value
+        decoration: InputDecoration(
+          labelText: label + (required ? ' *' : ''),
+          labelStyle: TextStyle(
+            fontFamily: 'NotoSansUI',
+            fontSize: 12.sp,
+            color: Colors.grey[500],
+          ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey[400]!,
+              width: 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Color(0xFFC62828),
+              width: 1.5,
+            ),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.grey[300]!,
+              width: 1.5,
+            ),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        onChanged: (Bank? newValue) {
+          setState(() {
+            _selectedBankDB = newValue?.id;
+          });
+        },
+        items: items.map<DropdownMenuItem<Bank>>((Bank bank) {
+          return DropdownMenuItem<Bank>(
+            value: bank,
+            child: Text(
+              languageCode == 'ar' ? bank.arabicName! : bank.englishName!,
+              style: TextStyle(
+                fontSize: 12.sp,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
 
   bool _validateFields() {
     String isRequired =Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired');
@@ -676,6 +732,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     if (_selectedPaymentMethod == cash) {
       // Validate amount for cash payment
       if (_amountController.text.isEmpty || _selectedCurrencyDB == null) {
+        print("nn");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
@@ -698,8 +755,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       // Validate fields for check payment
       if (_amountCheckController.text.isEmpty ||
           _checkNumberController.text.isEmpty ||
-          _bankBranchController.text.isEmpty ||
+          _selectedBankDB == null ||
           _dueDateCheckController.text.isEmpty) {
+        print(_selectedBankDB);
+        print("kk");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
@@ -825,9 +884,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   }
 
   void _savePayment() {
-    print("_savePayment method started");
     if (!_validateFields()) return;
     Payment paymentDetails = _preparePaymentObject('Saved');
+    print("aa");
     CustomPopups.showCustomDialog(
       context: context,
       icon: Icon(Icons.warning, size: 60.0, color: Color(0xFFC62828)),
@@ -835,15 +894,19 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
       title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('savePayment'),
       onPressButton: ()  {
-                          _agreedPayment(paymentDetails);
-                        },);
-  }
+        print("dd");
 
+        _agreedPayment(paymentDetails);
+        print("ff");
+
+      },);
+  }
   Payment _preparePaymentObject(String status) {
     DateTime? parseDueDate;
     if (_selectedPaymentMethod!.toLowerCase() == 'cash' || _selectedPaymentMethod!.toLowerCase() == 'كاش') {
       if ([_customerNameController.text, _amountController.text, _selectedCurrencyDB, _selectedPaymentMethod]
           .any((element) => element == null || element.isEmpty)) {
+        print("oo");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
@@ -852,10 +915,12 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         );
         return Payment(customerName: '', paymentMethod: '', status: '');
       }
-    } else if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
+    }
+    else if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
       if ([_customerNameController.text, _selectedPaymentMethod, _amountCheckController.text,
-        _checkNumberController.text, _bankBranchController.text,_selectedCurrencyDB, _dueDateCheckController.text]
+        _checkNumberController.text, _selectedBankDB,_selectedCurrencyDB, _dueDateCheckController.text]
           .any((element) => element == null || element.isEmpty)) {
+        print("ll");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
@@ -864,15 +929,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         );
         return Payment(customerName: '', paymentMethod: '', status: '');
       }
+
       if (_selectedPaymentMethod!.toLowerCase() == 'check' || _selectedPaymentMethod!.toLowerCase() == 'شيك') {
         if (_dueDateCheckController.text.isNotEmpty) {
           parseDueDate = DateFormat('yyyy-MM-dd').parse(_dueDateCheckController.text);
-          print("the date before saved to database ${parseDueDate.toString()}");
         }
       }
 
     }
-
     Payment paymentDetail= Payment(
       customerName: _customerNameController.text,
       msisdn: _msisdnController.text.isNotEmpty?_msisdnController.text: null,
@@ -883,7 +947,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       paymentInvoiceFor: _paymentInvoiceForController.text.length>0?_paymentInvoiceForController.text:null,
       amountCheck: _selectedPaymentMethod!.toLowerCase() == 'check'||_selectedPaymentMethod!.toLowerCase() == 'شيك' ? double.tryParse(_amountCheckController.text) : null,
       checkNumber: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'?  int.tryParse(_checkNumberController.text) : null,
-      bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _bankBranchController.text : null,
+      bankBranch: _selectedPaymentMethod!.toLowerCase() == 'check' ||_selectedPaymentMethod!.toLowerCase() == 'شيك'? _selectedBankDB : null,
       dueDateCheck: parseDueDate , // Formatting the date
       id:widget.id !=null ? widget.id : null,
       status: status,
@@ -976,10 +1040,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     _amountController.clear();
     _amountCheckController.clear();
     _checkNumberController.clear();
-    _bankBranchController.clear();
     _dueDateCheckController.clear();
     _selectedCurrencyDB = null;
-
+    _selectedBankDB = null;
   }
 
 }

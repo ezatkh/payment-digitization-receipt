@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class Bank {
   final String id;
   final String? arabicName;
@@ -9,11 +11,29 @@ class Bank {
     this.englishName,
   });
 
+  static String decodeArabicString(String encodedString) {
+    // Convert the encoded string to a list of bytes
+    List<int> bytes = encodedString.codeUnits;
+
+    // Decode the bytes to a proper UTF-8 string
+    String decodedString = utf8.decode(bytes);
+
+    return decodedString;
+  }
+
+  factory Bank.fromMapArabic(Map<String, dynamic> json) {
+    return Bank(
+      id: json['code'] as String,
+      arabicName: decodeArabicString(json['extValue1'].toString()),
+      englishName: json['dispalyValue'] as String?,
+    );
+  }
+
   factory Bank.fromMap(Map<String, dynamic> json) {
     return Bank(
-      id: json['rowId'],
-      arabicName: json['extValue1'],
-      englishName: json['extValue2'],
+      id: json['id'],
+      arabicName: json['arabicName'],
+      englishName: json['englishName'],
     );
   }
 

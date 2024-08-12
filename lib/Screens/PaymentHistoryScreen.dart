@@ -30,8 +30,12 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   String search='';
   late StreamSubscription _syncSubscription;
   List<String> _selectedStatuses = [];
-
   List<Payment> _paymentRecords = [];
+  Map<String, String> _currencies = {};
+  Map<String, String> _banks = {};
+
+
+
   void _initializeLocalizationStrings( ) {
     final localizationService = Provider.of<LocalizationService>(
         context, listen: false);
@@ -467,10 +471,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                         onPressButton: () async {
                           final int id = record.id!;
                           await DatabaseProvider.deletePayment(id);
-                          // Update the UI to reflect the deletion
-                          setState(() {
-                            _paymentRecords.removeWhere((item) => item.id == id);
-                          });
+                           _fetchPayments();
+                           setState(() {
+                           });
                         },
                       );
                     },
@@ -613,11 +616,48 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       ),
     );
   }
+  Future<Map<String, String>> _getCurrenciesMap(String selectedLanguage) async {
+    List<Map<String, dynamic>> currencies = await DatabaseProvider.getAllCurrencies();
+
+    // Create a map based on the selected language
+    Map<String, String> currencyMap = {};
+    for (var currency in currencies) {
+      print(currency);
+    }
+    return currencyMap;
+  }
 
   void _fetchPayments() async {
+    if (_currencies ==null || _currencies.length<1){
+      print("no currency");
+      List<Map<String, dynamic>> currencies = await DatabaseProvider.getAllCurrencies();
+      String selectedCode = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode;
+      Map<String, String> currencyMap = {};
+      for (var currency in currencies) {
+        String id = currency["id"];
+        String name = selectedCode == "ar" ? currency["arabicName"] : currency["englishName"];
+        currencyMap[id] = name;
+      }
+      setState(() {
+        _currencies=currencyMap;
+      });
+    }
+    if (_banks ==null || _banks.length<1){
+      print("no banks");
+      List<Map<String, dynamic>> banks = await DatabaseProvider.getAllBanks();
+      String selectedCode = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode;
+      Map<String, String> bankMap = {};
+      for (var bank in banks) {
+        String id = bank["id"];
+        String name = selectedCode == "ar" ? bank["arabicName"] : bank["englishName"];
+        bankMap[id] = name;
+      }
+      setState(() {
+        _banks=bankMap;
+      });
+    }
     //print("_fetchPayments method in PaymentHistory screen started");
     List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses);
-
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
     String? lastUpdatedDateString ;
@@ -627,6 +667,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     String? cancellationDateString ;
     DateTime? cancellationDate;
     String serialNumber="";
+
+ // i want to get all currencies fields in a map -> id with arabic or english based on the selected language
+ //then after that i will stored based on the id  in each payment i will get the value
     setState(() {
       _paymentRecords = payments.map((payment) {
         dueDateCheckString = payment['dueDateCheck'];
@@ -684,10 +727,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           prNumber: payment['prNumber'],
           paymentMethod: payment['paymentMethod'],
           amount: payment['amount'],
-          currency: payment['currency'],
+          currency: _currencies[payment['currency']],
           amountCheck: payment['amountCheck'],
           checkNumber: payment['checkNumber'],
-          bankBranch: payment['bankBranch'],
+          bankBranch: _banks[payment['bankBranch']],
           dueDateCheck: dueDateCheck,
           paymentInvoiceFor: payment['paymentInvoiceFor'],
           status: payment['status'],
