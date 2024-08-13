@@ -69,6 +69,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
   @override
   void initState() {
+    _fetchPaymentDetails();
     super.initState();
     _initializeLocalizationStrings();
     _syncSubscription = PaymentService.syncStream.listen((_) {
@@ -122,26 +123,29 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     confirmed = localizationService.getLocalizedString('confirmed') ?? 'Confirm Payment';
     cancelled = localizationService.getLocalizedString('cancelled') ?? 'Confirm Payment';
     cancelPending = localizationService.getLocalizedString('cancelpending') ?? 'Confirm Payment';
-
   }
 
   Future<void> _fetchPaymentDetails() async {
+    print("ss");
     try {
-      widget.paymentDetails = await DatabaseProvider.getPaymentById(widget.paymentId);
-      String currencyId = widget.paymentDetails!['currency']?.toString() ?? '';
-      // Fetch the currency by ID
-      Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(currencyId);
-      setState(() {
-        AppearedCurrency = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
-      });
 
-      String bankId = widget.paymentDetails!['bankBranch']?.toString() ?? '';
-      Map<String, dynamic>? bank = await DatabaseProvider.getBankById(bankId);
-      setState(() {
-        AppearedBank = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? bank!["arabicName"] :  bank!["englishName"];
-      });
-      if (widget.paymentDetails != null) {
-        setState(() {});
+      if (widget.paymentId != null) {
+        widget.paymentDetails = await DatabaseProvider.getPaymentById(widget.paymentId);
+        String currencyId = widget.paymentDetails!['currency']?.toString() ?? '';
+        // Fetch the currency by ID
+        Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(currencyId);
+        setState(() {
+          AppearedCurrency = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
+        });
+
+        String bankId = widget.paymentDetails!['bankBranch']?.toString() ?? '';
+        Map<String, dynamic>? bank = await DatabaseProvider.getBankById(bankId);
+        setState(() {
+          AppearedBank = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? bank!["arabicName"] :  bank!["englishName"];
+        });
+        print(AppearedCurrency);
+        print(AppearedBank);
+
       } else {
         print('No payment details found for ID ${widget.paymentId}');
       }
@@ -475,25 +479,23 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   Widget _detailNoteItem(String title, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        Text(
-              title,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
             ),
-          SizedBox(width: 20),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 16.sp,
-                color: Colors.black54,
-              ),
+          ),
+          SizedBox(height: 4.h), // Adjust space between title and value if needed
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.black54,
             ),
           ),
         ],

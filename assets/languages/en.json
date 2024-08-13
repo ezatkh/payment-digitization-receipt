@@ -152,6 +152,7 @@
   "transactionTime": "Transaction Time",
 
   "cancellationDate": "Cancellation Date",
+  "cancellationTime": "Cancellation Time",
   "cancelReason": "Cancel Reason",
 
   "sharePayment": "Share Payment",
@@ -190,5 +191,6 @@
   "additionalDetails": "Additional Detail",
   "checkoutPdf": "Checkout Pdf",
   "userid": "User Id",
-  "footerPdf": "Please keep the receipt as proof of payment"
+  "footerPdf": "Please keep the receipt as proof of payment",
+  "hello": "Hello"
 }

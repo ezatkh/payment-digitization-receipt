@@ -1,3 +1,6 @@
+import 'package:digital_payment_app/Services/secure_storage.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:digital_payment_app/Services/database.dart';
@@ -6,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import '../Models/LoginState.dart';
+import '../Screens/LoginScreen.dart';
 import 'apiConstants.dart';
 
 
@@ -13,19 +18,12 @@ class PaymentService {
   static final StreamController<void> _syncController = StreamController<void>.broadcast();
   static Stream<void> get syncStream => _syncController.stream;
 
-  static Future<void> testNetwork() async {
-     var connectivityResult = await (Connectivity().checkConnectivity());
-     print(connectivityResult);
-     if(connectivityResult == ConnectivityResult.none){}
-      else {
-        PaymentService.syncPayments();
-     }
-     }
-
-  static void startPeriodicNetworkTest() {
-    Timer.periodic(Duration(seconds: 5), (Timer timer) async {
-      await testNetwork();
-    });
+  void navigateToLoginScreen(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+          (route) => false, // This disables popping the LoginScreen route
+    );
   }
 
   static String convertAmountToWords(dynamic amount) {
@@ -38,6 +36,21 @@ class PaymentService {
 
     return NumberToWordsEnglish.convert(amountInt);
   }
+
+  static void startPeriodicNetworkTest() {
+    Timer.periodic(Duration(seconds: 5), (Timer timer) async {
+      await testNetwork();
+    });
+  }
+
+  static Future<void> testNetwork() async {
+     var connectivityResult = await (Connectivity().checkConnectivity());
+     print(connectivityResult);
+     if(connectivityResult == ConnectivityResult.none){}
+      else {
+        PaymentService.syncPayments();
+     }
+     }
 
   static Future <void> syncPayment(Map<String, dynamic> payment, String apiUrl, Map<String, String> headers)async {
 
@@ -88,6 +101,21 @@ class PaymentService {
         await DatabaseProvider.updatePaymentStatus(payment["id"], 'Synced');
         _syncController.add(null);
       } else {
+        Map<String, String?> credentials = await getCredentials();
+        String? username = credentials['username'];
+        String? password = credentials['password'];
+print("username for relogin is : ${username} : password is : ${password}");
+        if (username != null && password != null) {
+          LoginState loginState = LoginState();
+          bool loginSuccessful = await loginState.login(username, password);
+          if (loginSuccessful) {
+            print("relogin successfull");
+          }
+          else {
+            print("expand relogin wrong");
+          }
+
+          }
         // Handle errors
         print('Failed to sync payment: ${response.body}');
       }
@@ -162,7 +190,6 @@ class PaymentService {
     _syncController.add(null);
   }
 
-
   static Future <void> cancelPayment(String voucherSerial , String reason) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? tokenID = prefs.getString('token');
@@ -191,7 +218,7 @@ class PaymentService {
         "cancelTransactionDate":  cancelDateTime,
       };
       print(body);
-print("cancellation date : $cancelDateTime");
+      print("cancellation date : $cancelDateTime");
       try {
         final response = await http.delete(
           Uri.parse(apiUrlCancel),
@@ -221,4 +248,36 @@ print("cancellation date : $cancelDateTime");
       print('Error cancelling payment: $e');
     }
   }
+
+  static Future <void> getExpiredPaymentsNumber() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? tokenID = prefs.getString('token');
+    if (tokenID == null) {
+      print('Token not found');
+      return;
+    }
+    String fullToken="Barer ${tokenID}";
+    print("the token to user hen cancel :${fullToken}");
+
+
+    try {
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        'tokenID': fullToken,
+      };
+        final response = await http.get(
+          Uri.parse(apiUrlDeleteExpired),
+          headers: headers,
+        );
+
+        if (response.statusCode == 200) {
+          print(response.body);
+        }
+
+    } catch (e) {
+      // Handle the error if needed
+      print('Error deleting expired payment: $e');
+    }
+  }
+
 }

@@ -66,7 +66,6 @@ class Payment {
     this.cancellationDate
   })
   {
-    //printAllFields();
   }
 
   factory Payment.fromMap(Map<String, dynamic> map) {

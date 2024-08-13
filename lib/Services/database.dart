@@ -53,8 +53,8 @@ class DatabaseProvider {
         cancelReason TEXT,
         lastUpdatedDate TEXT,
         transactionDate TEXT,
-        cancellationDate TEXT
-
+        cancellationDate TEXT,
+        userId TEXT
       )
       
       
@@ -77,14 +77,17 @@ class DatabaseProvider {
     ''');
   }
 
-  static Future<List<Map<String, dynamic>>> getAllPayments() async {
+  static Future<List<Map<String, dynamic>>> getAllPayments(String userId) async {
     print("printAllPayments method , database.dart started");
 
     Database db = await database;
 
-    // Query the database to get all payments
-    List<Map<String, dynamic>> payments = await db.query('payments');
-
+    // Query the database to get all payments based on userId
+    List<Map<String, dynamic>> payments = await db.query(
+      'payments',
+      where: 'userId = ?',
+      whereArgs: [userId],
+    );
     print("printAllPayments method , database.dart finished");
     return payments;
   }
@@ -304,14 +307,14 @@ class DatabaseProvider {
   static Future<List<Map<String, dynamic>>> getPaymentsWithDateFilter(
       DateTime? fromDate,
       DateTime? toDate,
-      List<String>? statuses) async {
+      List<String>? statuses ,String userId) async {
     //print("getPaymentsWithDateFilter method, database.dart");
     //print("from date: $fromDate, to date: $toDate, statuses: $statuses");
 
     Database db = await database;
 
     // Start with the base query
-    String query = 'SELECT * FROM payments WHERE 1=1';
+    String query = 'SELECT * FROM payments WHERE userId = "$userId"';
 
     // Add date filters if they are provided
     if (fromDate != null && fromDate.toString().isNotEmpty) {
@@ -340,37 +343,30 @@ class DatabaseProvider {
 
   // Insert a currency record
   static Future<void> insertCurrency(Map<String, dynamic> currencyData) async {
-    print("insertCurrency method in database.dart started");
     Database db = await database;
     await db.insert('currencies', currencyData, conflictAlgorithm: ConflictAlgorithm.replace);
-    print("insertCurrency method in database.dart finished");
   }
 
   // Retrieve all currency records
   static Future<List<Map<String, dynamic>>> getAllCurrencies() async {
-    print("getAllCurrencies method in database.dart started");
     Database db = await database;
     List<Map<String, dynamic>> currencies = await db.query('currencies');
-    print("getAllCurrencies method in database.dart finished");
     return currencies;
   }
 
   // Retrieve a specific currency by ID
   static Future<Map<String, dynamic>?> getCurrencyById(String id) async {
-    print("getCurrencyById method in database.dart started");
     Database db = await database;
     List<Map<String, dynamic>> result = await db.query(
       'currencies',
       where: 'id = ?',
       whereArgs: [id],
     );
-    print("getCurrencyById method in database.dart finished");
     return result.isNotEmpty ? result.first : null;
   }
 
   // Update a currency record
   static Future<void> updateCurrency(String id, Map<String, dynamic> updatedData) async {
-    print("updateCurrency method in database.dart started");
     Database db = await database;
     await db.update(
       'currencies',
@@ -378,7 +374,6 @@ class DatabaseProvider {
       where: 'id = ?',
       whereArgs: [id],
     );
-    print("updateCurrency method in database.dart finished");
   }
 
   static Future<void> clearAllCurrencies() async {

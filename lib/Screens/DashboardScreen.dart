@@ -3,12 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Services/LOV_Sync.dart';
 import '../Services/LocalizationService.dart';
 import 'LoginScreen.dart';
-//import 'MoreScreen.dart';
 import 'PaymentHistoryScreen.dart';
-import 'ProfileScreen.dart';
 import 'RecordPaymentScreen.dart';
 import 'SettingsScreen.dart';
 
@@ -22,6 +19,8 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   List<DashboardItemModel> dashboardItems = []; // Initialize as empty list
   late SharedPreferences prefs; // SharedPreferences instance
+  String? usernameLogin; // State variable to hold the username
+
 
 
 
@@ -30,7 +29,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     print("dashboard page");
     super.initState();
     _initializeLocalization();
+    _getUsername();
     _initializeDashboardItems();
+  }
+
+  Future<void> _getUsername() async {
+    prefs = await SharedPreferences.getInstance();
+    String? storedUsername = prefs.getString('usernameLogin');
+    setState(() {
+      usernameLogin = storedUsername;
+    });
   }
 
   Future<void> _initializeLocalization() async {
@@ -38,6 +46,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _initializeDashboardItems() {
+
     dashboardItems = [
       DashboardItemModel(iconData: Icons.payment, title: 'recordPayment', onTap: () => _navigateTo(RecordPaymentScreen())),
       DashboardItemModel(iconData: Icons.history, title: 'paymentHistory', onTap: () => _navigateTo(PaymentHistoryScreen())),
@@ -50,6 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ScreenUtil.init(context, designSize: Size(360, 690));
     final screenSize = MediaQuery.of(context).size;
     final aspectRatio = screenSize.width / (screenSize.height-180);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -94,41 +104,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         centerTitle: true,
       ),
-      body: GridView.builder(
-        padding: EdgeInsets.all(10.w),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-          crossAxisSpacing: 10.w,
-          mainAxisSpacing: 10.h,
-          childAspectRatio:  (aspectRatio*3),
-        ),
-        itemCount: dashboardItems.length,
-        itemBuilder: (context, index) {
-          return Consumer<LocalizationService>(
-            builder: (context, localizationService, _) {
-              return DashboardItem(
-                iconData: dashboardItems[index].iconData,
-                title: localizationService.getLocalizedString(dashboardItems[index].title),
-                onTap: () async {
-                  switch (dashboardItems[index].title) {
-                    case 'recordPayment':
-                      _navigateTo(RecordPaymentScreen());
-                      break;
-                    case 'paymentHistory':
-                      _navigateTo(PaymentHistoryScreen());
-                      break;
-                    case 'settings':
-                      _navigateTo(SettingsScreen());
-                      break;
 
-                    default:
-                      break;
-                  }
-                },
-              );
-            },
-          );
-        },
+      body:
+      Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(6.w),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.15),
+                    offset: Offset(0, 1),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.person,
+                    color: Color(0xFFC62828),
+                    size: 24.sp,
+                  ),
+                  SizedBox(width: 8.w),
+                  Text(
+                    '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('hello')} $usernameLogin',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontFamily: "NotoSansUI",
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFC62828),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+
+          // Add some spacing between the message and the GridView
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.all(10.w),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                crossAxisSpacing: 10.w,
+                mainAxisSpacing: 10.h,
+                childAspectRatio:  (aspectRatio*3),
+              ),
+              itemCount: dashboardItems.length,
+              itemBuilder: (context, index) {
+                return Consumer<LocalizationService>(
+                  builder: (context, localizationService, _) {
+                    return DashboardItem(
+                      iconData: dashboardItems[index].iconData,
+                      title: localizationService.getLocalizedString(dashboardItems[index].title),
+                      onTap: () async {
+                        switch (dashboardItems[index].title) {
+                          case 'recordPayment':
+                            _navigateTo(RecordPaymentScreen());
+                            break;
+                          case 'paymentHistory':
+                            _navigateTo(PaymentHistoryScreen());
+                            break;
+                          case 'settings':
+                            _navigateTo(SettingsScreen());
+                            break;
+
+                          default:
+                            break;
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

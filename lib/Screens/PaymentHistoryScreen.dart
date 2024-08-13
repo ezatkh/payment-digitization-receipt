@@ -5,6 +5,7 @@ import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 import '../Services/database.dart';
@@ -394,7 +395,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)),
     childrenPadding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
     children: [
-      if (record.status.toLowerCase() != 'saved')
+      if (record.status.toLowerCase() != 'saved' && record.status.toLowerCase() != 'confirmed')
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('voucherNumber'), record.voucherSerialNumber),
 
       if(record.status.toLowerCase() == 'saved') ...[
@@ -426,6 +427,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('dueDateCheck'), _formatDate(record.dueDateCheck)),
       if(record.status.toLowerCase() == 'canceldpending' || record.status.toLowerCase() == 'cancelled' ) ...[
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancellationDate'), formatDate((record.cancellationDate!)).toString()),
+        _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancellationTime'), formatTime((record.cancellationDate!)).toString()),
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelReason'), (record.cancelReason!)),
       ],
       if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
@@ -621,9 +623,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
     // Create a map based on the selected language
     Map<String, String> currencyMap = {};
-    for (var currency in currencies) {
-      print(currency);
-    }
     return currencyMap;
   }
 
@@ -657,7 +656,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       });
     }
     //print("_fetchPayments method in PaymentHistory screen started");
-    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String usernameLogin = prefs.getString('usernameLogin') ?? 'null';
+    print("the payments get based on : ${usernameLogin}");
+    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses,usernameLogin);
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
     String? lastUpdatedDateString ;

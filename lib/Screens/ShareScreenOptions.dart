@@ -36,8 +36,6 @@ class ShareScreenOptions {
       final payment = Payment.fromMap(paymentMap);
       final currency = await DatabaseProvider.getCurrencyById(payment.currency!); // Implement this method
       final bank = await DatabaseProvider.getBankById(payment.bankBranch!); // Implement this method
-      print(currency);
-      print(bank);
 
       // Load fonts
       final notoSansFont = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));

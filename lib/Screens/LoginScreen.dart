@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Custom_Widgets/CustomButton.dart';
 import '../Custom_Widgets/CustomTextField.dart';
 import '../Custom_Widgets/LogoWidget.dart';
 import '../Models/LoginState.dart';
 import '../Services/LOV_Sync.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/PaymentService.dart';
 import '../Services/secure_storage.dart';
 import 'DashboardScreen.dart';
 import 'dart:async';
@@ -130,6 +132,7 @@ class LoginScreen extends StatelessWidget {
             await saveCredentials(loginState.username,loginState.password);
             await LOVCompareService.compareAndSyncCurrencies();
             await LOVCompareService.compareAndSyncBanks();
+            await PaymentService.getExpiredPaymentsNumber();
 
             _handleLogin(
           context, localizationService);
@@ -181,6 +184,9 @@ class LoginScreen extends StatelessWidget {
                                   height: 65,
                                   child: ElevatedButton(
                                     onPressed: () async {
+                                      // SharedPreferences prefs = await SharedPreferences.getInstance();
+                                      // String? test = prefs.getString('test');
+                                      // print("the test is ${test}");
                                       bool authenticated = await loginState
                                           .getAvailableBiometricsTypes();
                                       if (authenticated == true) {

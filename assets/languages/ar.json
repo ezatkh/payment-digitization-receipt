@@ -147,6 +147,7 @@
   "transactionTime": "وقت الدفعة",
 
   "cancellationDate": "تاريخ الغاء الدفعة",
+  "cancellationTime": "وقت الغاء الدفعة",
 
   "cancelReason": "سبب الإلغاء",
 
@@ -184,7 +185,6 @@
   "additionalDetails": "تفاصيل إضافية",
   "checkoutPdf": "تحقق من ملف PDF",
   "userid": "رمز المستخدم",
-  "footerPdf": "الرجاء الإحتفاظ بالسند لإثبات الدفع"
-
-
+  "footerPdf": "الرجاء الإحتفاظ بالسند لإثبات الدفع",
+  "hello": "مرحبا"
 }

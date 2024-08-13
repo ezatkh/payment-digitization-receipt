@@ -38,7 +38,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _handleNavigation() {
     final loginState = Provider.of<LoginState>(context, listen: false);
-    print ("handle navigation");
     if (loginState.isLoginSuccessful) {
       Navigator.of(context).pushReplacement(
         _createRoute(DashboardScreen()), // Navigate to DashboardScreen on successful login

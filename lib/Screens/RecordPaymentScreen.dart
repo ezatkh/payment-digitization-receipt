@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Custom_Widgets/CustomPopups.dart';
 import '../Models/Bank.dart';
 import '../Models/Currency.dart';
@@ -973,12 +974,15 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       else if(paymentDetails.paymentMethod == "شيك"){
         paymentDetails.paymentMethod = 'Check';
       }
-
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? usernameLogin = prefs.getString('usernameLogin');
+      print("the user created is ${usernameLogin}");
       if(paymentDetails.id == null)
       {
-        print("no id , create new payment :");
-        print(paymentDetails.paymentMethod);
+
+        print("no id , create new payment ");
         idPaymentStored= await DatabaseProvider.savePayment({
+          'userId': usernameLogin,
           'customerName': paymentDetails.customerName,
           'paymentMethod': paymentDetails.paymentMethod,
           'status':paymentDetails.status,
@@ -1006,6 +1010,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         idPaymentStored=id;
         print(paymentDetails.paymentMethod);
         await DatabaseProvider.updatePayment(id, {
+          'userId':usernameLogin,
           'customerName': paymentDetails.customerName,
           'paymentMethod': paymentDetails.paymentMethod,
           'status': paymentDetails.status,

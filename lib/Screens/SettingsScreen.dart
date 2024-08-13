@@ -5,9 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../Custom_Widgets/CustomAboutDialogScreen.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/PaymentService.dart';
 import 'LoginScreen.dart';
-import 'ProfileScreen.dart';
-import '../Custom_Widgets/CustomAboutDialogScreen.dart';
 
 
 class SettingsScreen extends StatelessWidget {
@@ -116,7 +115,7 @@ class SettingsScreen extends StatelessWidget {
                       }, localizationService: localizationService),
                     ], localizationService),
                     _buildSettingSection('Other', [
-                      _buildSettingOption(Icons.info_outline, 'aboutHelp', onTap: () {
+                      _buildSettingOption(Icons.info_outline, 'aboutHelp', onTap: () async {
                         showDialog(
                           context: context,
                           barrierDismissible: true,
