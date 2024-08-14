@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Custom_Widgets/CustomButton.dart';
@@ -184,33 +186,8 @@ class LoginScreen extends StatelessWidget {
                                   height: 65,
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      // SharedPreferences prefs = await SharedPreferences.getInstance();
-                                      // String? test = prefs.getString('test');
-                                      // print("the test is ${test}");
-                                      bool authenticated = await loginState
-                                          .getAvailableBiometricsTypes();
-                                      if (authenticated == true) {
-                                        Map<String, String?> credentials = await getCredentials();
-                                        String? username = credentials['username'];
-                                        String? password = credentials['password'];
+                                      _handleSmartLogin(context, loginState, localizationService);
 
-                                        if (username != null && password != null) {
-                                          bool loginSuccessful = await loginState.login(username, password);
-                                          if (loginSuccessful) {
-                                            LOVCompareService.compareAndSyncCurrencies();
-                                            _handleLogin(context, localizationService);
-                                          } else {
-                                            print("Login failed.");
-                                          }
-                                        } else {
-                                          print("No credentials found.");
-                                        }
-
-                                        print("authenticated successfully from screen");
-                                      } else {
-                                        print(
-                                            "authenticated failed from screen");
-                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.white,
@@ -249,6 +226,66 @@ class LoginScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _handleSmartLogin(BuildContext context, LoginState loginState, LocalizationService localizationService) async {
+    final LocalAuthentication auth = LocalAuthentication();
+    try {
+      // Check if the device supports biometric authentication
+      bool authenticated = await auth.authenticate(
+        localizedReason: 'Scan your sensor to login',
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
+      );
+
+      if (authenticated) {
+        Map<String, String?> credentials = await getCredentials();
+        String? username = credentials['username'];
+        String? password = credentials['password'];
+
+        if (username != null && password != null) {
+          bool loginSuccessful = await loginState.login(username, password);
+          if (loginSuccessful) {
+            LOVCompareService.compareAndSyncCurrencies();
+            _handleLogin(context, localizationService);
+          } else {
+            print("Login failed.");
+          }
+        } else {
+          print("No credentials found.");
+        }
+
+        print("Authenticated successfully from screen.");
+      } else {
+        print("Authentication failed from screen.");
+      }
+    } on PlatformException catch (e) {
+      print("PlatformException during authentication: $e");
+    }
+    // bool authenticated = await loginState.getAvailableBiometricsTypes();
+    // if (authenticated) {
+    //   Map<String, String?> credentials = await getCredentials();
+    //   String? username = credentials['username'];
+    //   String? password = credentials['password'];
+    //
+    //   if (username != null && password != null) {
+    //     bool loginSuccessful = await loginState.login(username, password);
+    //     if (loginSuccessful) {
+    //       LOVCompareService.compareAndSyncCurrencies();
+    //       _handleLogin(context, localizationService);
+    //     } else {
+    //       print("Login failed.");
+    //     }
+    //   } else {
+    //     print("No credentials found.");
+    //   }
+    //
+    //   print("Authenticated successfully from screen.");
+    // } else {
+    //   print("Authentication failed from screen.");
+    // }
   }
 
   Widget _buildLanguageDropdown(

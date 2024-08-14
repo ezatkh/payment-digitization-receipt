@@ -135,7 +135,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Text(
                     '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('hello')} $usernameLogin',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 16.sp,
                       fontFamily: "NotoSansUI",
                       fontWeight: FontWeight.bold,
                       color: Color(0xFFC62828),

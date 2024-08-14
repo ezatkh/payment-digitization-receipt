@@ -69,7 +69,7 @@ class LoginState with ChangeNotifier {
       if (userData.containsKey('token')) {
         String token = userData['token'].toString().substring(6);
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('usernameLogin', username);
+        await prefs.setString('usernameLogin', username.toLowerCase());
         await prefs.setString('token', token);
         print("Token stored successfully: $token");
 

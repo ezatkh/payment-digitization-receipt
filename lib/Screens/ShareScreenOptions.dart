@@ -18,7 +18,6 @@ class ShareScreenOptions {
 
   static Future<void> sharePdf(BuildContext context, int id, String languageCode) async {
     try {
-
       // Get the current localization service without changing the app's locale
       final localizationService = Provider.of<LocalizationService>(context, listen: false);
       // Fetch localized strings for the specified language code
@@ -35,17 +34,32 @@ class ShareScreenOptions {
       // Create a Payment instance from the fetched map
       final payment = Payment.fromMap(paymentMap);
       final currency = await DatabaseProvider.getCurrencyById(payment.currency!); // Implement this method
-      final bank = await DatabaseProvider.getBankById(payment.bankBranch!); // Implement this method
+      Map<String, String>? bankDetails;
 
-      // Load fonts
+      if (payment.paymentMethod == 'cash') {
+        // Handle cash payment case
+        print('Payment is made in cash. No need to fetch bank details.');
+      } else {
+        try {
+          final dynamicFetchedBank = await DatabaseProvider.getBankById(payment.bankBranch!);
+          if (dynamicFetchedBank != null) {
+            // Convert the fetched map from Map<String, dynamic>? to Map<String, String>
+            bankDetails = Map<String, String>.from(dynamicFetchedBank.map(
+                  (key, value) => MapEntry(key, value.toString()), // Ensure all values are strings
+            ));
+            print('Bank details retrieved: $bankDetails');
+          } else {
+            print('No bank details found.');
+          }
+        } catch (e) {
+          print('Failed to retrieve bank details: $e');
+        }
+      }      // Load fonts
       final notoSansFont = pw.Font.ttf(await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'));
       final amiriFont = pw.Font.ttf(await rootBundle.load('assets/fonts/Amiri-Regular.ttf'));
 
       final isEnglish = languageCode == 'en';
       final font = isEnglish ? notoSansFont : amiriFont;
-      // Calculate dimensions based on DPI
-      final dpi = 203;
-      final mmToPt = 2.83464567; // Conversion factor from mm to pt (72 pt per inch)
 
 
       // Generate PDF content with payment details
@@ -78,7 +92,7 @@ class ShareScreenOptions {
           {'title': localizedStrings['amountCheck'], 'value': payment.amountCheck.toString()},
           {'title': localizedStrings['currency'], 'value': languageCode =='ar' ? currency!["arabicName"] ?? '' : currency!["englishName"]},
           {'title': localizedStrings['checkNumber'], 'value': payment.checkNumber.toString()},
-          {'title': localizedStrings['bankBranchCheck'], 'value': languageCode =='ar' ? bank!["arabicName"] ?? '' : bank!["englishName"]},
+          {'title': localizedStrings['bankBranchCheck'], 'value': languageCode =='ar' ? bankDetails!["arabicName"] ??'' : bankDetails!["englishName"] ?? ''},
           {'title': localizedStrings['dueDateCheck'], 'value': payment.dueDateCheck != null
               ? DateFormat('yyyy-MM-dd').format(payment.dueDateCheck!)
               : ''},
@@ -92,7 +106,6 @@ class ShareScreenOptions {
 
       pdf.addPage(
         pw.Page(
-         // pageFormat: PdfPageFormat(72 * mmToPt, 50 * mmToPt, marginAll: 5 * mmToPt),
           build: (pw.Context context) {
             return pw.Directionality(
               textDirection: isEnglish ? pw.TextDirection.ltr : pw.TextDirection.rtl,

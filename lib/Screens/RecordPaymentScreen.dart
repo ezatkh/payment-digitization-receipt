@@ -982,7 +982,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
         print("no id , create new payment ");
         idPaymentStored= await DatabaseProvider.savePayment({
-          'userId': usernameLogin,
+          'userId': usernameLogin!.toLowerCase(),
           'customerName': paymentDetails.customerName,
           'paymentMethod': paymentDetails.paymentMethod,
           'status':paymentDetails.status,
@@ -1010,7 +1010,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         idPaymentStored=id;
         print(paymentDetails.paymentMethod);
         await DatabaseProvider.updatePayment(id, {
-          'userId':usernameLogin,
+          'userId':usernameLogin!.toLowerCase(),
           'customerName': paymentDetails.customerName,
           'paymentMethod': paymentDetails.paymentMethod,
           'status': paymentDetails.status,

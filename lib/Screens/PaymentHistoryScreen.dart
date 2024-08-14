@@ -659,7 +659,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String usernameLogin = prefs.getString('usernameLogin') ?? 'null';
     print("the payments get based on : ${usernameLogin}");
-    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses,usernameLogin);
+    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses,usernameLogin.toLowerCase());
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
     String? lastUpdatedDateString ;
