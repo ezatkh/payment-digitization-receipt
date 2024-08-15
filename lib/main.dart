@@ -39,7 +39,6 @@ Future<void> _performDailyTask() async {
 
 
 void main() async {
-  PaymentService.startPeriodicNetworkTest();
   WidgetsFlutterBinding.ensureInitialized();
   // await AndroidAlarmManager.initialize();
   LocalizationService localizeService = LocalizationService();

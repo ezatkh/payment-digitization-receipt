@@ -106,12 +106,13 @@ class ShareScreenOptions {
 
       pdf.addPage(
         pw.Page(
+          margin: pw.EdgeInsets.zero,
           build: (pw.Context context) {
             return pw.Directionality(
               textDirection: isEnglish ? pw.TextDirection.ltr : pw.TextDirection.rtl,
               child: pw.Container(
                 color: PdfColors.white,
-                padding: pw.EdgeInsets.all(10),
+                padding: pw.EdgeInsets.zero, // Remove padding
                 child: pw.Column(
                   children: [
                     pw.Container(

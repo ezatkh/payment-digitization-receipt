@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/PaymentService.dart';
 import 'LoginScreen.dart';
 import 'PaymentHistoryScreen.dart';
 import 'RecordPaymentScreen.dart';
@@ -38,6 +39,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     String? storedUsername = prefs.getString('usernameLogin');
     setState(() {
       usernameLogin = storedUsername;
+    });
+
+    // Start the periodic network test with context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (usernameLogin != null && usernameLogin!.isNotEmpty) {
+        PaymentService.startPeriodicNetworkTest(context);
+      }
     });
   }
 
@@ -260,6 +268,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       await prefs.remove('token');
                       await prefs.remove('language_code');
                       await prefs.setString('language_code', 'en'); // Set default language
+                      await prefs.remove('usernameLogin');
 
                       // Navigate to login screen
                       Navigator.pushAndRemoveUntil(

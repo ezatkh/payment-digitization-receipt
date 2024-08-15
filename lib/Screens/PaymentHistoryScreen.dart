@@ -10,6 +10,7 @@ import '../Services/LocalizationService.dart';
 import 'package:provider/provider.dart';
 import '../Services/database.dart';
 import '../Models/Payment.dart';
+import '../Services/secure_storage.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Services/PaymentService.dart';
 import '../Custom_Widgets/CustomPopups.dart';
@@ -506,9 +507,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                         deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'),
                         onPressButton: () async {
                           if (record.id != null) {
+                            Map<String, String?> credentials = await getCredentials();
+                            String? username = credentials['username'];
+                            String? password = credentials['password'];
+                            print("the username and password to relogin is :${username} : ${password}");
                             final int idToConfirm = record.id!;
                             await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
-                            await PaymentService.syncPayments();
+                            await PaymentService.syncPayments(context);
 
                             // Ensure that the syncSubscription is properly set up
                             _syncSubscription = PaymentService.syncStream.listen((_) {
@@ -547,7 +552,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                         ) ?? false; // Default to false if dialog is dismissed
 
                         if (result) {
-                          await PaymentService.syncPayments();
+                          await PaymentService.syncPayments(context);
                           _fetchPayments();
                           setState(() {});
                         }
