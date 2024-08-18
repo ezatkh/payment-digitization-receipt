@@ -89,14 +89,15 @@ class PaymentService {
     for (var payment in confirmedPayments) {
       PaymentService.syncPayment(payment, apiUrl, headers,context);
     }
-
+print("tt");
     for (var p in cancelledPendingPayments) {
       Map<String, String> body = {
         "voucherSerialNumber": p["voucherSerialNumber"],
-        "cancelReason": p["reason"].toString(),
-        "cancellationDate": DateTime.parse(p["cancellationDate"])
-            .toIso8601String(),
+        "cancelReason": p["cancelReason"].toString(),
+        "cancelTransactionDate": p["cancellationDate"] ,
       };
+      print("kk");
+      print(body);
       try {
         final response = await http.delete(
           Uri.parse(apiUrlCancel),
@@ -173,22 +174,20 @@ class PaymentService {
         print("failed to sync heres the body of response: ${response.body}");
         if (errorResponse['error'] == 'Unauthorized' &&
             errorResponse['errorInDetail'] == 'JWT Authentication Failed') {
-          await _attemptReLoginAndRetrySync(payment, apiUrl, headers,context);
+          await _attemptReLoginAndRetrySync(context);
         } else {
           print('Failed to sync payment: ${response.body}');
 
         }
       }
     } catch (e) {
-      // Handle exceptions
       print('Error syncing payment: $e');
-      //  await _attemptReLoginAndRetrySync(payment, apiUrl, headers);
     }
   }
 
 
   static Future <void> cancelPayment(String voucherSerial,
-      String reason) async {
+      String reason, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? tokenID = prefs.getString('token');
 
@@ -197,10 +196,6 @@ class PaymentService {
       return;
     }
     String fullToken = "Barer ${tokenID}";
-    print("the token to user hen cancel :${fullToken}");
-
-
-    try {
       Map<String, String> headers = {
         'Content-Type': 'application/json',
         'tokenID': fullToken,
@@ -215,8 +210,8 @@ class PaymentService {
         "cancelReason": reason,
         "cancelTransactionDate": cancelDateTime,
       };
+    print("jj");
       print(body);
-      print("cancellation date : $cancelDateTime");
       try {
         final response = await http.delete(
           Uri.parse(apiUrlCancel),
@@ -224,30 +219,72 @@ class PaymentService {
           body: json.encode(body),
         );
         if (response.statusCode == 200) {
-          print("inside status code 200 of cancel api");
+          print("inside status code 200 of cancel api :${response.body}");
           await DatabaseProvider.cancelPayment(
-              voucherSerial, reason, cancelDateTime.toString(), 'Cancelled');
+              voucherSerial, reason, cancelDateTime, 'Cancelled');
 
           _syncController.add(null);
-        } else {
-          await DatabaseProvider.cancelPayment(
-              voucherSerial, reason, cancelDateTime.toString(),
-              'CancelPending');
-          _syncController.add(null);
-          print('Failed to cancel payment: ${response.body}');
+        }
+        else {
+          Map<String, dynamic> errorResponse = json.decode(response.body);
+          print("failed to sync heres the body of response: ${response.body}");
+          if (errorResponse['error'] == 'Unauthorized' &&  errorResponse['errorInDetail'] == 'JWT Authentication Failed')
+          {
+            await _attemptReLoginAndRetrySync(context);
+          } else {
+            print('^ Failed to cancel/sync payment: ${response.body}');
+          }
         }
       } catch (e) {
         await DatabaseProvider.cancelPayment(
-            voucherSerial, reason, cancelDateTime.toString(), 'CancelPending');
+            voucherSerial, reason, cancelDateTime,
+            'CancelPending');
         _syncController.add(null);
-        // Handle exceptions
-        print('Error syncing payment: $e');
+        print('Error cancelling payment: $e');
       }
-    } catch (e) {
-      // Handle the error if needed
-      print('Error cancelling payment: $e');
-    }
   }
+
+  static Future<void> _attemptReLoginAndRetrySync(BuildContext context) async {
+    Map<String, String?> credentials = await getCredentials();
+    String? username = credentials['username'];
+    String? password = credentials['password'];
+     if (username != null && password != null) {
+       LoginState loginState = LoginState();
+       bool loginSuccessful = await loginState.login(username, password);
+       if (loginSuccessful) {
+        print("Re-login successful");
+          await syncPayments(context); // Retry the sync with new token
+      } else {
+        print("Re-login failed. Unable to sync payment.");
+        _showSessionExpiredDialog(context); // Show session expired message
+        navigateToLoginScreen(context);
+      }
+    } else {
+      print("Username or password is missing. Cannot attempt re-login.");
+     }
+  }
+
+  static void _showSessionExpiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Session Expired'),
+          content: Text('Your session has expired. Please contact the admin.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                navigateToLoginScreen(context); // Navigate to login screen
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   static Future <void> getExpiredPaymentsNumber() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -277,31 +314,5 @@ class PaymentService {
       // Handle the error if needed
       print('Error deleting expired payment: $e');
     }
-  }
-
-  static Future<void> _attemptReLoginAndRetrySync(Map<String, dynamic> payment,
-      String apiUrl, Map<String, String> headers ,BuildContext context) async {
-    Map<String, String?> credentials = await getCredentials();
-    String? username = credentials['username'];
-    String? password = credentials['password'];
-     if (username != null && password != null) {
-       LoginState loginState = LoginState();
-       bool loginSuccessful = await loginState.login(username, password);
-       if (loginSuccessful) {
-        print("Re-login successful");
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? tokenID = prefs.getString('token');
-        if (tokenID != null) {
-          headers['tokenID'] = "Barer $tokenID";
-          await syncPayment(
-              payment, apiUrl, headers,context); // Retry the sync with new token
-        }
-      } else {
-        print("Re-login failed. Unable to sync payment.");
-        navigateToLoginScreen(context);
-      }
-    } else {
-      print("Username or password is missing. Cannot attempt re-login.");
-     }
   }
 }

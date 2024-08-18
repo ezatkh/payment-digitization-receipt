@@ -28,7 +28,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
 
 
   Future <void> _confirmCancellationAction(BuildContext context, String voucher, String reason) async {
-    await PaymentService.cancelPayment(voucher, reason);
+    await PaymentService.cancelPayment(voucher, reason,context);
   }
 
   void _handleCancellation(BuildContext context, String voucher) async {

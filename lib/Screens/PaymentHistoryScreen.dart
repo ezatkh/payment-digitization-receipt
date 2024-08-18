@@ -623,13 +623,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       ),
     );
   }
-  Future<Map<String, String>> _getCurrenciesMap(String selectedLanguage) async {
-    List<Map<String, dynamic>> currencies = await DatabaseProvider.getAllCurrencies();
-
-    // Create a map based on the selected language
-    Map<String, String> currencyMap = {};
-    return currencyMap;
-  }
 
   void _fetchPayments() async {
     if (_currencies ==null || _currencies.length<1){
@@ -663,7 +656,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     //print("_fetchPayments method in PaymentHistory screen started");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String usernameLogin = prefs.getString('usernameLogin') ?? 'null';
-    print("the payments get based on : ${usernameLogin}");
     List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses,usernameLogin.toLowerCase());
     String? dueDateCheckString ;
     DateTime? dueDateCheck;
@@ -674,9 +666,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     String? cancellationDateString ;
     DateTime? cancellationDate;
     String serialNumber="";
-
- // i want to get all currencies fields in a map -> id with arabic or english based on the selected language
- //then after that i will stored based on the id  in each payment i will get the value
     setState(() {
       _paymentRecords = payments.map((payment) {
         dueDateCheckString = payment['dueDateCheck'];
@@ -742,16 +731,12 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           paymentInvoiceFor: payment['paymentInvoiceFor'],
           status: payment['status'],
           voucherSerialNumber:serialNumber,
-            cancelReason:payment['cancelReason'],
-            cancellationDate:cancellationDate
-
-
+          cancelReason:payment['cancelReason'],
+          cancellationDate:cancellationDate
         );
       }).toList();
 
     });
-    //print("_fetchPayments method in PaymentHistory screen finished");
-
   }
 
 

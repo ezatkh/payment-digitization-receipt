@@ -296,7 +296,7 @@ class DatabaseProvider {
         whereArgs: [voucherSerialNumber],
       );
 
-     print('Payment with voucherSerialNumber $voucherSerialNumber has been cancelled');
+     print('Payment with voucherSerialNumber $voucherSerialNumber has been cancelled with these details : ${cancelReason}:${formattedCancelDateTime}');
     } catch (e) {
       print('Error cancelling payment: $e');
       throw Exception('Failed to cancel payment');

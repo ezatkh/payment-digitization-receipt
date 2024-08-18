@@ -7,26 +7,24 @@ import 'package:local_auth/local_auth.dart';
 import 'package:flutter/material.dart';
 
 class LoginState with ChangeNotifier {
+  final FlutterSecureStorage storage = FlutterSecureStorage();
   String _username = '';
   String _password = '';
   String _usernameLogin = '';
-  bool _rememberMe = false;
-  final FlutterSecureStorage storage = FlutterSecureStorage();
   bool _isLoading = false;
   bool _isLoginSuccessful = false;
 
+
   bool get isLoading => _isLoading;
   bool get isLoginSuccessful => _isLoginSuccessful;
+  String get username => _username;
+  String get usernameLogin => _usernameLogin;
+  String get password => _password;
 
   void setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
   }
-
-  String get username => _username;
-  String get usernameLogin => _usernameLogin;
-  String get password => _password;
-  bool get rememberMe => _rememberMe;
 
   void setUsernameLogin(String username) {
     _usernameLogin = username;
@@ -43,13 +41,6 @@ class LoginState with ChangeNotifier {
   void setPassword(String password) {
     _password = password;
     notifyListeners();
-  }
-
-  void setRememberMe(bool? value) {
-    if (value != null) {
-      _rememberMe = value;
-      notifyListeners();
-    }
   }
 
 
