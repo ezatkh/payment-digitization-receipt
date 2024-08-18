@@ -13,12 +13,11 @@ import 'package:pdf/widgets.dart' as pw;
 import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' show rootBundle;
-
 import '../Utils/Enum.dart';
 
 class ShareScreenOptions {
 
-  static Future<void> sharePdf(BuildContext context, int id, String languageCode) async {
+  static Future<File?> sharePdf(BuildContext context, int id, String languageCode) async {
     try {
       // Get the current localization service without changing the app's locale
       final localizationService = Provider.of<LocalizationService>(context, listen: false);
@@ -29,7 +28,7 @@ class ShareScreenOptions {
       final paymentMap = await DatabaseProvider.getPaymentById(id);
       if (paymentMap == null) {
         print('No payment details found for ID $id');
-        return;
+        return null;
       }
 
 
@@ -226,19 +225,20 @@ class ShareScreenOptions {
 
       // Write the PDF file
       await file.writeAsBytes(await pdf.save());
-
+      return file;
       // Share the PDF file
-      await Share.shareFiles(
-        [file.path],
-        text: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('checkoutPdf'),
-        mimeTypes: ['application/pdf'],
-      );
+
+      // await Share.shareFiles(
+      //   [file.path],
+      //   text: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('checkoutPdf'),
+      //   mimeTypes: ['application/pdf'],
+      // );
     } catch (e) {
       print('Error: $e');
+      return null;
       // Handle the error (e.g., show a snackbar or dialog in the UI)
     }
   }
-
   // Build info table with dynamic localization
   static pw.Widget _buildInfoTableDynamic(List<Map<String, String>> rowData, pw.Font fontEnglish, pw.Font fontArabic, bool isEnglish) {
     return pw.Table(
@@ -312,10 +312,39 @@ class ShareScreenOptions {
     );
   }
 
+
   static void showLanguageSelectionAndShare(BuildContext context, int id,ShareOption option) {
-    _showLanguageSelectionDialog(context, (String languageCode) {
-      sharePdf(context, id, languageCode);
-    });
+
+    switch (option) {
+      case ShareOption.sendEmail:
+      //  _shareViaEmail(context, id, languageCode);
+        break;
+      case ShareOption.sendSms:
+      //  _shareViaSms(context, id, languageCode);
+        break;
+      case ShareOption.print:
+      //  _shareViaSocialMedia(context, id, languageCode);
+        break;
+      case ShareOption.sendWhats:
+        _showLanguageSelectionDialog(context, (String languageCode) async {
+          final file = await sharePdf(context, id, languageCode);
+          if (file != null) {
+            // Share the PDF file via WhatsApp
+            Share.shareFiles(
+              [file.path],
+              text: 'Here is the payment receipt.',
+              mimeTypes: ['application/pdf'],
+            );
+          } else {
+            // Handle case where file could not be generated
+            print('Failed to generate PDF.');
+          }
+        });
+        break;
+      default:
+      // Optionally handle unexpected values
+        break;
+    }
   }
   // Language selection dialog
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
