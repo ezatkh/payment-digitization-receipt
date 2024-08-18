@@ -16,6 +16,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../Utils/Enum.dart';
 
 class ShareScreenOptions {
+  static String? _selectedLanguageCode;
 
   static Future<File?> sharePdf(BuildContext context, int id, String languageCode) async {
     try {
@@ -312,41 +313,54 @@ class ShareScreenOptions {
     );
   }
 
+  static void showLanguageSelectionAndShare(BuildContext context, int id, ShareOption option) {
+    _showLanguageSelectionDialog(context, (String languageCode) {
+      _selectedLanguageCode = languageCode;
+      _handleShareOption(context, id, option);
+    });
+  }
 
-  static void showLanguageSelectionAndShare(BuildContext context, int id,ShareOption option) {
-
+  static void _handleShareOption(BuildContext context, int id, ShareOption option) {
     switch (option) {
       case ShareOption.sendEmail:
-      //  _shareViaEmail(context, id, languageCode);
+        _shareViaEmail(context, id, _selectedLanguageCode!);
         break;
       case ShareOption.sendSms:
-      //  _shareViaSms(context, id, languageCode);
+        _shareViaSms(context, id, _selectedLanguageCode!);
         break;
       case ShareOption.print:
-      //  _shareViaSocialMedia(context, id, languageCode);
+        _shareViaPrint(context, id, _selectedLanguageCode!);
         break;
       case ShareOption.sendWhats:
-        _showLanguageSelectionDialog(context, (String languageCode) async {
-          final file = await sharePdf(context, id, languageCode);
-          if (file != null) {
-            // Share the PDF file via WhatsApp
-            Share.shareFiles(
-              [file.path],
-              text: 'Here is the payment receipt.',
-              mimeTypes: ['application/pdf'],
-            );
-          } else {
-            // Handle case where file could not be generated
-            print('Failed to generate PDF.');
-          }
-        });
+        _shareViaWhatsApp(context, id, _selectedLanguageCode!);
         break;
       default:
       // Optionally handle unexpected values
         break;
     }
   }
-  // Language selection dialog
+
+  static void _shareViaEmail(BuildContext context, int id, String languageCode) {
+    // Implement email sharing logic using the selected language
+  }
+  static void _shareViaSms(BuildContext context, int id, String languageCode) {
+    // Implement SMS sharing logic using the selected language
+  }
+  static void _shareViaPrint(BuildContext context, int id, String languageCode) {
+    // Implement print logic using the selected language
+  }
+  static void _shareViaWhatsApp(BuildContext context, int id, String languageCode) async {
+    final file = await sharePdf(context, id, languageCode);
+    if (file != null) {
+      Share.shareFiles(
+        [file.path],
+        text: 'Here is the payment receipt.',
+        mimeTypes: ['application/pdf'],
+      );
+    } else {
+      print('Failed to generate PDF.');
+    }
+  }
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
     showModalBottomSheet(
       context: context,
