@@ -259,23 +259,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     backgroundColor: Colors.grey.shade300,
                     textColor: Colors.black,
                   ),
+
                   _buildDialogButton(
                     context: context,
                     label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('logout'),
                     onPressed: () async {
-                      // Clear user data
-                      SharedPreferences prefs = await SharedPreferences.getInstance();
-                      await prefs.remove('token');
-                      await prefs.remove('language_code');
-                      await prefs.setString('language_code', 'en'); // Set default language
-                      await prefs.remove('usernameLogin');
-
-                      // Navigate to login screen
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                            (route) => false, // This disables popping the LoginScreen route
-                      );
+                      PaymentService.showLoadingAndNavigate(context);
                     },
                     backgroundColor: Color(0xFFC62828), // Ooredoo theme color
                     textColor: Colors.white,

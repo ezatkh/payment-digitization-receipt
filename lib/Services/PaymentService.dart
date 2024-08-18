@@ -1,26 +1,113 @@
+import 'dart:ui';
+
 import 'package:digital_payment_app/Services/secure_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:digital_payment_app/Services/database.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:number_to_words_english/number_to_words_english.dart';
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../Models/LoginState.dart';
 import '../Screens/LoginScreen.dart';
+import 'LocalizationService.dart';
 import 'apiConstants.dart';
 
 
 class PaymentService {
+  static Timer? _networkTimer; // Reference to the Timer
   static final StreamController<void> _syncController = StreamController<
       void>.broadcast();
 
   static Stream<void> get syncStream => _syncController.stream;
 
-  static void navigateToLoginScreen(BuildContext context) {
+
+  static void _cancelNetworkTimer() {
+    if (_networkTimer != null) {
+      _networkTimer!.cancel();
+      _networkTimer = null;
+    }
+  }
+
+  static Future<void> showLoadingAndNavigate(BuildContext context) async {
+    // Show custom loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return Center(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10.r),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                width: 130.w,
+                height: 100.h,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2), // Semi-transparent white for glass effect
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SpinKitFadingCircle(
+                      itemBuilder: (BuildContext context, int index) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index.isEven
+                                ? Colors.white
+                                : Colors.grey[300], // Adjust color for effect
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10.h), // Reduced space between spinner and text
+                    Text(
+                      Provider.of<LocalizationService>(context, listen: false).getLocalizedString('pleaseWait'),
+                      style: TextStyle(
+                        decoration: TextDecoration.none,
+                        color: Colors.white,
+                        fontFamily: 'NotoSansUI',
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    // Ensure the loading dialog is displayed for at least 1 second
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Clear user data
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('language_code');
+    await prefs.setString('language_code', 'en'); // Set default language
+    await prefs.remove('usernameLogin');
+    _cancelNetworkTimer();
+
+    // Dismiss the loading dialog
+    Navigator.of(context).pop(); // Dismiss the progress indicator dialog
+
+    // Navigate to the login screen
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -40,7 +127,9 @@ class PaymentService {
   }
 
   static void startPeriodicNetworkTest(BuildContext context) {
-    Timer.periodic(Duration(seconds: 5), (Timer timer) async {
+    _cancelNetworkTimer();
+
+    _networkTimer = Timer.periodic(Duration(seconds: 5), (Timer timer) async {
       await testNetwork(context);
     });
   }
@@ -57,7 +146,6 @@ class PaymentService {
   static Future<void> syncPayments(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? tokenID = prefs.getString('token');
-
     if (tokenID == null) {
       print('Token not found');
       return;
@@ -253,7 +341,6 @@ class PaymentService {
       } else {
         print("Re-login failed. Unable to sync payment.");
         _showSessionExpiredDialog(context); // Show session expired message
-        navigateToLoginScreen(context);
       }
     } else {
       print("Username or password is missing. Cannot attempt re-login.");
@@ -269,11 +356,13 @@ class PaymentService {
           content: Text('Your session has expired. Please contact the admin.'),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                await Future.delayed(Duration(seconds: 1));
                 Navigator.of(context).pop(); // Close the dialog
-                navigateToLoginScreen(context); // Navigate to login screen
-              },
-              child: Text('OK'),
+                showLoadingAndNavigate(context); // Navigate to login screen
+              },//
+              child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
+              ),
             ),
           ],
         );

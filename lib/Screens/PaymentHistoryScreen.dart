@@ -429,10 +429,11 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       if(record.status.toLowerCase() == 'canceldpending' || record.status.toLowerCase() == 'cancelled' ) ...[
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancellationDate'), formatDate((record.cancellationDate!)).toString()),
         _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancellationTime'), formatTime((record.cancellationDate!)).toString()),
-        _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelReason'), (record.cancelReason!)),
+        _detailNoteItem(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelReason'), (record.cancelReason!),Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
+      //lll
       ],
       if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
-    _paymentDetailRowWithMultiline(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentInvoiceFor'), record.paymentInvoiceFor.toString()),
+        _detailNoteItem(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentInvoiceFor'), record.paymentInvoiceFor.toString(),Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
     SizedBox(height: 8.h),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -738,7 +739,54 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
     });
   }
+//lll
+  Widget _detailNoteItem(String title, String value, String locale) {
+    // Determine if the locale is RTL
+    bool isRtl = locale == 'ar'; // Assuming 'ar' is the locale for Arabic
 
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Title
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: isRtl ? Alignment.centerRight : Alignment.centerLeft,
+              child: Text(
+                title,
+                textAlign: isRtl ? TextAlign.right : TextAlign.left,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 8.0),
+          // Value
+          Expanded(
+            flex: 3,
+            child: Align(
+              alignment: isRtl ? Alignment.centerLeft : Alignment.centerRight,
+              child: Text(
+                value,
+                textAlign: isRtl ? TextAlign.left : TextAlign.right,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
 }
 

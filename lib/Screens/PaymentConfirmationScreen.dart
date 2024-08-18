@@ -3,7 +3,6 @@
   import 'package:flutter/material.dart';
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:provider/provider.dart';
-  import '../Models/Currency.dart';
   import '../Services/LocalizationService.dart';
   import 'package:intl/intl.dart';
   import 'package:number_to_word_arabic/number_to_word_arabic.dart';

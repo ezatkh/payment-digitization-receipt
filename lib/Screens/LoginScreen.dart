@@ -6,7 +6,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Custom_Widgets/CustomButton.dart';
 import '../Custom_Widgets/CustomTextField.dart';
 import '../Custom_Widgets/LogoWidget.dart';
@@ -30,7 +29,6 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690), minTextAdapt: true);
-    final theme = Theme.of(context);
     double maxWidth =
         ScreenUtil().screenWidth > 600 ? 600.w : ScreenUtil().screenWidth * 0.9;
 

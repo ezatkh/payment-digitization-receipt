@@ -1,8 +1,3 @@
-import 'dart:convert';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/material.dart';
-
 class Payment {
   String voucherSerialNumber;
   String customerName;
@@ -23,28 +18,6 @@ class Payment {
   String? cancelReason;
   DateTime? cancellationDate;
 
-  void printAllFields() {
-    if(this.status.toLowerCase() == 'saved')
-      print("lastUpdatedDate: " + this.lastUpdatedDate.toString() ?? '');
-    else print("transactionDate: " + this.transactionDate.toString() ?? '');
-    print("voucherSerialNumber: " + (this.voucherSerialNumber.toString()));
-    print("id: " + (this.id.toString()));
-    print("customerName: " + (this.customerName ?? ''));
-    print("msisdn: " + (this.msisdn ?? ''));
-    print("prNumber: " + (this.prNumber ?? ''));
-    print("paymentMethod: " + (this.paymentMethod ?? ''));
-    print("amount: " + (this.amount?.toString() ?? ''));
-    print("amountCheck: " + (this.amountCheck?.toString() ?? ''));
-    print("checkNumber: " + (this.checkNumber.toString() ?? ''));
-    print("bankBranch: " + (this.bankBranch ?? ''));
-    print("dueDateCheck: " + (this.dueDateCheck.toString() ?? ''));
-    print("currency: " + (this.currency ?? ''));
-    print("paymentInvoiceFor: " + (this.paymentInvoiceFor ?? ''));
-    print("status: " + this.status);
-    print("cancelReason: " + (this.cancelReason ?? '')); // New field
-    print("cancellationDate: " + (this.cancellationDate?.toString() ?? '')); // New field
-
-  }
   Payment({
     this.transactionDate,
     this.lastUpdatedDate,
@@ -91,6 +64,7 @@ class Payment {
 
     );
   }
+  // delete vougher serial number duplicate
   Map<String, dynamic> toMap() {
     return {
       'voucherSerialNumber': voucherSerialNumber,
@@ -106,7 +80,6 @@ class Payment {
       'currency': currency,
       'paymentInvoiceFor': paymentInvoiceFor,
       'status': status,
-      'voucherSerialNumber': voucherSerialNumber,
       'id': id,
       'transactionDate': transactionDate?.toIso8601String(),
       'lastUpdatedDate': lastUpdatedDate?.toIso8601String(),
