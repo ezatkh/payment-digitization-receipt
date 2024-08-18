@@ -83,20 +83,17 @@ class PaymentService {
         cancelledPendingPayments.add(payment);
       }
     }
-// Assuming NumberToWordsEnglish.convert expects an int
-
 
     for (var payment in confirmedPayments) {
       PaymentService.syncPayment(payment, apiUrl, headers,context);
     }
-print("tt");
+
     for (var p in cancelledPendingPayments) {
       Map<String, String> body = {
         "voucherSerialNumber": p["voucherSerialNumber"],
         "cancelReason": p["cancelReason"].toString(),
         "cancelTransactionDate": p["cancellationDate"] ,
       };
-      print("kk");
       print(body);
       try {
         final response = await http.delete(
@@ -159,8 +156,7 @@ print("tt");
         // Parse the response
         Map<String, dynamic> responseBody = json.decode(response.body);
         String? voucherSerialNumber = responseBody['voucherSerialNumber'];
-        print("voucherSerialNumber :");
-        print(voucherSerialNumber!);
+        print("voucherSerialNumber : ${voucherSerialNumber!}");
 
         // Update payment in local database
         await DatabaseProvider.updatePaymentvoucherSerialNumber(
