@@ -127,6 +127,7 @@ class LoginScreen extends StatelessWidget {
           else{
           bool isValid = validateLoginInputs(loginState);
           if (isValid) {
+            _handleLogin(context, localizationService);
           bool? loginResult =await loginState.login(loginState.username,loginState.password);
           if (loginResult ) {
             await saveCredentials(loginState.username,loginState.password);
@@ -134,11 +135,15 @@ class LoginScreen extends StatelessWidget {
             await LOVCompareService.compareAndSyncBanks();
             await PaymentService.getExpiredPaymentsNumber();
 
-            _handleLogin(
-          context, localizationService);
-
+            Navigator.of(context).pop();  // Dismiss the loading dialog
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardScreen()),
+            );
           } else {
-          _showLoginFailedDialog(
+            Navigator.of(context).pop();
+
+            _showLoginFailedDialog(
           context,
           localizationService
               .getLocalizedString(
@@ -457,9 +462,9 @@ class LoginScreen extends StatelessWidget {
     return true; // Validation succeeded
   }
 
-  void _handleLogin(
-      BuildContext context, LocalizationService localizationService) async {
+  void _handleLogin(BuildContext context, LocalizationService localizationService) async {
     print("_handleLogin invoked in loginScreen");
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -474,7 +479,6 @@ class LoginScreen extends StatelessWidget {
                 height: 100.h,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  // Semi-transparent white for glass effect
                   borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
                     color: Colors.white.withOpacity(0.2),
@@ -492,13 +496,12 @@ class LoginScreen extends StatelessWidget {
                             shape: BoxShape.circle,
                             color: index.isEven
                                 ? Colors.white
-                                : Colors.grey[300], // Adjust color for effect
+                                : Colors.grey[300],
                           ),
                         );
                       },
                     ),
                     SizedBox(height: 10.h),
-                    // Reduced space between spinner and text
                     Text(
                       localizationService.getLocalizedString('pleaseWait'),
                       style: TextStyle(
@@ -518,13 +521,9 @@ class LoginScreen extends StatelessWidget {
       },
     );
 
+    // Ensure the dialog is shown for at least 2 seconds
     await Future.delayed(const Duration(seconds: 2));
-    Navigator.of(context).pop(); // Dismiss the progress indicator dialog
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => DashboardScreen()),
-    );
   }
+
 
 }
