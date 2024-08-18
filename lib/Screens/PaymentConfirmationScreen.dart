@@ -275,7 +275,7 @@
                   languageCode == 'ar'
                       ? Tafqeet.convert(paymentDetails['amountCheck']?.toInt().toString() ?? '')
                       : NumberToWordsEnglish.convert(paymentDetails['amountCheck'] != null ? (paymentDetails['amountCheck'] as double).toInt() : 0)
-              ),
+              ,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
               _divider(),
               _detailItem(checkNumber, paymentDetails['checkNumber']?.toString() ?? ''),
               _divider(),
@@ -294,10 +294,10 @@
                 languageCode == 'ar'
                     ?  paymentDetails['amount']!= null ? Tafqeet.convert(paymentDetails['amount'].toInt().toString() )  : 'Invalid amount'
                     : NumberToWordsEnglish.convert(paymentDetails['amount'] != null ? (paymentDetails['amount'] as double).toInt() : 0),
-              ),
+      Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
             ],
             _divider(),
-            _detailNoteItem(paymentInvoiceFor, paymentDetails['paymentInvoiceFor']?.toString() ?? ''),
+            _detailNoteItem(paymentInvoiceFor, paymentDetails['paymentInvoiceFor']?.toString() ?? '',Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
           ],
         ),
       );
@@ -345,6 +345,35 @@
                   ),
                 ),
               if (canSend)
+                ...[
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('print'),
+                    child:IconButton(
+                      icon: Icon(Icons.print, color: Colors.black),
+                      onPressed: () {
+                      },
+                    ),),
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
+                    child:IconButton(
+                      icon: Icon(Icons.message),
+                      onPressed: () {
+                      },
+                    ),),
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
+                    child:IconButton(
+                      icon: Icon(Icons.email),
+                      onPressed: () {
+                      },
+                    ),),
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendWhats'),
+                    child:IconButton(
+                      icon: Icon(Icons.whatshot),
+                      onPressed: () {
+                      },
+                    ),),
                 Tooltip(
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment'),
                     child:IconButton(
@@ -353,6 +382,8 @@
                   ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
                 },
                     ),),
+
+                ],
 
               if (canDelete)
                 Tooltip(
@@ -480,27 +511,43 @@
       );
     }
 
-    Widget _detailNoteItem(String title, String value) {
+    Widget _detailNoteItem(String title, String value, String languageCode) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: languageCode == 'ar' ? TextAlign.right : TextAlign.left, // Adjust alignment based on language
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 4.h), // Adjust space between title and value if needed
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.black54,
-              ),
+            SizedBox(height: 4.h), // Adjust space between title and value
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    value,
+                    textAlign: languageCode == 'ar' ? TextAlign.left : TextAlign.right, // Opposite alignment for value
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

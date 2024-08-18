@@ -211,11 +211,7 @@ class SettingsScreen extends StatelessWidget {
                     context: context,
                     label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('logout'),
                     onPressed: () {
-                 //     PaymentService.closeSyncController();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                      );
+                          PaymentService.showLoadingAndNavigate(context);
                     },
                     backgroundColor: Color(0xFFC62828), // Ooredoo theme color
                     textColor: Colors.white,
