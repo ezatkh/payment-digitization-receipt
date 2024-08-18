@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../Services/database.dart';
 import '../Models/Payment.dart';
 import '../Services/secure_storage.dart';
+import '../Utils/Enum.dart';
 import 'PaymentConfirmationScreen.dart';
 import '../Services/PaymentService.dart';
 import '../Custom_Widgets/CustomPopups.dart';
@@ -569,7 +570,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   child: IconButton(
                     icon: Icon(Icons.send, color: Colors.green),
                     onPressed: () {
-                      ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!);
+                      ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendWhats);
                     },
                   ),
                 ),

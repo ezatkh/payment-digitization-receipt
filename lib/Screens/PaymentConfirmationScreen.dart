@@ -9,11 +9,14 @@
   import 'package:number_to_words_english/number_to_words_english.dart';
   import '../Services/PaymentService.dart';
   import '../Services/database.dart';
-  import 'PaymentCancellationScreen.dart';
+  import '../Utils/Enum.dart';
+import 'PaymentCancellationScreen.dart';
   import 'PaymentHistoryScreen.dart';
   import '../Custom_Widgets/CustomPopups.dart';
   import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
   import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
+  import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 
   class PaymentConfirmationScreen extends StatefulWidget {
     final int paymentId;
@@ -351,38 +354,46 @@
                     child:IconButton(
                       icon: Icon(Icons.print, color: Colors.black),
                       onPressed: () {
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.print);
+
                       },
                     ),),
                   Tooltip(
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
-                    child:IconButton(
-                      icon: Icon(Icons.message),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.75),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    textStyle: TextStyle(color: Colors.white),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.message,
+                        color: Colors.green, // Set the color of the icon here
+                      ),
                       onPressed: () {
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendSms);
+
                       },
-                    ),),
+                    )
+                  ),
                   Tooltip(
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
                     child:IconButton(
-                      icon: Icon(Icons.email),
+                      icon: Icon(Icons.email,  color: Colors.blue,
+                      ),
                       onPressed: () {
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendEmail);
                       },
-                    ),),
-                  Tooltip(
-                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendWhats'),
-                    child:IconButton(
-                      icon: Icon(Icons.whatshot),
-                      onPressed: () {
-                      },
-                    ),),
+                    ),),//
                 Tooltip(
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment'),
                     child:IconButton(
-                icon: Icon(Icons.send, color: Colors.green),
+                      icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
                 onPressed: () {
-                  ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId);
+                  ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendWhats);
                 },
-                    ),),
-
+                    ),
+                ),
                 ],
 
               if (canDelete)
@@ -474,7 +485,6 @@
                       },
                   ),
                 ),
-
             ],
           ),
         ],

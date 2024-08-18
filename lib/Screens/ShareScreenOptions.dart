@@ -14,6 +14,8 @@ import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../Utils/Enum.dart';
+
 class ShareScreenOptions {
 
   static Future<void> sharePdf(BuildContext context, int id, String languageCode) async {
@@ -310,88 +312,79 @@ class ShareScreenOptions {
     );
   }
 
-  static void showLanguageSelectionAndShare(BuildContext context, int id) {
+  static void showLanguageSelectionAndShare(BuildContext context, int id,ShareOption option) {
     _showLanguageSelectionDialog(context, (String languageCode) {
       sharePdf(context, id, languageCode);
     });
   }
   // Language selection dialog
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 12.0,
+                offset: Offset(0, -4),
+              ),
+            ],
           ),
-          elevation: 12,
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12.0),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10.0,
-                  offset: Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('selectPreferredLanguage'),
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 16),
-                _buildLanguageOption(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString('english'), 'en', onLanguageSelected),
-                SizedBox(height: 8),
-                _buildLanguageOption(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString('arabic'), 'ar', onLanguageSelected),
-              ],
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Select Preferred Language',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20),
+              _buildLanguageButton(context, 'English', 'en', Icons.language, onLanguageSelected),
+              SizedBox(height: 12),
+              _buildLanguageButton(context, 'Arabic', 'ar', Icons.language, onLanguageSelected),
+            ],
           ),
         );
       },
     );
   }
 
-  static Widget _buildLanguageOption(BuildContext context, String language, String code, Function(String) onLanguageSelected) {
-    return InkWell(
-      onTap: () {
+  static Widget _buildLanguageButton(BuildContext context, String language, String code, IconData icon, Function(String) onLanguageSelected) {
+    return ElevatedButton(
+      onPressed: () {
         onLanguageSelected(code);
         Navigator.of(context).pop();
       },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
-        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: Colors.white,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.black, backgroundColor: Colors.white,
+        elevation: 4,
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6.0,
-              offset: Offset(0, 3),
-            ),
-          ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              language,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            Icon(
-              Icons.language,
-              color: Colors.blueAccent,
-            ),
-          ],
-        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            language,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          Icon(
+            icon,
+            color: Colors.blueAccent,
+          ),
+        ],
       ),
     );
   }
+
 }
