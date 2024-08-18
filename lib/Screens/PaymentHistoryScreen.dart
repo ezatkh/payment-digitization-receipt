@@ -201,7 +201,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  status,
+                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString(status.toLowerCase()),
                   style: TextStyle(
                     fontSize: 12.0,  // Font size
                     fontWeight: FontWeight.w300,  // Font weight
@@ -286,7 +286,8 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 children: <String>['Saved', 'Confirmed', 'Synced', 'cancelPending', 'Cancelled']
                     .map((String status) {
                   return CheckboxListTile(
-                    title: Text(                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString(status.toLowerCase()),
+                    title: Text(
+                      Provider.of<LocalizationService>(context, listen: false).getLocalizedString(status.toLowerCase()),
                     ),
                     value: _selectedStatuses.contains(status),
                     onChanged: (bool? value) {
@@ -409,7 +410,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
 
     ],
 
-    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentMethod'), record.paymentMethod),
+    _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentMethod'),Provider.of<LocalizationService>(context, listen: false).getLocalizedString(record.paymentMethod.toLowerCase()) ),
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('status'), Provider.of<LocalizationService>(context, listen: false).getLocalizedString(record.status.toLowerCase())),
     if (record.msisdn != null && record.msisdn!.isNotEmpty)
     _paymentDetailRow(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('MSISDN'), record.msisdn.toString()),
