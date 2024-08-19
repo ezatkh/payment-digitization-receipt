@@ -14,6 +14,8 @@ import 'dart:io';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import '../Utils/Enum.dart';
+import 'EmailBottomSheet.dart';
+import 'SMSBottomSheet.dart';
 
 class ShareScreenOptions {
   static String? _selectedLanguageCode;
@@ -31,7 +33,6 @@ class ShareScreenOptions {
         print('No payment details found for ID $id');
         return null;
       }
-
 
       // Create a Payment instance from the fetched map
       final payment = Payment.fromMap(paymentMap);
@@ -314,19 +315,12 @@ class ShareScreenOptions {
   }
 
   static void showLanguageSelectionAndShare(BuildContext context, int id, ShareOption option) {
-    _showLanguageSelectionDialog(context, (String languageCode) {
-      _selectedLanguageCode = languageCode;
-      _handleShareOption(context, id, option);
-    });
-  }
-
-  static void _handleShareOption(BuildContext context, int id, ShareOption option) {
     switch (option) {
       case ShareOption.sendEmail:
-        _shareViaEmail(context, id, _selectedLanguageCode!);
+        _shareViaEmail(context, id);
         break;
       case ShareOption.sendSms:
-        _shareViaSms(context, id, _selectedLanguageCode!);
+        _shareViaSms(context, id);
         break;
       case ShareOption.print:
         _shareViaPrint(context, id, _selectedLanguageCode!);
@@ -338,13 +332,35 @@ class ShareScreenOptions {
       // Optionally handle unexpected values
         break;
     }
+
   }
 
-  static void _shareViaEmail(BuildContext context, int id, String languageCode) {
-    // Implement email sharing logic using the selected language
+  static Future<void> _shareViaEmail(BuildContext context, int id) async {
+    // Fetch payment details from the database
+    final paymentMap = await DatabaseProvider.getPaymentById(id);
+    if (paymentMap == null) {
+      print('No payment details found for ID $id');
+      return null;
+    }
+
+    // Create a Payment instance from the fetched map
+    final payment = Payment.fromMap(paymentMap);
+
+    showEmailBottomSheet(context,payment);
   }
-  static void _shareViaSms(BuildContext context, int id, String languageCode) {
-    // Implement SMS sharing logic using the selected language
+
+  static Future<void> _shareViaSms(BuildContext context, int id) async {
+    // Fetch payment details from the database
+    final paymentMap = await DatabaseProvider.getPaymentById(id);
+    if (paymentMap == null) {
+      print('No payment details found for ID $id');
+      return null;
+    }
+
+    // Create a Payment instance from the fetched map
+    final payment = Payment.fromMap(paymentMap);
+
+    showSmsBottomSheet(context,payment);
   }
   static void _shareViaPrint(BuildContext context, int id, String languageCode) {
     // Implement print logic using the selected language
@@ -386,13 +402,13 @@ class ShareScreenOptions {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Select Preferred Language',
+                Provider.of<LocalizationService>(context, listen: false).getLocalizedString("selectPreferredLanguage"),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              _buildLanguageButton(context, 'English', 'en', Icons.language, onLanguageSelected),
+              _buildLanguageButton(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("english"), 'en', Icons.language, onLanguageSelected),
               SizedBox(height: 12),
-              _buildLanguageButton(context, 'Arabic', 'ar', Icons.language, onLanguageSelected),
+              _buildLanguageButton(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("arabic"), 'ar', Icons.language, onLanguageSelected),
             ],
           ),
         );

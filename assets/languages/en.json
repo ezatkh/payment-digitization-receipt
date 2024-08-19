@@ -20,6 +20,7 @@
   "position": "Position",
   "email": "Email",
   "phone": "Phone",
+  "phoneNumber": "PhoneNumber",
   "region": "Region",
   "department": "Department",
   "lastLogin": "LastLogin",
@@ -192,5 +193,24 @@
   "checkoutPdf": "Checkout Pdf",
   "userid": "User Id",
   "footerPdf": "Please keep the receipt as proof of payment",
-  "hello": "Hello"
+  "hello": "Hello",
+
+  "emailSubject": "Payment Notification -",
+  "emailBodyLine1": "Dear Subscriber",
+  "emailBodyLine2": "Attached is your payment notification dated",
+  "emailBodyLine3": "and thank you",
+  "smsSubject": "Payment Notification -",
+  "subject": "Subject",
+  "body": "Subject",
+  "to": "To",
+  "toFieldError": "Please enter an email address",
+  "send": "Send",
+  "phoneNumber": "PhoneNumber",
+  "message": "Message",
+  "phoneNumberFieldError": "Please enter a valid phone number",
+
+  "sendSms": "Share Via SMS",
+  "sendEmail": "Share Via Email",
+  "selectLanguageForMessage": "Select language of Message:",
+  "selectLanguageForEmail": "Select language of Email:"
 }

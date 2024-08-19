@@ -186,5 +186,26 @@
   "checkoutPdf": "تحقق من ملف PDF",
   "userid": "رمز المستخدم",
   "footerPdf": "الرجاء الإحتفاظ بالسند لإثبات الدفع",
-  "hello": "مرحبا"
+  "hello": "مرحبا",
+
+  "emailSubject": "إشعار دفع -",
+  "emailBodyLine1": "عزيزي المشترك",
+  "emailBodyLine2": "مرفق لحضرتكم إشعار دفع بتاريخ",
+  "emailBodyLine3": "وشكراً",
+  "smsSubject": "إشعار دفع -",
+  "subject": "الموضوع",
+  "body": "المحتوى",
+  "to": "إلى",
+  "toFieldError": "يرجى إدخال عنوان البريد الإلكتروني",
+  "send": "إرسال",
+  "phoneNumber": "رقم الهاتف",
+  "message": "الرسالة",
+  "phoneNumberFieldError": "يرجى إدخال رقم هاتف صحيح",
+
+  "sendSms": "مشاركة عبر واتساب",
+  "sendEmail": "مشاركة عبر إيميل",
+  "selectLanguageForMessage": "إختر لغة الرسالة:",
+  "selectLanguageForEmail": "إختر لغة الإيميل :"
+
+
 }

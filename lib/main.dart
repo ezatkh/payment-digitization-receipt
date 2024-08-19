@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Screens/SplashScreen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Services/LocalizationService.dart';
-import 'Services/PaymentService.dart';
 import 'package:workmanager/workmanager.dart';
 
 // Define the task key
