@@ -192,7 +192,7 @@
   "emailBodyLine1": "عزيزي المشترك",
   "emailBodyLine2": "مرفق لحضرتكم إشعار دفع بتاريخ",
   "emailBodyLine3": "وشكراً",
-  "smsSubject": "إشعار دفع -",
+  "smsSubject": "تم استقبال دفعة ",
   "subject": "الموضوع",
   "body": "المحتوى",
   "to": "إلى",

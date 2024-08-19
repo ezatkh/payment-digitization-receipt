@@ -563,8 +563,33 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     },
                   ),
                 ),
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
+                  child:IconButton(
+                    icon: Icon(Icons.email,  color: Colors.blue,
+                    ),
+                    onPressed: () {
+                      ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendEmail);
+                    },
+                  ),),
+                Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.75),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    textStyle: TextStyle(color: Colors.white),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.message,
+                        color: Colors.green, // Set the color of the icon here
+                      ),
+                      onPressed: () {
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendSms);
 
-
+                      },
+                    )
+                ),
                 Tooltip(
                   message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment') ,
                   child: IconButton(

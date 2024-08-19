@@ -355,7 +355,6 @@ import 'PaymentCancellationScreen.dart';
                       icon: Icon(Icons.print, color: Colors.black),
                       onPressed: () {
                         ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.print);
-
                       },
                     ),),
                   Tooltip(

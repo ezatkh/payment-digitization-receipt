@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/database.dart';
 
 class SmsBottomSheet extends StatefulWidget {
   final Payment payment;
@@ -150,8 +151,19 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                             await _loadLocalizedMessage(_selectedMessageLanguage);
 
                             if (_messageJson != null) {
+
+                              Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(widget.payment.currency!);
+                              String AppearedCurrency='';
+                              setState(() {
+                                 AppearedCurrency = _selectedMessageLanguage == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
+                              });
                               // Fetch the localized message based on the selected language
-                              String message = '${_messageJson!['smsSubject']} ${widget.payment.transactionDate}';
+                              String message ='';
+                              if(widget.payment.paymentMethod.toLowerCase() == 'cash' || widget.payment.paymentMethod.toLowerCase() == 'كاش')
+                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]}  ${widget.payment.amount}  ${AppearedCurrency}';
+                             else
+                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]}  ${widget.payment.amountCheck}  ${widget.payment.currency}';
+
                               print("Phone Number: ${_phoneController.text}");
                               print("Message Language: $_selectedMessageLanguage");
                               print("Message: $message");
@@ -164,7 +176,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                           icon: Icon(Icons.send),
                           label: Text(appLocalization.getLocalizedString('send')),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
+                            backgroundColor: Color(0xFFC62828),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

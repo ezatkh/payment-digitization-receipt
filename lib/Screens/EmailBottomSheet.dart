@@ -179,7 +179,7 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
                           icon: Icon(Icons.send),
                           label: Text(appLocalization.getLocalizedString('send')),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
+                            backgroundColor: Color(0xFFC62828),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
