@@ -264,6 +264,38 @@ class DatabaseProvider {
     await db.delete('payments', where: 'id = ?', whereArgs: [id]);
   }
 
+  static Future<void> deleteRecordsOlderThan(int days) async {
+    Database db = await database;
+
+    // Calculate the threshold date
+    DateTime now = DateTime.now();
+    DateTime thresholdDate = now.subtract(Duration(days: days));
+
+    // Start of day for threshold date
+    DateTime startOfDay = DateTime(thresholdDate.year, thresholdDate.month, thresholdDate.day);
+
+    // Log the threshold date for debugging
+    print('Deleting records older than: ${startOfDay.toIso8601String()}');
+
+    try {
+      await db.transaction((Transaction txn) async {
+        // Execute delete commands within the transaction
+        await txn.execute(
+          'DELETE FROM payments WHERE status != ? AND transactionDate < ?',
+          ['saved', startOfDay.toIso8601String()],
+        );
+        await txn.execute(
+          'DELETE FROM payments WHERE status = ? AND lastUpdatedDate < ?',
+          ['saved', startOfDay.toIso8601String()],
+        );
+      });
+    } catch (e) {
+      print('Error during delete operation: $e');
+    }
+  }
+
+
+
   // Clear Date base
   static Future<void> clearDatabase() async {
     Database db = await database;

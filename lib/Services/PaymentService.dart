@@ -379,8 +379,6 @@ class PaymentService {
       return;
     }
     String fullToken = "Barer ${tokenID}";
-    print("the token to user hen cancel :${fullToken}");
-
 
     try {
       Map<String, String> headers = {
@@ -393,11 +391,23 @@ class PaymentService {
       );
 
       if (response.statusCode == 200) {
-        print(response.body);
+        int days;
+        try {
+          days = int.parse(response.body); // Parse the body to an integer
+        } catch (e) {
+          print('Error parsing days from response body: $e');
+          return;
+        }
+        print("number of ays to delete before is : ${days}");
+        await DatabaseProvider.deleteRecordsOlderThan(days);
+      }
+      else {
+        print('Failed to get the number of days. Status code: ${response.statusCode}');
       }
     } catch (e) {
       // Handle the error if needed
       print('Error deleting expired payment: $e');
     }
+
   }
 }
