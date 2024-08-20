@@ -38,6 +38,125 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   Map<String, String> _banks = {};
 
 
+  void _fetchPayments() async {
+    if (!mounted) return;
+
+    if (_currencies ==null || _currencies.length<1){
+      print("no currency");
+      List<Map<String, dynamic>> currencies = await DatabaseProvider.getAllCurrencies();
+      String selectedCode = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode;
+      Map<String, String> currencyMap = {};
+      for (var currency in currencies) {
+        String id = currency["id"];
+        String name = selectedCode == "ar" ? currency["arabicName"] : currency["englishName"];
+        currencyMap[id] = name;
+      }
+      setState(() {
+        _currencies=currencyMap;
+      });
+    }
+    if (_banks ==null || _banks.length<1){
+      print("no banks");
+      List<Map<String, dynamic>> banks = await DatabaseProvider.getAllBanks();
+      String selectedCode = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode;
+      Map<String, String> bankMap = {};
+      for (var bank in banks) {
+        String id = bank["id"];
+        String name = selectedCode == "ar" ? bank["arabicName"] : bank["englishName"];
+        bankMap[id] = name;
+      }
+      setState(() {
+        _banks=bankMap;
+      });
+    }
+
+    //print("_fetchPayments method in PaymentHistory screen started");
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String usernameLogin = prefs.getString('usernameLogin') ?? 'null';
+    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses,usernameLogin.toLowerCase());
+    String? dueDateCheckString ;
+    DateTime? dueDateCheck;
+    String? lastUpdatedDateString ;
+    DateTime? lastUpdatedDate;
+    String? transactionDateString ;
+    DateTime? transactionDate;
+    String? cancellationDateString ;
+    DateTime? cancellationDate;
+    String serialNumber="";
+    if (mounted){
+    setState(() {
+      _paymentRecords = payments.map((payment) {
+        dueDateCheckString = payment['dueDateCheck'];
+        lastUpdatedDateString = payment['lastUpdatedDate'];
+        transactionDateString = payment['transactionDate'];
+        cancellationDateString = payment['cancellationDate'];
+
+        if(cancellationDateString != null && cancellationDateString!.isNotEmpty)
+          try {
+            cancellationDate =  DateTime.parse(cancellationDateString!);
+          } catch (e) {
+            //print('Error parsing cancellationDate: $cancellationDate');
+            cancellationDate = null;
+          }
+
+        if(payment['voucherSerialNumber'] != null)
+          serialNumber=payment['voucherSerialNumber'];
+        if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
+          try {
+            dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
+          } catch (e) {
+            //print('Error parsing dueDateCheck: $dueDateCheckString');
+            dueDateCheck = null;
+          }
+        } else {
+          dueDateCheck = null;
+        }
+        if (lastUpdatedDateString != null && lastUpdatedDateString!.isNotEmpty) {
+          try {
+            lastUpdatedDate =  DateTime.parse(lastUpdatedDateString!);
+          } catch (e) {
+            //print('Error parsing dueDateCheck: $lastUpdatedDate');
+            lastUpdatedDate = null;
+          }
+        } else {
+          lastUpdatedDate = null;
+        }
+        if (transactionDateString != null && transactionDateString!.isNotEmpty) {
+          try {
+            transactionDate =  DateTime.parse(transactionDateString!);
+          } catch (e) {
+            //print('Error parsing dueDateCheck: $transactionDate');
+            transactionDate = null;
+          }
+        } else {
+          transactionDate = null;
+        }
+
+        return Payment(
+            id:payment['id'],
+            transactionDate:transactionDate,
+            lastUpdatedDate:lastUpdatedDate,
+            customerName: payment['customerName'],
+            msisdn: payment['msisdn'],
+            prNumber: payment['prNumber'],
+            paymentMethod: payment['paymentMethod'],
+            amount: payment['amount'],
+            currency: _currencies[payment['currency']],
+            amountCheck: payment['amountCheck'],
+            checkNumber: payment['checkNumber'],
+            bankBranch: _banks[payment['bankBranch']],
+            dueDateCheck: dueDateCheck,
+            paymentInvoiceFor: payment['paymentInvoiceFor'],
+            status: payment['status'],
+            voucherSerialNumber:serialNumber,
+            cancelReason:payment['cancelReason'],
+            cancellationDate:cancellationDate
+        );
+      }).toList();
+      _paymentRecords.sort((a, b) => (b.transactionDate ?? DateTime.now()).compareTo(a.transactionDate ?? DateTime.now()));
+    });
+    }
+  }
 
   void _initializeLocalizationStrings( ) {
     final localizationService = Provider.of<LocalizationService>(
@@ -149,10 +268,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  Widget _buildDateField(BuildContext context,
-      {required String label,
-        required TextEditingController controller,
-        required Function(DateTime) onDateSelected}) {
+  Widget _buildDateField(BuildContext context, {required String label, required TextEditingController controller, required Function(DateTime) onDateSelected}) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -625,148 +741,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  Widget _paymentDetailRowWithMultiline(String title, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(title,
-                textAlign: TextAlign.start,
-                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w400,color: Colors.grey.shade500)),
-          ),
-          SizedBox(height: 4.h),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(value,
-                textAlign: TextAlign.start,
-                style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _fetchPayments() async {
-    if (_currencies ==null || _currencies.length<1){
-      print("no currency");
-      List<Map<String, dynamic>> currencies = await DatabaseProvider.getAllCurrencies();
-      String selectedCode = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode;
-      Map<String, String> currencyMap = {};
-      for (var currency in currencies) {
-        String id = currency["id"];
-        String name = selectedCode == "ar" ? currency["arabicName"] : currency["englishName"];
-        currencyMap[id] = name;
-      }
-      setState(() {
-        _currencies=currencyMap;
-      });
-    }
-    if (_banks ==null || _banks.length<1){
-      print("no banks");
-      List<Map<String, dynamic>> banks = await DatabaseProvider.getAllBanks();
-      String selectedCode = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode;
-      Map<String, String> bankMap = {};
-      for (var bank in banks) {
-        String id = bank["id"];
-        String name = selectedCode == "ar" ? bank["arabicName"] : bank["englishName"];
-        bankMap[id] = name;
-      }
-      setState(() {
-        _banks=bankMap;
-      });
-    }
-    //print("_fetchPayments method in PaymentHistory screen started");
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String usernameLogin = prefs.getString('usernameLogin') ?? 'null';
-    List<Map<String, dynamic>> payments = await DatabaseProvider.getPaymentsWithDateFilter(_selectedFromDate, _selectedToDate, _selectedStatuses,usernameLogin.toLowerCase());
-    String? dueDateCheckString ;
-    DateTime? dueDateCheck;
-    String? lastUpdatedDateString ;
-    DateTime? lastUpdatedDate;
-    String? transactionDateString ;
-    DateTime? transactionDate;
-    String? cancellationDateString ;
-    DateTime? cancellationDate;
-    String serialNumber="";
-    setState(() {
-      _paymentRecords = payments.map((payment) {
-        dueDateCheckString = payment['dueDateCheck'];
-        lastUpdatedDateString = payment['lastUpdatedDate'];
-        transactionDateString = payment['transactionDate'];
-        cancellationDateString = payment['cancellationDate'];
-
-        if(cancellationDateString != null && cancellationDateString!.isNotEmpty)
-          try {
-            cancellationDate =  DateTime.parse(cancellationDateString!);
-          } catch (e) {
-            //print('Error parsing cancellationDate: $cancellationDate');
-            cancellationDate = null;
-          }
-
-        if(payment['voucherSerialNumber'] != null)
-          serialNumber=payment['voucherSerialNumber'];
-        if (dueDateCheckString != null && dueDateCheckString!.isNotEmpty) {
-          try {
-            dueDateCheck = DateFormat('yyyy-MM-dd').parse(dueDateCheckString!);
-          } catch (e) {
-            //print('Error parsing dueDateCheck: $dueDateCheckString');
-            dueDateCheck = null;
-          }
-        } else {
-          dueDateCheck = null;
-        }
-        if (lastUpdatedDateString != null && lastUpdatedDateString!.isNotEmpty) {
-          try {
-            lastUpdatedDate =  DateTime.parse(lastUpdatedDateString!);
-          } catch (e) {
-            //print('Error parsing dueDateCheck: $lastUpdatedDate');
-            lastUpdatedDate = null;
-          }
-        } else {
-          lastUpdatedDate = null;
-        }
-        if (transactionDateString != null && transactionDateString!.isNotEmpty) {
-          try {
-            transactionDate =  DateTime.parse(transactionDateString!);
-          } catch (e) {
-            //print('Error parsing dueDateCheck: $transactionDate');
-            transactionDate = null;
-          }
-        } else {
-          transactionDate = null;
-        }
-
-        return Payment(
-          id:payment['id'],
-          transactionDate:transactionDate,
-          lastUpdatedDate:lastUpdatedDate,
-          customerName: payment['customerName'],
-          msisdn: payment['msisdn'],
-          prNumber: payment['prNumber'],
-          paymentMethod: payment['paymentMethod'],
-          amount: payment['amount'],
-          currency: _currencies[payment['currency']],
-          amountCheck: payment['amountCheck'],
-          checkNumber: payment['checkNumber'],
-          bankBranch: _banks[payment['bankBranch']],
-          dueDateCheck: dueDateCheck,
-          paymentInvoiceFor: payment['paymentInvoiceFor'],
-          status: payment['status'],
-          voucherSerialNumber:serialNumber,
-          cancelReason:payment['cancelReason'],
-          cancellationDate:cancellationDate
-        );
-      }).toList();
-
-    });
-  }
-//lll
   Widget _detailNoteItem(String title, String value, String locale) {
     // Determine if the locale is RTL
     bool isRtl = locale == 'ar'; // Assuming 'ar' is the locale for Arabic

@@ -247,11 +247,8 @@ class PaymentService {
         print("voucherSerialNumber : ${voucherSerialNumber!}");
 
         // Update payment in local database
-        await DatabaseProvider.updatePaymentvoucherSerialNumber(
-            payment["id"], voucherSerialNumber);
+        await DatabaseProvider.updateSyncedPaymentDetail(payment["id"], voucherSerialNumber, 'Synced');
 
-        // Update payment status to 'Synced'
-        await DatabaseProvider.updatePaymentStatus(payment["id"], 'Synced');
         _syncController.add(null);
       } else {
         Map<String, dynamic> errorResponse = json.decode(response.body);

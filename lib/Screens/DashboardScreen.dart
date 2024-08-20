@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -21,7 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<DashboardItemModel> dashboardItems = []; // Initialize as empty list
   late SharedPreferences prefs; // SharedPreferences instance
   String? usernameLogin; // State variable to hold the username
-
+  Timer? _timer; // Timer instance
 
 
 
@@ -32,6 +33,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _initializeLocalization();
     _getUsername();
     _initializeDashboardItems();
+    _scheduleDailyTask();
+  }
+
+  void _scheduleDailyTask() {
+    // Calculate the time until the next 12:30 PM
+    final now = DateTime.now();
+    final nextRun = DateTime(now.year, now.month, now.day, 23, 59);
+
+    // If it's already past 12:30 PM today, schedule for tomorrow
+    if (now.isAfter(nextRun)) {
+      nextRun.add(Duration(days: 1));
+    }
+
+    // Calculate the duration until the next run
+    final durationUntilNextRun = nextRun.difference(now);
+
+    // Schedule the timer to run daily
+    _timer = Timer.periodic(
+      durationUntilNextRun,
+          (Timer timer) {
+        PaymentService.getExpiredPaymentsNumber();
+        // Schedule next execution after 24 hours
+        _timer?.cancel(); // Cancel the previous timer
+        _timer = Timer.periodic(Duration(days: 1), (Timer timer) {
+          PaymentService.getExpiredPaymentsNumber();
+        });
+      },
+    );
   }
 
   Future<void> _getUsername() async {
@@ -294,7 +323,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Text(label, style: TextStyle(fontFamily: "NotoSansUI", color: textColor)),
     );
   }
-
 
 }
 

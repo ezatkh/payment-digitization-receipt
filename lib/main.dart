@@ -1,45 +1,12 @@
-import 'dart:async';
-import 'dart:io';
 import 'package:digital_payment_app/Models/LoginState.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'Screens/SplashScreen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'Services/LocalizationService.dart';
-import 'package:workmanager/workmanager.dart';
-
-// Define the task key
-const dailyTaskKey = "dailyTask";
-
-@pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    if (task == dailyTaskKey) {
-      await _performDailyTask();
-    } else {
-      print("Unknown task: $task");
-    }
-    return Future.value(true);
-  });
-}
-
-Future<void> _performDailyTask() async {
-  final now = DateTime.now();
-  print("now.hour :${now.hour} : now.minute :${now.minute}");
-  if (now.hour == 10 && now.minute == 46) {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString('test', 'dim');
-    print("SharedPreferences updated at 10:46 AM");
-  } else {
-    print("Not the scheduled time for task execution: ${now.hour}:${now.minute}");
-  }
-}
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await AndroidAlarmManager.initialize();
   LocalizationService localizeService = LocalizationService();
 
   try {
@@ -48,13 +15,6 @@ void main() async {
     print("Error initializing localization: $e");
     // Handle initialization error as needed
   }
-  const dailyTaskKey = "dailyTask";
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
-  Workmanager().registerPeriodicTask(
-    dailyTaskKey,
-    dailyTaskKey,
-    frequency: Duration(minutes: 1),
-  );
   runApp(
     MultiProvider(
       providers: [

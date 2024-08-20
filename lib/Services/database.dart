@@ -115,35 +115,39 @@ class DatabaseProvider {
     return result.isNotEmpty ? result.first : null;
   }
 
-  //update the voucher serial number by id
-  static Future<void> updatePaymentvoucherSerialNumber(int id, String voucherSerialNumber) async {
+  static Future<void> updateSyncedPaymentDetail(int id, String voucherSerialNumber, String status) async {
     try {
       Database db = await database;
 
-      // Check the current voucher serial number in the database
-      List<Map<String, dynamic>> payments = await db.query('payments', where: 'id = ?', whereArgs: [id]);
-      if (payments.isNotEmpty) {
-        String? currentVoucherNumber = payments.first['voucherSerialNumber'];
+      // Validate the voucherSerialNumber
+      if (voucherSerialNumber.isEmpty) {
+        throw ArgumentError('Voucher serial number must not be empty');
+      }
 
-        // Only update if the current voucher number is null
-        if (currentVoucherNumber == null) {
-          await db.update(
-            'payments',
-            {'voucherSerialNumber': voucherSerialNumber},
-            where: 'id = ?',
-            whereArgs: [id],
-          );
-          print('Voucher serial number updated for payment with id $id');
-        } else {
-          print('Voucher serial number already exists for payment with id $id. Skipping update.');
-        }
+      // Prepare the values to update
+      Map<String, dynamic> updates = {
+        'voucherSerialNumber': voucherSerialNumber,
+        'status': status,
+      };
+
+      // Perform the update operation
+      int updatedRows = await db.update(
+        'payments',
+        updates,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (updatedRows > 0) {
+        print('Payment details updated successfully for payment with id $id');
+
       } else {
         throw Exception('Payment with id $id not found');
       }
     } catch (e) {
-      print('Error updating voucher serial number: $e');
+      print('Error updating payment details: $e');
       // Handle the error as per your application's requirements
-      throw Exception('Failed to update voucher serial number');
+      throw Exception('Failed to update payment details');
     }
   }
 
@@ -269,7 +273,7 @@ class DatabaseProvider {
 
     // Calculate the threshold date
     DateTime now = DateTime.now();
-    DateTime thresholdDate = now.subtract(Duration(days: days));
+    DateTime thresholdDate = now.subtract(Duration(days: days+1));
 
     // Start of day for threshold date
     DateTime startOfDay = DateTime(thresholdDate.year, thresholdDate.month, thresholdDate.day);
