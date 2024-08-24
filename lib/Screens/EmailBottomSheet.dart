@@ -1,9 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart'; // Adjust import if needed
+import 'package:pdf/widgets.dart' as pw;
 
 class EmailBottomSheet extends StatefulWidget {
   final Payment payment;
@@ -23,6 +28,8 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
   String? _errorText;
   String _selectedLanguage = 'en'; // Default message language is English
   Map<String, dynamic>? _emailJson;
+  String? _headerBase64;
+  String? _footerBase64;
 
   @override
   void initState() {
@@ -35,6 +42,7 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
       });
     });
     _loadLocalizedEmailContent(_selectedLanguage);
+    _loadBase64Images();
   }
 
   Future<void> _loadLocalizedEmailContent(String languageCode) async {
@@ -55,16 +63,101 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
     return _emailJson![key] ?? '** $key not found';
   }
 
+  Future<void> _loadBase64Images() async {
+    try {
+      final headerBase64 = await encodeImageToBase64('assets/images/headerEmail.jpg');
+      final footerBase64 = await encodeImageToBase64('assets/images/footerEmail.jpg');
+      setState(() {
+        _headerBase64 = headerBase64;
+        _footerBase64 = footerBase64;
+      });
+    } catch (e) {
+      print("Error encoding images to Base64: $e");
+    }
+  }
+
+  Future<String> encodeImageToBase64(String path) async {
+    final ByteData data = await rootBundle.load(path);
+    final List<int> bytes = data.buffer.asUint8List();
+    return base64Encode(bytes);
+  }
+
+  Future<void> shareEmail(String toEmail, String subject, String body) async {
+    // This will open the default email client with the provided details
+    await Share.share(
+      body,
+      subject: subject,
+      sharePositionOrigin: Rect.fromLTWH(0, 0, 100, 100), // Adjust position as needed
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_emailJson == null) {
+    if (_emailJson == null || _headerBase64 == null || _footerBase64 == null) {
       return Center(child: CircularProgressIndicator());
     }
 
+
     String subject = "${getLocalizedEmailContent('emailSubject')} ${widget.payment.transactionDate}";
-    String body = '${getLocalizedEmailContent('emailBodyLine1')},\n\n${getLocalizedEmailContent('emailBodyLine2')} ${widget.payment.transactionDate} \n\n${getLocalizedEmailContent('emailBodyLine3')}';
+    String body2 = '${getLocalizedEmailContent('emailBodyLine1')},\n\n${getLocalizedEmailContent('emailBodyLine2')} ${widget.payment.transactionDate} \n\n${getLocalizedEmailContent('emailBodyLine3')}';
     var appLocalization = Provider.of<LocalizationService>(context, listen: false);
     String currentLanguageCode = Localizations.localeOf(context).languageCode;
+
+    final body = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header img {
+            width: 100%;
+            height: auto;
+        }
+        .footer img {
+            width: 100%;
+            height: auto;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="data:image/png;base64,$_headerBase64" alt="Header Image">
+        </div>
+        <div class="content"
+            <p>${getLocalizedEmailContent('emailBodyLine1')},</p>
+            <p>${getLocalizedEmailContent('emailBodyLine2')}</p>
+            <p>${getLocalizedEmailContent('emailBodyLine3')}</p>
+        </div>
+        <div class="footer">
+            <img src="data:image/png;base64,$_footerBase64" alt="Footer Image">
+        </div>
+    </div>
+</body>
+</html>
+""";
+
 
     return Directionality(
       textDirection: currentLanguageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
@@ -166,9 +259,14 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
                             String toEmail = _toController.text;
                             print("To: $toEmail");
                             print("Subject: $subject");
-                            print("Body: $body");
-                            print("Language Code: $_selectedLanguage");
+                            print("header: ${_headerBase64}");
+                            print("Body1: ${getLocalizedEmailContent('emailBodyLine1')}");
+                            print("Body2: ${getLocalizedEmailContent('emailBodyLine2')}");
+                            print("Body3: ${getLocalizedEmailContent('emailBodyLine3')}");
+                            print("footer: ${_footerBase64}");
 
+                            print("Language Code: $_selectedLanguage");
+                            await shareEmail(toEmail, subject, body);
                             // Here you can call a method to send the email with the content
                             // For example:
                             // await sendEmail(toEmail, subject, body);

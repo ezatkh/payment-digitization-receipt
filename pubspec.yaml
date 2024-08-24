@@ -89,6 +89,8 @@ flutter:
     - assets/images/Init Logo.png
     - assets/images/logo_ooredoo.png
     - assets/fonts/
+    - assets/images/headerEmail.jpg
+    - assets/images/footerEmail.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

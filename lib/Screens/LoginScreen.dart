@@ -23,9 +23,7 @@ class LoginScreen extends StatelessWidget {
     {'name': 'العربية', 'code': 'ar'},
     // Add more languages as needed
   ];
-
   const LoginScreen({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690), minTextAdapt: true);
@@ -189,6 +187,7 @@ class LoginScreen extends StatelessWidget {
                                   height: 65,
                                   child: ElevatedButton(
                                     onPressed: () async {
+                                      print("try to login using smart login way");
                                       _handleSmartLogin(context, loginState, localizationService);
 
                                     },
@@ -232,18 +231,31 @@ class LoginScreen extends StatelessWidget {
   }
 
   void _handleSmartLogin(BuildContext context, LoginState loginState, LocalizationService localizationService) async {
-    final LocalAuthentication auth = LocalAuthentication();
-    try {
-      // Check if the device supports biometric authentication
-      bool authenticated = await auth.authenticate(
-        localizedReason: 'Scan your sensor to login',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
-      );
+    late final LocalAuthentication auth;
+    bool supportState = false;
 
+    auth = LocalAuthentication();
+    bool isSupported = await auth.isDeviceSupported();
+    try {
+      List<BiometricType> availableBiometrics = await auth.getAvailableBiometrics();
+      String localizedReason = 'Scan to login';
+
+      // Check for Face ID or Fingerprint biometrics
+      if (availableBiometrics.contains(BiometricType.face) || availableBiometrics.contains(BiometricType.weak)) {
+        localizedReason = 'Scan your face to login';
+      } else if (availableBiometrics.contains(BiometricType.fingerprint)) {
+        localizedReason = 'Scan your finger to login';
+      }
+
+      bool authenticated = await auth.authenticate(
+  localizedReason: localizedReason,
+  options: const AuthenticationOptions(
+    stickyAuth: true,
+    biometricOnly: true,
+  ),
+);
       if (authenticated) {
+        print("qqq");
         Map<String, String?> credentials = await getCredentials();
         String? username = credentials['username'];
         String? password = credentials['password'];

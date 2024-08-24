@@ -28,7 +28,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
   @override
   void initState() {
     super.initState();
-    if(widget.payment.msisdn! != null)
+    if(widget.payment.msisdn != null)
     _phoneController.text=widget.payment.msisdn!;
     _phoneFocusNode.addListener(() {
       setState(() {

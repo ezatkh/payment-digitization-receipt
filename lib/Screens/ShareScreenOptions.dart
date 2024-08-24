@@ -323,11 +323,29 @@ class ShareScreenOptions {
         _shareViaSms(context, id);
         break;
       case ShareOption.print:
-        _shareViaPrint(context, id, _selectedLanguageCode!);
+        //_shareViaPrint(context, id, _selectedLanguageCode!);
         break;
       case ShareOption.sendWhats:
-        _shareViaWhatsApp(context, id, _selectedLanguageCode!);
-        break;
+        _showLanguageSelectionDialog(context, (String languageCode) async {
+          final file = await sharePdf(context, id, languageCode);
+          if (file != null) {
+            // Share the PDF file via WhatsApp
+            Share.shareFiles(
+              [file.path],
+              text: 'Here is the payment receipt.',
+              mimeTypes: ['application/pdf'],
+            );
+          } else {
+            // Handle case where file could not be generated
+            print('Failed to generate PDF.');
+          }
+          if (_selectedLanguageCode != null) {
+            _shareViaWhatsApp(context, id, _selectedLanguageCode!);
+          } else {
+            // Handle the case where _selectedLanguageCode is null, e.g., show an error message
+            print('Please select a language before sharing.');
+          }
+        });
       default:
       // Optionally handle unexpected values
         break;
@@ -362,9 +380,11 @@ class ShareScreenOptions {
 
     showSmsBottomSheet(context,payment);
   }
+
   static void _shareViaPrint(BuildContext context, int id, String languageCode) {
     // Implement print logic using the selected language
   }
+
   static void _shareViaWhatsApp(BuildContext context, int id, String languageCode) async {
     final file = await sharePdf(context, id, languageCode);
     if (file != null) {
@@ -377,6 +397,7 @@ class ShareScreenOptions {
       print('Failed to generate PDF.');
     }
   }
+
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
     showModalBottomSheet(
       context: context,
