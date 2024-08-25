@@ -1,6 +1,7 @@
   import 'dart:async';
   import 'dart:ui';
-  import 'package:flutter/material.dart';
+  import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
   import 'package:flutter_screenutil/flutter_screenutil.dart';
   import 'package:provider/provider.dart';
   import '../Services/LocalizationService.dart';
@@ -369,7 +370,13 @@ import 'PaymentCancellationScreen.dart';
                         Icons.message,
                         color: Colors.green, // Set the color of the icon here
                       ),
-                      onPressed: () {
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
                         ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendSms);
 
                       },
@@ -380,7 +387,13 @@ import 'PaymentCancellationScreen.dart';
                     child:IconButton(
                       icon: Icon(Icons.email,  color: Colors.blue,
                       ),
-                      onPressed: () {
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
                         ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendEmail);
                       },
                     ),),//
@@ -388,8 +401,14 @@ import 'PaymentCancellationScreen.dart';
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment'),
                     child:IconButton(
                       icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
-                onPressed: () {
-                  ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendWhats);
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
+                          ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendWhats);
                 },
                     ),
                 ),

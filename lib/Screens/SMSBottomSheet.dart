@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Custom_Widgets/CustomPopups.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/apiConstants.dart';
 import '../Services/database.dart';
+import 'package:http/http.dart' as http;
 
 class SmsBottomSheet extends StatefulWidget {
   final Payment payment;
@@ -160,14 +164,73 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                               // Fetch the localized message based on the selected language
                               String message ='';
                               if(widget.payment.paymentMethod.toLowerCase() == 'cash' || widget.payment.paymentMethod.toLowerCase() == 'كاش')
-                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]}  ${widget.payment.amount}  ${AppearedCurrency}';
+                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} ${_messageJson!['withValue']}  ${widget.payment.amount}  ${AppearedCurrency}';
                              else
-                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]}  ${widget.payment.amountCheck}  ${widget.payment.currency}';
+                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} ${_messageJson!['withValue']}  ${widget.payment.amountCheck}  ${widget.payment.currency}';
 
                               print("Phone Number: ${_phoneController.text}");
                               print("Message Language: $_selectedMessageLanguage");
                               print("Message: $message");
 
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              String? tokenID = prefs.getString('token');
+                              if (tokenID == null) {
+                                print('Token not found');
+                                return;
+                              }
+                              String fullToken = "Barer ${tokenID}";
+
+                              Map<String, String> headers = {
+                                'Content-Type': 'application/json',
+                                'tokenID': fullToken,
+                              };
+
+                              Map<String, String> body = {
+                                "phoneNumber": _phoneController.text,
+                                "languageCode": _selectedMessageLanguage,
+                                "message": message ,
+                              };
+                              try {
+                                final response = await http.post(
+                                  Uri.parse(apiUrlSMS),
+                                  headers: headers,
+                                  body: json.encode(body),
+                                );
+                                if (response.statusCode == 200) {
+                                  CustomPopups.showCustomResultPopup(
+                                    context: context,
+                                    icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
+                                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsOk"),
+                                    buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                    onPressButton: () {
+                                      // Define what happens when the button is pressed
+                                      print('Success acknowledged');
+                                    },
+                                  );
+                                } else {
+                                  CustomPopups.showCustomResultPopup(
+                                    context: context,
+                                    icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                    message:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsFailed"),
+                                    buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                    onPressButton: () {
+                                      // Define what happens when the button is pressed
+                                      print('Error acknowledged');
+                                    },
+                                  );
+                                }
+                              } catch (e) {
+                                // Handle exceptions
+                                CustomPopups.showCustomResultPopup(
+                                  context: context,
+                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                  message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsFailed")}: $e',
+                                  buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                  onPressButton: () {
+                                    // Define what happens when the button is pressed
+                                    print('Error acknowledged');
+                                  },
+                                );                              }
                               // Close bottom sheet if no error
                               if (_errorText == null) Navigator.pop(context);
                             }

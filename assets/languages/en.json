@@ -215,7 +215,12 @@
   "selectLanguageForEmail": "Select language of Email:",
   "noCredentialsFoundBody": "Biometric is not defined , please login with your username and password",
   "WrongCredentialsFoundBody": "Unable to login using biometrics , Please login with your username and password.",
-  "noBiometricSupportBody": "Your device does not support biometric authentication. Please login with your username and password."
+  "noBiometricSupportBody": "Your device does not support biometric authentication. Please login with your username and password.",
+  "withValue": "in the amount of",
 
+  "paymentSentEmailOk": "The payment has been successfully sent via email.",
+  "paymentSentSmsOk": "The payment has been successfully sent via sms.",
 
+  "paymentSentEmailFailed": "Failed to send payment via email.",
+  "paymentSentSmsFailed": "Failed to send payment via SMS."
 }

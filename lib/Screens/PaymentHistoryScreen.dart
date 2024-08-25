@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:digital_payment_app/Screens/PaymentCancellationScreen.dart';
 import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
 import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
@@ -684,7 +685,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   child:IconButton(
                     icon: Icon(Icons.email,  color: Colors.blue,
                     ),
-                    onPressed: () {
+                    onPressed: () async{
+                      var connectivityResult = await (Connectivity().checkConnectivity());
+                      if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                        CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                            : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                      }
+                      else
                       ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendEmail);
                     },
                   ),),
@@ -700,7 +707,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                         Icons.message,
                         color: Colors.green, // Set the color of the icon here
                       ),
-                      onPressed: () {
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
                         ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendSms);
 
                       },
@@ -710,7 +723,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                   message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment') ,
                   child: IconButton(
                     icon: Icon(Icons.send, color: Colors.green),
-                    onPressed: () {
+                    onPressed: () async{
+                      var connectivityResult = await (Connectivity().checkConnectivity());
+                      if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                        CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                            : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                      }
+                      else
                       ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendWhats);
                     },
                   ),

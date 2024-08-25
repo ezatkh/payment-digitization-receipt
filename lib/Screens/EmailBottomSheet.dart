@@ -6,9 +6,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Custom_Widgets/CustomPopups.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart'; // Adjust import if needed
 import 'package:pdf/widgets.dart' as pw;
+import 'package:http/http.dart' as http;
+
+import '../Services/apiConstants.dart';
 
 class EmailBottomSheet extends StatefulWidget {
   final Payment payment;
@@ -264,12 +269,68 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
                             print("Body2: ${getLocalizedEmailContent('emailBodyLine2')}");
                             print("Body3: ${getLocalizedEmailContent('emailBodyLine3')}");
                             print("footer: ${_footerBase64}");
-
                             print("Language Code: $_selectedLanguage");
-                            await shareEmail(toEmail, subject, body);
-                            // Here you can call a method to send the email with the content
-                            // For example:
-                            // await sendEmail(toEmail, subject, body);
+
+
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            String? tokenID = prefs.getString('token');
+                            if (tokenID == null) {
+                              print('Token not found');
+                              return;
+                            }
+                            String fullToken = "Barer ${tokenID}";
+
+                            Map<String, String> headers = {
+                              'Content-Type': 'application/json',
+                              'tokenID': fullToken,
+                            };
+
+                            Map<String, String> body = {
+                              "to": toEmail,
+                              "languageCode": _selectedLanguage,
+                              "subject": subject ,
+                            };
+                            try {
+                              final response = await http.post(
+                                Uri.parse(apiUrlEmail),
+                                headers: headers,
+                                body: json.encode(body),
+                              );
+                              if (response.statusCode == 200) {
+                                CustomPopups.showCustomResultPopup(
+                                  context: context,
+                                  icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
+                                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentEmailOk"),
+                                  buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                  onPressButton: () {
+                                    // Define what happens when the button is pressed
+                                    print('Success acknowledged');
+                                  },
+                                );
+                              } else {
+                                CustomPopups.showCustomResultPopup(
+                                  context: context,
+                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                  message:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentEmailFailed"),
+                                  buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                  onPressButton: () {
+                                    // Define what happens when the button is pressed
+                                    print('Error acknowledged');
+                                  },
+                                );                              }
+                            } catch (e) {
+                              // Handle exceptions
+                              CustomPopups.showCustomResultPopup(
+                                context: context,
+                                icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentEmailFailed")}: $e',
+                                buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                onPressButton: () {
+                                  // Define what happens when the button is pressed
+                                  print('Error acknowledged');
+                                },
+                              );                               }
+
 
                             // Close bottom sheet if no error
                             if (_errorText == null) Navigator.pop(context);
