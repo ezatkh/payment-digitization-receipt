@@ -205,7 +205,11 @@
   "sendSms": "مشاركة عبر واتساب",
   "sendEmail": "مشاركة عبر إيميل",
   "selectLanguageForMessage": "إختر لغة الرسالة:",
-  "selectLanguageForEmail": "إختر لغة الإيميل :"
+  "selectLanguageForEmail": "إختر لغة الإيميل :",
+  "noCredentialsFoundTitle": "فشل تسجيل الدخول",
+  "noCredentialsFoundBody": "لم يتم تعريف خاصية البصمة، يرجى تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور",
+  "WrongCredentialsFoundBody": "تعذر تسجيل الدخول باستخدام البصمة, يرجى تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور",
+  "noBiometricSupportBody": "جهازك لا يدعم المصادقة البيومترية. يرجى تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور."
 
 
 }

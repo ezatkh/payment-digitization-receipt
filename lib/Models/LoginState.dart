@@ -55,7 +55,6 @@ class LoginState with ChangeNotifier {
     NetworkHelper helper = NetworkHelper(url: url, map: map);
 
     try {
-      print("before send api");
       var userData = await helper.getData();
       if (userData.containsKey('token')) {
         String token = userData['token'].toString().substring(6);
@@ -118,7 +117,6 @@ class LoginState with ChangeNotifier {
     }
   }
 
-
   Future<bool> authWithFaceId(LocalAuthentication auth) async {
     bool authenticated = false;
     try {
@@ -142,7 +140,4 @@ class LoginState with ChangeNotifier {
     return false;
   }
 
-
-
 }
-//bool isLoginSuccessful = await login();

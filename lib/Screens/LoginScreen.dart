@@ -187,8 +187,20 @@ class LoginScreen extends StatelessWidget {
                                   height: 65,
                                   child: ElevatedButton(
                                     onPressed: () async {
-                                      print("try to login using smart login way");
-                                      _handleSmartLogin(context, loginState, localizationService);
+                                      var connectivityResult = await (Connectivity().checkConnectivity());
+                                      if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                                        _showLoginFailedDialog(
+                                          context,
+                                          localizationService.getLocalizedString('noInternet'),
+                                          localizationService.isLocalizationLoaded
+                                              ? localizationService.getLocalizedString('noInternetConnection')
+                                              : 'No Internet Connection',
+                                          localizationService.selectedLanguageCode,
+                                        );
+                                      }
+                                      else{
+                                        _handleSmartLogin(context, loginState, localizationService);
+                                      }
 
                                     },
                                     style: ElevatedButton.styleFrom(
@@ -232,10 +244,20 @@ class LoginScreen extends StatelessWidget {
 
   void _handleSmartLogin(BuildContext context, LoginState loginState, LocalizationService localizationService) async {
     late final LocalAuthentication auth;
-    bool supportState = false;
 
     auth = LocalAuthentication();
     bool isSupported = await auth.isDeviceSupported();
+    if (!isSupported) {
+      _showLoginFailedDialog(
+        context,
+        localizationService.getLocalizedString('noBiometricSupportBody'),
+        localizationService.isLocalizationLoaded
+            ? localizationService.getLocalizedString('loginFailed')
+            : "Biometric not supported",
+        localizationService.selectedLanguageCode,
+      );
+      return;
+    }
     try {
       List<BiometricType> availableBiometrics = await auth.getAvailableBiometrics();
       String localizedReason = 'Scan to login';
@@ -248,59 +270,70 @@ class LoginScreen extends StatelessWidget {
       }
 
       bool authenticated = await auth.authenticate(
-  localizedReason: localizedReason,
-  options: const AuthenticationOptions(
-    stickyAuth: true,
-    biometricOnly: true,
-  ),
-);
+      localizedReason: localizedReason,
+      options: const AuthenticationOptions(
+      stickyAuth: true,
+      biometricOnly: true,
+      ),
+      );
       if (authenticated) {
-        print("qqq");
+        _handleLogin(context, localizationService);
         Map<String, String?> credentials = await getCredentials();
         String? username = credentials['username'];
         String? password = credentials['password'];
-
         if (username != null && password != null) {
           bool loginSuccessful = await loginState.login(username, password);
           if (loginSuccessful) {
             LOVCompareService.compareAndSyncCurrencies();
-            _handleLogin(context, localizationService);
-          } else {
-            print("Login failed.");
-          }
-        } else {
-          print("No credentials found.");
-        }
+            await LOVCompareService.compareAndSyncBanks();
+            await PaymentService.getExpiredPaymentsNumber();
 
+            Navigator.of(context).pop();  // Dismiss the loading dialog
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardScreen()),
+            );
+          }
+          else {
+            Navigator.of(context).pop();
+            _showLoginFailedDialog(
+              context,
+              localizationService
+                  .getLocalizedString(
+                  'WrongCredentialsFoundBody'),
+              localizationService
+                  .isLocalizationLoaded
+                  ? localizationService
+                  .getLocalizedString(
+                  'loginfailed')
+                  : "Login Failed",
+              localizationService
+                  .selectedLanguageCode,
+            );
+          }
+        }
+        else {
+          Navigator.of(context).pop();
+          _showLoginFailedDialog(
+            context,
+            localizationService
+                .getLocalizedString(
+                'noCredentialsFoundBody'),
+            localizationService
+                .isLocalizationLoaded
+                ? localizationService
+                .getLocalizedString(
+                'noCredentialsFoundTitle')
+                : "Login Failed",
+            localizationService
+                .selectedLanguageCode,
+          );
+        }
         print("Authenticated successfully from screen.");
-      } else {
-        print("Authentication failed from screen.");
       }
     } on PlatformException catch (e) {
       print("PlatformException during authentication: $e");
     }
-    // bool authenticated = await loginState.getAvailableBiometricsTypes();
-    // if (authenticated) {
-    //   Map<String, String?> credentials = await getCredentials();
-    //   String? username = credentials['username'];
-    //   String? password = credentials['password'];
-    //
-    //   if (username != null && password != null) {
-    //     bool loginSuccessful = await loginState.login(username, password);
-    //     if (loginSuccessful) {
-    //       LOVCompareService.compareAndSyncCurrencies();
-    //       _handleLogin(context, localizationService);
-    //     } else {
-    //       print("Login failed.");
-    //     }
-    //   } else {
-    //     print("No credentials found.");
-    //   }
-    //
-    //   print("Authenticated successfully from screen.");
-    // } else {
-    //   print("Authentication failed from screen.");
-    // }
   }
 
   Widget _buildLanguageDropdown(
@@ -475,8 +508,6 @@ class LoginScreen extends StatelessWidget {
   }
 
   void _handleLogin(BuildContext context, LocalizationService localizationService) async {
-    print("_handleLogin invoked in loginScreen");
-
     showDialog(
       context: context,
       barrierDismissible: false,
