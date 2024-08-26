@@ -1,5 +1,8 @@
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
+import 'package:path/path.dart' as path;
+import 'dart:io';
 
 class NetworkHelper {
   final String? url;
@@ -13,6 +16,8 @@ class NetworkHelper {
     this.headers,
     this.method = 'POST', // Default method is POST
   });
+
+
 
   Future<dynamic> getData() async {
     print("api :${url}:${map}:${headers}");
@@ -65,6 +70,54 @@ class NetworkHelper {
       }
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<dynamic> uploadFile({
+    required File file,
+    required String fileName,
+    required String emailDetailsJson,
+  }) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(url!));
+
+      // Add headers
+      request.headers.addAll(headers ?? {
+        'Content-Type': 'multipart/form-data',
+      });
+
+      // Add email details
+      request.fields['emailDetails'] = emailDetailsJson;
+
+      // Add file
+      var fileStream = http.ByteStream(file.openRead());
+      var length = await file.length();
+      var multipartFile = http.MultipartFile(
+        'files',
+        fileStream,
+        length,
+        filename: '${fileName}.pdf',
+        contentType: MediaType('application', 'pdf'),
+      );
+      request.files.add(multipartFile);
+
+      // Send request
+      var response = await request.send();
+
+      // Get response body
+      final responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        print('File uploaded successfully.');
+        return responseBody;
+      } else {
+        print('Status Code: ${response.statusCode}');
+        print('Response Body: $responseBody');
+        return null;
+      }
+    } catch (e) {
+      print('Error during HTTP request: $e');
+      return null;
     }
   }
 

@@ -284,6 +284,7 @@ class LoginScreen extends StatelessWidget {
         if (username != null && password != null) {
           bool loginSuccessful = await loginState.login(username, password);
           if (loginSuccessful) {
+            print("loginSuccessful tt");
             LOVCompareService.compareAndSyncCurrencies();
             await LOVCompareService.compareAndSyncBanks();
             await PaymentService.getExpiredPaymentsNumber();

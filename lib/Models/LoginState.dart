@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
+import '../Services/apiConstants.dart';
 import '../Services/networking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
@@ -51,11 +53,12 @@ class LoginState with ChangeNotifier {
     };
     print("Attempting login with username, password: $map");
 
-    var url = "http://192.168.20.65:8080/authentication-server/mobile/login";
-    NetworkHelper helper = NetworkHelper(url: url, map: map);
+    NetworkHelper helper = NetworkHelper(url: apiUrlLogin, map: map);
 
     try {
       var userData = await helper.getData();
+      print("userData.status :${userData}");
+
       if (userData.containsKey('token')) {
         String token = userData['token'].toString().substring(6);
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -69,7 +72,7 @@ class LoginState with ChangeNotifier {
         return false;
       }
     } catch (e) {
-      print("Login failed");
+      print("Login failed :${e}");
       return false;
     }
   }

@@ -141,7 +141,7 @@
 
   "receipt": "RECEIPT",
   "time": "Time",
-  "thankyou": "'--- Thank You! ---'",
+  "thankYou": "Thank You",
 
   "paymentInvoiceFor": "Payment is for the following invoices:",
 

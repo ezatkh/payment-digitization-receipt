@@ -124,43 +124,61 @@ class CustomPopups {
     required String buttonText,
     required VoidCallback onPressButton,
   }) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              icon,
-              SizedBox(height: 20),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            backgroundColor: Colors.white, // White background for the dialog
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                icon,
+                SizedBox(height: 20),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black, // Black text color for readability
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFF7F7F7), // Set light red button color
+                    elevation: 0, // Remove shadow for a flat button effect
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10), // Rounded corners
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15), // Padding for a larger button
+                  ),
+                  child: Text(
+                    buttonText,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black, // Black text for contrast
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    onPressButton();
+                  },
                 ),
               ),
             ],
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Text color
-              ),
-              child: Text(buttonText),
-              onPressed: () {
-                Navigator.of(context).pop();
-                onPressButton();
-              },
-            ),
-          ],
-        );
-      },
-    );
+          );
+        },
+      );
+    });
+
+
   }
 
   static void showLoginFailedDialog(BuildContext context, String errorMessage,

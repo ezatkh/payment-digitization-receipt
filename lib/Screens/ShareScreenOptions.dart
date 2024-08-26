@@ -39,7 +39,7 @@ class ShareScreenOptions {
       final currency = await DatabaseProvider.getCurrencyById(payment.currency!); // Implement this method
       Map<String, String>? bankDetails;
 
-      if (payment.paymentMethod == 'cash') {
+      if (payment.paymentMethod.toLowerCase() == 'cash') {
         // Handle cash payment case
         print('Payment is made in cash. No need to fetch bank details.');
       } else {
@@ -69,11 +69,23 @@ class ShareScreenOptions {
       final pdf = pw.Document();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? usernameLogin = prefs.getString('usernameLogin');
+      DateTime transactionDate = payment.transactionDate!;
+
+// Extract year, month, day, hour, and minute
+      int year = transactionDate.year;
+      int month = transactionDate.month;
+      int day = transactionDate.day;
+      int hour = transactionDate.hour;
+      int minute = transactionDate.minute;
+
+// Format the output as a string
+      String formattedDate = '${year.toString().padLeft(4, '0')}/${month.toString().padLeft(2, '0')}/${day.toString().padLeft(2, '0')} ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+
       final List<Map<String, String>> customerDetails = [
         {'title': localizedStrings['customerName'], 'value': payment.customerName},
         if (payment.msisdn != null && payment.msisdn.toString().length>0)
         {'title': localizedStrings['mobileNumber'], 'value': payment.msisdn.toString()},
-        {'title': localizedStrings['transactionDate'], 'value': payment.transactionDate.toString()},
+        {'title': localizedStrings['transactionDate'], 'value': formattedDate},
         {'title': localizedStrings['voucherNumber'], 'value': payment.voucherSerialNumber},
       ];
 
@@ -113,10 +125,13 @@ class ShareScreenOptions {
           build: (pw.Context context) {
             return pw.Directionality(
               textDirection: isEnglish ? pw.TextDirection.ltr : pw.TextDirection.rtl,
-              child: pw.Container(
+              child: pw.Center(
+                child: pw.Container(
+
                 color: PdfColors.white,
-                padding: pw.EdgeInsets.zero, // Remove padding
-                child: pw.Column(
+                  padding: pw.EdgeInsets.all(20),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                   children: [
                     pw.Container(
                       alignment: pw.Alignment.center,
@@ -128,7 +143,7 @@ class ShareScreenOptions {
                         'Ooredoo',
                         style: pw.TextStyle(
                           color: PdfColors.black,
-                          fontSize: 40,
+                          fontSize: 42,
                           fontWeight: pw.FontWeight.bold,
                         ),
                       ),
@@ -143,7 +158,7 @@ class ShareScreenOptions {
                         receiptVoucher,
                         style: pw.TextStyle(
                           color: PdfColors.white,
-                          fontSize: 24,
+                          fontSize: 26,
                           fontWeight: pw.FontWeight.bold,
                           font: font,
                         ),
@@ -158,7 +173,7 @@ class ShareScreenOptions {
                       child: pw.Text(
                         customersDetail,
                         style: pw.TextStyle(
-                          fontSize: 22,
+                          fontSize: 24,
                           fontWeight: pw.FontWeight.bold,
                           font: font,
                         ),
@@ -174,7 +189,7 @@ class ShareScreenOptions {
                       child: pw.Text(
                         paymentDetail,
                         style: pw.TextStyle(
-                          fontSize: 22,
+                          fontSize: 24,
                           fontWeight: pw.FontWeight.bold,
                           font: font,
                         ),
@@ -190,7 +205,7 @@ class ShareScreenOptions {
                       child: pw.Text(
                         additionalDetails,
                         style: pw.TextStyle(
-                          fontSize: 22,
+                          fontSize: 24,
                           fontWeight: pw.FontWeight.bold,
                           font: font,
                         ),
@@ -215,6 +230,7 @@ class ShareScreenOptions {
                   ],
                 ),
               ),
+            ),
             );
           },
         ),
