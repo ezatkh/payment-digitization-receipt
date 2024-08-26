@@ -17,6 +17,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:http_parser/http_parser.dart';
 
+import '../Services/PaymentService.dart';
 import '../Services/apiConstants.dart';
 import '../Services/networking.dart';
 
@@ -303,9 +304,22 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
         emailDetailsJson: emailDetailsJson,
       );
 
-      if (response != null) {
+      if (response == 200) {
         print('File uploaded successfully. Response: $response');
-      } else {
+      }
+      else if(response == 401){
+        int responseNumber = await PaymentService.attemptReLogin(context);
+        print("the response number from get expend the session is :${responseNumber}");
+        if(responseNumber == 200 ){
+          print("relogin successfully");
+          await networkHelper.uploadFile(
+            fileName: fileName,
+            file: pdfFile,
+            emailDetailsJson: emailDetailsJson,
+          );
+        }
+      }
+      else {
         print(response.statusCode);
         print(response.reasonPhrase);
 
@@ -332,6 +346,8 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
       );
     }
   }
+
+
 
 }
 

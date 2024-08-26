@@ -45,7 +45,6 @@ class LoginState with ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<bool> login(String username, String password) async {
     Map<String, dynamic> map = {
       "username": username,
@@ -75,72 +74,6 @@ class LoginState with ChangeNotifier {
       print("Login failed :${e}");
       return false;
     }
-  }
-
-  Future<bool> getAvailableBiometricsTypes() async {
-    final LocalAuthentication auth = LocalAuthentication();
-    List<BiometricType> availableBiometrics;
-    try {
-      availableBiometrics = await auth.getAvailableBiometrics();
-      if (availableBiometrics.isNotEmpty) {
-        try{
-         await auth.authenticate(
-            localizedReason: 'Please authenticate to access this feature',
-            options: AuthenticationOptions(
-              biometricOnly: true,
-            ),
-          );
-        }
-        catch (e) {
-          // Handle errors, such as device not supporting biometrics
-          print(e);
-        }
-        for (BiometricType type in availableBiometrics) {
-          if (type == BiometricType.face) {
-            print("Face ID is available.");
-            bool authResult = await authWithFaceId(auth);
-            return authResult;
-          } else if (type == BiometricType.fingerprint) {
-            print("Touch ID is available.");
-            // Consider adding biometric authentication for fingerprint as well
-            return false;
-          } else if (type == BiometricType.iris) {
-            print("Iris authentication is available.");
-            // Consider adding biometric authentication for iris as well
-            return false;
-          }
-        }
-      } else {
-        print("No biometric authentication methods are available.");
-      }
-      return false;
-    } on PlatformException catch (e) {
-      print('PlatformException: ${e.message}');
-      return false;
-    }
-  }
-
-  Future<bool> authWithFaceId(LocalAuthentication auth) async {
-    bool authenticated = false;
-    try {
-      authenticated = await auth.authenticate(
-        localizedReason:
-            'Please authenticate using Face ID to access this feature',
-        options: const AuthenticationOptions(
-          useErrorDialogs: true,
-          stickyAuth: true,
-          biometricOnly: true, // Ensure only biometrics are used
-        ),
-      );
-    } on PlatformException catch (e) {
-      print(e);
-    }
-    if (authenticated) {
-      print("Face ID authentication successful!");
-      return true;
-    } else
-      print("Face ID authentication failed.");
-    return false;
   }
 
 }

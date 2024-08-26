@@ -344,6 +344,26 @@ class PaymentService {
      }
   }
 
+  static Future<int> attemptReLogin(BuildContext context) async {
+    Map<String, String?> credentials = await getCredentials();
+    String? username = credentials['username'];
+    String? password = credentials['password'];
+    if (username != null && password != null) {
+      LoginState loginState = LoginState();
+      bool loginSuccessful = await loginState.login(username, password);
+      if (loginSuccessful) {
+        return 200;
+      } else {
+        print("Re-login failed. Unable to sync payment.");
+        _showSessionExpiredDialog(context); // Show session expired message
+        return 400;
+      }
+    } else {
+      print("Username or password is missing. Cannot attempt re-login.");
+      return 401;
+    }
+  }
+
   static void _showSessionExpiredDialog(BuildContext context) {
     showDialog(
       context: context,

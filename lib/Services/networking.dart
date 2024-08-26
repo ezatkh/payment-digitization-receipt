@@ -109,10 +109,24 @@ class NetworkHelper {
 
       if (response.statusCode == 200) {
         print('File uploaded successfully.');
-        return responseBody;
+        return response.statusCode;
       } else {
-        print('Status Code: ${response.statusCode}');
-        print('Response Body: $responseBody');
+        try {
+          final decodedResponse = jsonDecode(responseBody);
+
+          // Access individual fields
+          String errorMessage = decodedResponse['error'];
+          String errorDetail = decodedResponse['errorInDetail'];
+          // print('Error: $errorMessage');
+          // print('Error Detail: $errorDetail');
+
+          // Check if the token is expired
+          if (errorMessage == 'Unauthorized' && errorDetail == 'JWT Authentication Failed') {
+            return 401;
+          }
+        } catch (e) {
+          print('Failed to decode JSON: $e');
+        }
         return null;
       }
     } catch (e) {
