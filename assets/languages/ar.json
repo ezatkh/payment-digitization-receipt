@@ -56,6 +56,7 @@
   "lastSync": "آخر مزامنة",
   "notSyncedYet": "لم تتم المزامنة بعد",
   "retry": "إعادة المحاولة",
+  "saveAndConfirm": "حفظ و تأكيد",
 
   "printreceipt": "طباعة الإيصال",
   "filterNumber": "رقم القسيمة",
@@ -125,7 +126,6 @@
   "checkNumber": "رقم الشيك",
   "bankBranchCheck": "البنك/الفرع",
   "dueDateCheck": "تاريخ الاستحقاق",
-  "creditCard": "بطاقة ائتمان",
   "confirmPayment": "حفظ و تاكيد",
   "confirmPaymentBody": "هل أنت متأكد أنك تريد حفظ وتأكيد هذه الدفعة؟",
   "paymentSummary": "ملخص الدفعة",
@@ -204,6 +204,7 @@
 
   "sendSms": "مشاركة عبر واتساب",
   "sendEmail": "مشاركة عبر إيميل",
+  "sendPaymentOptions": "خيارات ارسال الدفعة",
   "selectLanguageForMessage": "إختر لغة الرسالة:",
   "selectLanguageForEmail": "إختر لغة الإيميل :",
   "noCredentialsFoundTitle": "فشل تسجيل الدخول",

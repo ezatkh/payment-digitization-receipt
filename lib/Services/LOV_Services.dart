@@ -16,7 +16,7 @@ class LovApiService {
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',
-      'tokenID': fullToken, // Adjust the key if necessary
+      'tokenID': fullToken,
     };
 
     final String url = '$baseUrl$listName';
@@ -24,6 +24,7 @@ class LovApiService {
     final response = await networkHelper.getData();
 
     if (response != null) {
+      print('finished load $listName');
     } else {
       throw Exception('Failed to load $listName');
     }

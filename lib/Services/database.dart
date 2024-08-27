@@ -273,7 +273,7 @@ class DatabaseProvider {
 
     // Calculate the threshold date
     DateTime now = DateTime.now();
-    DateTime thresholdDate = now.subtract(Duration(days: days+1));
+    DateTime thresholdDate = now.subtract(Duration(days: days));
 
     // Start of day for threshold date
     DateTime startOfDay = DateTime(thresholdDate.year, thresholdDate.month, thresholdDate.day);

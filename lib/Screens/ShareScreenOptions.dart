@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:digital_payment_app/Models/LoginState.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -404,26 +403,6 @@ class ShareScreenOptions {
     // Implement print logic using the selected language
   }
 
-  static void _shareViaWhatsApp(BuildContext context, int id, String languageCode) async {
-    final file = await sharePdf(context, id, languageCode);
-    if (file != null) {
-      Share.shareFiles(
-        [file.path],
-        text: 'Here is the payment receipt.',
-        mimeTypes: ['application/pdf'],
-      );
-    } else {
-      CustomPopups.showCustomResultPopup(
-        context: context,
-        icon: Icon(Icons.error, color: Colors.red, size: 40),
-        message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentWhatsFailed")}: Failed to upload file',
-        buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
-        onPressButton: () {
-          print('Failed to upload file. Status code');
-        },
-      );
-    }
-  }
 
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
     showModalBottomSheet(
