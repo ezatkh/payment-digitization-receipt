@@ -351,6 +351,11 @@ class ShareScreenOptions {
               text: 'Here is the payment receipt.',
               mimeTypes: ['application/pdf'],
             );
+
+           if (await file.exists()) {
+             await file.delete();
+             print('File deleted successfully');
+           }
           } else {
 
             CustomPopups.showCustomResultPopup(

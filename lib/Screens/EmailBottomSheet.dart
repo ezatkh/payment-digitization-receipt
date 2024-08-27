@@ -240,8 +240,12 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
                               }
                               else {
                                 print("ready to send to email api");
-                                await sendPdfFileViaApi(context,
-                                    file, toEmail, subject, emailBody,fileName);
+                                await sendPdfFileViaApi(context, file, toEmail, subject, emailBody,fileName);
+
+                                if (await file.exists()) {
+                                  await file.delete();
+                                  print('File deleted successfully');
+                                }
                               }
 
                               // Close bottom sheet if no error
