@@ -218,9 +218,9 @@
   "noBiometricSupportBody": "Your device does not support biometric authentication. Please login with your username and password.",
   "withValue": "in the amount of",
 
-  "paymentSentEmailOk": "The payment has been successfully sent via email.",
-  "paymentSentSmsOk": "The payment has been successfully sent via sms.",
+  "paymentSentEmailOk": "The payment information has been successfully sent via email.",
+  "paymentSentSmsOk": "The payment information has been successfully sent via sms.",
 
-  "paymentSentEmailFailed": "Failed to send payment via email.",
-  "paymentSentSmsFailed": "Failed to send payment via SMS."
+  "paymentSentEmailFailed": "Failed to send payment information via email.",
+  "paymentSentSmsFailed": "Failed to send payment information via SMS."
 }

@@ -305,8 +305,16 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
       );
 
       if (response == 200) {
-        print('File uploaded successfully. Response: $response');
-      }
+        CustomPopups.showCustomResultPopup(
+          context: context,
+          icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
+          message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentEmailOk"),
+          buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+          onPressButton: () {
+            // Define what happens when the button is pressed
+            print('Success acknowledged');
+          },
+        );      }
       else if(response == 401){
         int responseNumber = await PaymentService.attemptReLogin(context);
         print("the response number from get expend the session is :${responseNumber}");

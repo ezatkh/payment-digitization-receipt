@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Custom_Widgets/CustomPopups.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
+import '../Services/PaymentService.dart';
 import '../Services/apiConstants.dart';
 import '../Services/database.dart';
 import 'package:http/http.dart' as http;
@@ -186,8 +187,8 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                               };
 
                               Map<String, String> body = {
-                                "phoneNumber": _phoneController.text,
-                                "languageCode": _selectedMessageLanguage,
+                                "to": _phoneController.text,
+                                "lang": _selectedMessageLanguage,
                                 "message": message ,
                               };
                               try {
@@ -207,7 +208,20 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                       print('Success acknowledged');
                                     },
                                   );
-                                } else {
+                                }
+                                else if(response == 401){
+                                  int responseNumber = await PaymentService.attemptReLogin(context);
+                                  print("the response number from get expend the session is :${responseNumber}");
+                                  if(responseNumber == 200 ){
+                                    print("relogin successfully");
+                                    await http.post(
+                                      Uri.parse(apiUrlSMS),
+                                      headers: headers,
+                                      body: json.encode(body),
+                                    );
+                                  }
+                                }
+                                else {
                                   CustomPopups.showCustomResultPopup(
                                     context: context,
                                     icon: Icon(Icons.error, color: Colors.red, size: 40),
@@ -228,7 +242,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                   buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
                                   onPressButton: () {
                                     // Define what happens when the button is pressed
-                                    print('Error acknowledged');
+                                    print('Error acknowledged :${e}');
                                   },
                                 );                              }
                               // Close bottom sheet if no error

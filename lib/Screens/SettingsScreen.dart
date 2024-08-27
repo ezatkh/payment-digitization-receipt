@@ -203,7 +203,7 @@ class SettingsScreen extends StatelessWidget {
                   _buildDialogButton(
                     context: context,
                     label: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel'),
-                    onPressed: () => Navigator.of(context).pop(), // Close the dialog
+                    onPressed: () => Navigator.of(context).pop(),
                     backgroundColor: Colors.grey.shade300,
                     textColor: Colors.black,
                   ),
