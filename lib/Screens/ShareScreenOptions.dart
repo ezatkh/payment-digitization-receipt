@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../Custom_Widgets/CustomPopups.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
 import '../Services/database.dart';
@@ -346,20 +347,22 @@ class ShareScreenOptions {
           final file = await sharePdf(context, id, languageCode);
           if (file != null) {
             // Share the PDF file via WhatsApp
-            Share.shareFiles(
+           await Share.shareFiles(
               [file.path],
               text: 'Here is the payment receipt.',
               mimeTypes: ['application/pdf'],
             );
           } else {
-            // Handle case where file could not be generated
-            print('Failed to generate PDF.');
-          }
-          if (_selectedLanguageCode != null) {
-            _shareViaWhatsApp(context, id, _selectedLanguageCode!);
-          } else {
-            // Handle the case where _selectedLanguageCode is null, e.g., show an error message
-            print('Please select a language before sharing.');
+
+            CustomPopups.showCustomResultPopup(
+              context: context,
+              icon: Icon(Icons.error, color: Colors.red, size: 40),
+              message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentWhatsFailed")}: Failed to upload file',
+              buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+              onPressButton: () {
+                print('Failed to upload file. Status code');
+              },
+            );
           }
         });
       default:
@@ -410,7 +413,15 @@ class ShareScreenOptions {
         mimeTypes: ['application/pdf'],
       );
     } else {
-      print('Failed to generate PDF.');
+      CustomPopups.showCustomResultPopup(
+        context: context,
+        icon: Icon(Icons.error, color: Colors.red, size: 40),
+        message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentWhatsFailed")}: Failed to upload file',
+        buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+        onPressButton: () {
+          print('Failed to upload file. Status code');
+        },
+      );
     }
   }
 

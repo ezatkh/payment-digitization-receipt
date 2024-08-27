@@ -6,7 +6,7 @@ import '../Models/Currency.dart';
 import '../Services/networking.dart';
 
 class LovApiService {
-  static const String baseUrl = 'http://192.168.20.65:8080/ApplicationUtils/getLOVList?listname=';
+  static const String baseUrl = 'http://172.20.0.160:8080/ApplicationUtils/getLOVList?listname=';
 
   // Generic method to fetch lists from the backend
   static Future<List<T>> fetchList<T>(String listName, Function fromMap) async {

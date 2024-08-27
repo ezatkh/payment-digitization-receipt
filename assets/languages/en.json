@@ -220,7 +220,10 @@
 
   "paymentSentEmailOk": "The payment information has been successfully sent via email.",
   "paymentSentSmsOk": "The payment information has been successfully sent via sms.",
+  "paymentSentWhatsOk": "The payment information has been successfully sent via Whatsapp.",
+
 
   "paymentSentEmailFailed": "Failed to send payment information via email.",
-  "paymentSentSmsFailed": "Failed to send payment information via SMS."
+  "paymentSentSmsFailed": "Failed to send payment information via SMS.",
+  "paymentSentWhatsFailed": "Failed to send payment information via Whatsapp."
 }
