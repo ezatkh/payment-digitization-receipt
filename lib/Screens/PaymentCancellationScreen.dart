@@ -1,152 +1,158 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../Services/LocalizationService.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:ui';  // Required for ImageFilter
+import '../Services/PaymentService.dart';
+import '../Services/database.dart';
 
-class PaymentCancellationScreen extends StatelessWidget {
-  final List<String> paymentIds = ['PR12345', 'PR67890', 'PR23456'];  // Example PR#s
+class PaymentCancellationScreen extends StatefulWidget {
+  final int id;
+
+  PaymentCancellationScreen({required this.id});
+
+  @override
+  _PaymentCancellationScreenState createState() => _PaymentCancellationScreenState();
+}
+
+class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
+  final TextEditingController _reasonController = TextEditingController();
+  String? _errorText;
+
+
+  Future<String?> _fetchVoucherNumber(int id) async {
+    final payment = await DatabaseProvider.getPaymentById(id);
+    print(payment);
+    return payment?['voucherSerialNumber'];
+  }
+
+
+
+  Future <void> _confirmCancellationAction(BuildContext context, String voucher, String reason) async {
+    await PaymentService.cancelPayment(voucher, reason,context);
+  }
+
+  void _handleCancellation(BuildContext context, String voucher) async {
+    final reason = _reasonController.text.trim();
+    if (reason.isEmpty) {
+      setState(() {
+        _errorText = '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('reasonCancellation')} ${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired')}';
+      });
+    } else {
+      setState(() {
+        _errorText = null;
+      });
+      // Show a loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+      await _confirmCancellationAction(context,voucher, reason);
+      await Future.delayed(Duration(seconds: 1));
+      // Close the loading indicator
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentCancelledSuccessfully')),
+          backgroundColor: Colors.green, // Optional: set a background color
+          duration: Duration(seconds: 2), // Optional: set duration for how long the snackbar will be shown
+        ),
+      );
+      Navigator.of(context).pop(true); // Return true indicating cancellation was confirmed
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFFF7F7F7),
-      appBar: AppBar(
-        elevation: 4,
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(4.0),
-          child: Container(
-            color: Colors.white.withOpacity(0.2),
-            height: 1.0,
-          ),
-        ),
-        title: Text('Cancel Payment',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.sp,
-              fontFamily: 'NotoSansUI',
-            )),
-        backgroundColor: Color(0xFFC62828),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSelectionCard(context),
-            SizedBox(height: 24.h),
-            _buildInputCard(context, 'Reason for Cancellation', 'Enter the reason'),
-            SizedBox(height: 16.h),
-            _buildInputCard(context, 'Additional Details (optional)', 'Add more details', maxLines: 3),
-            SizedBox(height: 30.h),
-            _buildActionButton(context, 'Cancel Payment', Color(0xFFD32F2F)),
-            SizedBox(height: 12.h),
-            _buildActionButton(context, 'Back', Colors.black, isOutlined: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSelectionCard(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black54,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
         padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Select Payment to Cancel", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-            DropdownButton<String>(
-              isExpanded: true,
-              underline: Container(height: 0),
-              items: paymentIds.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (_) {},
-              hint: Text("Choose a payment"),
-            ),
-          ],
+        child: FutureBuilder<String?>(
+          future: _fetchVoucherNumber(widget.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error fetching voucher number'));
+            } else if (!snapshot.hasData || snapshot.data == null) {
+              return Center(child: Text('No voucher number found'));
+            }
+
+            final voucherNumber = snapshot.data!;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment'),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  '${ Provider.of<LocalizationService>(context, listen: false).getLocalizedString('voucherNumber')}: $voucherNumber',
+                  style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                ),
+                SizedBox(height: 16.h),
+                Text(
+                  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('reasonCancellation'),
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 8.h),
+                TextField(
+                  controller: _reasonController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('enterTheReasonHere'),
+                    fillColor: Color(0xFFF2F2F2),
+                    filled: true,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    errorText: _errorText,
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+
+                      },
+                      child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancel'), style: TextStyle(fontSize: 16.sp)),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFC62828),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {
+                        _handleCancellation(context, voucherNumber);
+                      },
+                      child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'), style: TextStyle(fontSize: 16.sp)),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildInputCard(BuildContext context, String label, String hint, {int maxLines = 1}) {
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black54,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600)),
-            SizedBox(height: 8.h),
-            TextField(
-              maxLines: maxLines,
-              decoration: InputDecoration(
-                fillColor: Color(0xFFE0E0E0),
-                filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                hintText: hint,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(BuildContext context, String text, Color color, {bool isOutlined = false}) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, backgroundColor: color,
-        minimumSize: Size(double.infinity, 33.h),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        side: isOutlined ? BorderSide(color: color) : BorderSide.none,
-      ),
-      onPressed: () {
-        if (isOutlined) {
-          Navigator.pop(context);
-        } else {
-          _showConfirmationDialog(context);
-        }
-      },
-      child: Text(text, style: TextStyle(fontSize: 18.sp)),
-    );
-  }
-
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Confirm Cancellation"),
-          content: Text("Are you sure you want to cancel this payment?"),
-          actions: <Widget>[
-            TextButton(
-              child: Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text("Confirm"),
-              onPressed: () {
-                // TODO: Implement the cancellation logic
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  @override
+  void dispose() {
+    _reasonController.dispose();
+    super.dispose();
   }
 }

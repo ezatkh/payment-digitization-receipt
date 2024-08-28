@@ -1,19 +1,42 @@
- import 'package:flutter/material.dart';
-
+import 'package:digital_payment_app/Models/LoginState.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'Screens/SplashScreen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'Services/LocalizationService.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  LocalizationService localizeService = LocalizationService();
+
+  try {
+    await localizeService.initLocalization();
+  } catch (e) {
+    print("Error initializing localization: $e");
+    // Handle initialization error as needed
+  }
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LocalizationService()),
+        ChangeNotifierProvider(create: (context) => LoginState()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    const Color primaryRed = Color(0xFFD32F2F); // Adjust this hex to match exact color from image
-    const Color backgroundGrey = Color(0xFFF7F7F7); // Adjust this hex to match exact color from image
-    const Color inputFieldGrey = Color(0xFFE0E0E0); // Adjust this hex to match exact color from image
+    const Color primaryRed =
+        Color(0xFFD32F2F); // Adjust this hex to match exact color from image
+    const Color backgroundGrey =
+        Color(0xFFF7F7F7); // Adjust this hex to match exact color from image
+    const Color inputFieldGrey =
+        Color(0xFFE0E0E0); // Adjust this hex to match exact color from image
 
     final ThemeData theme = ThemeData(
       brightness: Brightness.light,
@@ -26,7 +49,8 @@ class MyApp extends StatelessWidget {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: inputFieldGrey,
-        contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 25.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 20.0, horizontal: 25.0),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
           borderSide: BorderSide.none,
@@ -47,33 +71,47 @@ class MyApp extends StatelessWidget {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: Colors.white, backgroundColor: primaryRed,
+          foregroundColor: Colors.white,
+          backgroundColor: primaryRed,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 2,
         ),
       ),
       textTheme: TextTheme(
-        subtitle1: TextStyle(color: primaryRed, fontWeight: FontWeight.bold),
-        bodyText2: TextStyle(color: Colors.black),
+        titleMedium: TextStyle(color: primaryRed, fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(color: Colors.black),
       ),
     );
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'OoPay', // App title
-      theme: theme,
-      home: SplashScreen()
+    return Consumer<LocalizationService>(
+      builder: (context, localizeService, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'OoPay', // App title
+          theme: theme,
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en', 'US'), // English
+            Locale('ar', 'AE'), // Arabic
+            // Add more locales as needed
+          ],
+          locale: Locale(localizeService.selectedLanguageCode),
+          home: SplashScreen(),
+          builder: (context, child) {
+            return Directionality(
+              textDirection: localizeService.selectedLanguageCode == 'en'
+                  ? TextDirection.ltr
+                  : TextDirection.rtl,
+              child: child!,
+            );
+
+          },
+        );
+      },
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-

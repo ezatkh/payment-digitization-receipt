@@ -1,221 +1,588 @@
-import 'dart:ui';
-
+  import 'dart:async';
+  import 'dart:ui';
+  import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+  import 'package:flutter_screenutil/flutter_screenutil.dart';
+  import 'package:provider/provider.dart';
+  import '../Services/LocalizationService.dart';
+  import 'package:intl/intl.dart';
+  import 'package:number_to_word_arabic/number_to_word_arabic.dart';
+  import 'package:number_to_words_english/number_to_words_english.dart';
+  import '../Services/PaymentService.dart';
+  import '../Services/database.dart';
+  import '../Utils/Enum.dart';
+import 'PaymentCancellationScreen.dart';
+  import 'PaymentHistoryScreen.dart';
+  import '../Custom_Widgets/CustomPopups.dart';
+  import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
+  import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
+  import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'DashboardScreen.dart';
 
-class PaymentConfirmationScreen extends StatelessWidget {
-  final PaymentDetails paymentDetails;
+  class PaymentConfirmationScreen extends StatefulWidget {
+    final int paymentId;
+    Map<String, dynamic>? paymentDetails;
+    PaymentConfirmationScreen({required this.paymentId});
 
-  PaymentConfirmationScreen({required this.paymentDetails});
+    @override
+    State<PaymentConfirmationScreen> createState() => _PaymentConfirmationScreenState();
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: Size(360, 690));
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Confirm Payment', style: TextStyle(color: Colors.white, fontSize: 20.sp, fontFamily: 'NotoSansUI')),
-        backgroundColor: Color(0xFFC62828),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
+  class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
+    String voucherNumber = "";
+    String paymentInvoiceFor = "";
+    String amountCheck = "";
+    String checkNumber = "";
+    String bankBranch = "";
+    String dueDateCheck = "";
+    String amount = "";
+    String currency = "";
+    String viewPayment = '';
+    String confirmPayment = '';
+    String savePayment = '';
+    String confirmTitle = '';
+    String paymentSummary = '';
+    String customerName = '';
+    String transactionDate = '';
+    String transactionTime = '';
+    String cancellationDate = '';
+    String paymentMethod = '';
+    String confirm = '';
+    String cancel = '';
+    String paymentSuccessful = '';
+    String paymentSuccessfulBody = '';
+    String ok = '';
+    String prNumber = '';
+    String msisdn = '';
+    String status = '';
+    String theSumOf = '';
+    String numberConvertBody = '';
+    String languageCode = "";
+    String cancelReason = "";
+
+    String saved= "";
+    String synced= "";
+    String confirmed= "";
+    String cancelled= "";
+    String cancelPending= "";
+
+    late StreamSubscription _syncSubscription;
+    String? AppearedCurrency;
+    String? AppearedBank;
+
+    @override
+    void initState() {
+      _fetchPaymentDetails();
+      super.initState();
+      _initializeLocalizationStrings();
+      _syncSubscription = PaymentService.syncStream.listen((_) {
+        _fetchPaymentDetails();
+      });
+    }
+
+    @override
+    void dispose() {
+      _syncSubscription.cancel();
+      super.dispose();
+    }
+
+    void _initializeLocalizationStrings() {
+      final localizationService = Provider.of<LocalizationService>(context, listen: false);
+      languageCode = localizationService.selectedLanguageCode;
+      voucherNumber = localizationService.getLocalizedString('voucherNumber') ?? 'Voucher Number';
+      paymentInvoiceFor = localizationService.getLocalizedString('paymentInvoiceFor') ?? 'Confirm Payment';
+      amountCheck = localizationService.getLocalizedString('amountCheck') ?? 'Confirm Payment';
+      checkNumber = localizationService.getLocalizedString('checkNumber') ?? 'Confirm Payment';
+      bankBranch = localizationService.getLocalizedString('bankBranchCheck') ?? 'Confirm Payment';
+      dueDateCheck = localizationService.getLocalizedString('dueDateCheck') ?? 'Confirm Payment';
+      amount = localizationService.getLocalizedString('amount') ?? 'Confirm Payment';
+      currency = localizationService.getLocalizedString('currency') ?? 'Confirm Payment';
+      cancellationDate = localizationService.getLocalizedString('cancellationDate') ?? 'Confirm Payment';
+
+      ok = localizationService.getLocalizedString('ok') ?? 'Confirm Payment';
+      status = localizationService.getLocalizedString('status') ?? '';
+      prNumber = localizationService.getLocalizedString('PR') ?? 'Confirm Payment';
+      msisdn = localizationService.getLocalizedString('MSISDN') ?? 'Confirm Payment';
+      theSumOf = localizationService.getLocalizedString('theSumOf') ?? 'Confirm Payment';
+
+      viewPayment = localizationService.getLocalizedString('viewPayment') ?? 'Confirm Payment';
+      savePayment = localizationService.getLocalizedString('savePayment') ?? 'Save Payment';
+      confirmPayment = localizationService.getLocalizedString('confirmPayment') ?? 'Confirm Payment';
+
+      paymentSummary = localizationService.getLocalizedString('paymentSummary') ?? 'Payment Summary';
+      customerName = localizationService.getLocalizedString('customerName') ?? 'Customer Name';
+      paymentMethod = localizationService.getLocalizedString('paymentMethod') ?? 'Payment Method';
+
+      confirm = localizationService.getLocalizedString('confirm') ?? 'Confirm';
+      paymentSuccessful = localizationService.getLocalizedString('paymentSuccessful') ?? 'Payment Successful';
+      paymentSuccessfulBody = localizationService.getLocalizedString('paymentSuccessfulBody') ?? 'Your payment was successful!';
+      cancel = localizationService.getLocalizedString('cancel') ?? 'Cancel';
+      cancelReason = localizationService.getLocalizedString('cancelReason') ?? 'Confirm Payment';
+
+      transactionDate = localizationService.getLocalizedString('transactionDate') ?? 'Confirm Payment';
+      transactionTime = localizationService.getLocalizedString('transactionTime') ?? 'Confirm Payment';
+      saved = localizationService.getLocalizedString('saved') ?? 'Confirm Payment';
+      synced = localizationService.getLocalizedString('synced') ?? 'Confirm Payment';
+      confirmed = localizationService.getLocalizedString('confirmed') ?? 'Confirm Payment';
+      cancelled = localizationService.getLocalizedString('cancelled') ?? 'Confirm Payment';
+      cancelPending = localizationService.getLocalizedString('cancelpending') ?? 'Confirm Payment';
+    }
+
+    Future<void> _fetchPaymentDetails() async {
+      try {
+        if (widget.paymentId != null) {
+          widget.paymentDetails = await DatabaseProvider.getPaymentById(widget.paymentId);
+          String currencyId = widget.paymentDetails!['currency']?.toString() ?? '';
+          // Fetch the currency by ID
+          Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(currencyId);
+          setState(() {
+            AppearedCurrency = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
+          });
+
+          String bankId = widget.paymentDetails!['bankBranch']?.toString() ?? '';
+          Map<String, dynamic>? bank = await DatabaseProvider.getBankById(bankId);
+          setState(() {
+            if (bank != null) {
+              AppearedBank = Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode == 'ar'
+                  ? bank["arabicName"] ?? 'Unknown Bank'
+                  : bank["englishName"] ?? 'Unknown Bank';
+            } else {
+              AppearedBank = 'Unknown Bank';
+            }
+          });
+
+          print(AppearedCurrency);
+          print(AppearedBank);
+
+        } else {
+          print('No payment details found for ID ${widget.paymentId}');
+        }
+      } catch (e) {
+        print('Error fetching payment details: $e');
+      }
+    }
+
+    @override
+    Widget build(BuildContext context) {
+      ScreenUtil.init(context, designSize: Size(360, 690));
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(
+            viewPayment,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.sp,
+              fontFamily: 'NotoSansUI',
+            ),
+          ),
+          backgroundColor: Color(0xFFC62828),
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => PaymentHistoryScreen()),
+              );
+            },
+          ),
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPaymentDetailCard(),
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget _buildPaymentDetailCard() {
+      if (widget.paymentDetails == null) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+       final paymentDetails = widget.paymentDetails!;
+
+      return Container(
         padding: EdgeInsets.all(16.w),
+        margin: EdgeInsets.only(bottom: 20.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              spreadRadius: 0,
+              blurRadius: 15,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildPaymentDetailCard(),
-            SizedBox(height: 24.h),
-            _buildConfirmationActions(context),
+            _buildSummaryHeader(paymentDetails['status'].toLowerCase()),
+
+            Divider(color: Color(0xFFC62828), thickness: 2, height: 15.h),
+
+            if ((paymentDetails['status']?.toLowerCase() == "synced") || (paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "canceldpending")) ...[
+              _detailItem(voucherNumber, paymentDetails['voucherSerialNumber'] ?? ''),
+              _divider(),
+
+            ],
+            _detailItem(transactionDate, paymentDetails['status']?.toLowerCase() == "saved"
+                ? (paymentDetails['lastUpdatedDate'] != null
+                ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['lastUpdatedDate']))
+                : '')
+                : (paymentDetails['transactionDate'] != null
+                ? DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['transactionDate']))
+                : '')),
+            _divider(),
+            _detailItem(transactionTime, paymentDetails['status']?.toLowerCase() == "saved"
+                ? (paymentDetails['lastUpdatedDate'] != null
+                ? DateFormat('HH:mm:ss').format(DateTime.parse(paymentDetails['lastUpdatedDate']))
+                : '')
+                : (paymentDetails['transactionDate'] != null
+                ? DateFormat('HH:mm:ss').format(DateTime.parse(paymentDetails['transactionDate']))
+                : '')),
+            _divider(),
+            if ((paymentDetails['status']?.toLowerCase() == "cancelled") || (paymentDetails['status']?.toLowerCase() == "canceldpending"))
+              ...[
+                _detailItem(cancellationDate, paymentDetails['cancellationDate']?.toString() ?? ''),
+                _divider(),
+                _detailItem(cancelReason, paymentDetails['cancelReason']?.toString() ?? ''),
+                _divider(),
+              ],
+
+
+              _detailItem(customerName, paymentDetails['customerName'] ?? ''),
+            _divider(),
+            _detailItem(status,Provider.of<LocalizationService>(context, listen: false).getLocalizedString(paymentDetails['status'].toLowerCase()) ?? ''),
+            _divider(),
+            _detailItem(prNumber, paymentDetails['prNumber']?.toString() ?? ''),
+            _divider(),
+            _detailItem(msisdn, paymentDetails['msisdn']?.toString() ?? ''),
+            _divider(),
+            _detailItem(paymentMethod, Provider.of<LocalizationService>(context, listen: false).getLocalizedString(paymentDetails['paymentMethod'].toLowerCase()) ?? ''),
+
+            if ((paymentDetails['paymentMethod']?.toLowerCase() == "check") || (paymentDetails['paymentMethod'] == "شيك")) ...[
+              _divider(),
+              _detailItem(amountCheck, paymentDetails['amountCheck']?.toString() ?? ''),
+              _divider(),
+              _detailItem(currency, AppearedCurrency!),
+              _divider(),
+              _detailNoteItem(
+                  theSumOf,
+                  languageCode == 'ar'
+                      ? Tafqeet.convert(paymentDetails['amountCheck']?.toInt().toString() ?? '')
+                      : NumberToWordsEnglish.convert(paymentDetails['amountCheck'] != null ? (paymentDetails['amountCheck'] as double).toInt() : 0)
+              ,Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
+              _divider(),
+              _detailItem(checkNumber, paymentDetails['checkNumber']?.toString() ?? ''),
+              _divider(),
+              _detailItem(bankBranch,AppearedBank ?? ''),
+              _divider(),
+              _detailItem(dueDateCheck, DateFormat('yyyy-MM-dd').format(DateTime.parse(paymentDetails['dueDateCheck'])) ?? ''),
+            ],
+            if ((paymentDetails['paymentMethod']?.toLowerCase() == "cash") || (paymentDetails['paymentMethod'] == "كاش")) ...[
+              _divider(),
+              _detailItem(amount, paymentDetails['amount']?.toString() ?? ''),
+              _divider(),
+              _detailItem(currency, AppearedCurrency!),
+              _divider(),
+              _detailNoteItem(
+                theSumOf,
+                languageCode == 'ar'
+                    ?  paymentDetails['amount']!= null ? Tafqeet.convert(paymentDetails['amount'].toInt().toString() )  : 'Invalid amount'
+                    : NumberToWordsEnglish.convert(paymentDetails['amount'] != null ? (paymentDetails['amount'] as double).toInt() : 0),
+      Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
+            ],
+            _divider(),
+            _detailNoteItem(paymentInvoiceFor, paymentDetails['paymentInvoiceFor']?.toString() ?? '',Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  Widget _buildPaymentDetailCard() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      margin: EdgeInsets.only(bottom: 20.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            spreadRadius: 0,
-            blurRadius: 15,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
+    Widget _buildSummaryHeader(String paymentStatus) {
+      // Determine if icons should be shown based on conditions
+      bool canEdit = paymentStatus == 'saved';
+      bool canDelete = paymentStatus == 'saved';
+      bool canConfirm = paymentStatus == 'saved';
+      bool canSend = paymentStatus == 'synced';
+      bool canCancel = paymentStatus == 'synced';
+
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Payment Summary', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, fontFamily: 'NotoSansUI', color: Color(0xFFC62828))),
-          Divider(color: Color(0xFFC62828), thickness: 1, height: 20.h),
-          _detailItem('Customer Name', paymentDetails.customerName),
-          _detailItem('MSISDN', paymentDetails.msisdn),
-          _detailItem('PR#', paymentDetails.prNumber),
-          _detailItem('Amount', ' ${paymentDetails.amount.toStringAsFixed(2)}'),
-          _detailItem('Currency', paymentDetails.currency),
-          _detailItem('Payment Method', paymentDetails.paymentMethod),
-          _detailItem('Date', paymentDetails.date),
-        ],
-      ),
-    );
-  }
-
-  Widget _detailItem(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, fontFamily: 'NotoSansUI', color: Colors.grey.shade800)),
-          Flexible(
-            child: Text(value, textAlign: TextAlign.right, style: TextStyle(fontSize: 16.sp, fontFamily: 'NotoSansUI', color: Colors.black87)),
+          Text(
+            paymentSummary,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
-        ],
-      ),
-    );
-  }
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
 
-  Widget _buildConfirmationActions(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _actionButton(context, 'Cancel', Colors.red.shade300, () => Navigator.of(context).pop()),
-        _actionButton(context, 'Confirm', Color(0xFF4CAF50), () => _confirmPayment(context)),
-      ],
-    );
-  }
-  void _confirmPayment(BuildContext context) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
-
-    // Simulate a network request/waiting time
-    await Future.delayed(Duration(seconds: 2));
-
-    Navigator.pop(context);  // Close the CircularProgressIndicator
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return Center(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10.r),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-                width: 300.w,
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),  // Semi-transparent white for glass effect
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.5),
-                    width: 1.5,
+              if (canCancel)
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment'),
+                  child: IconButton(
+                    icon: Icon(Icons.cancel, color: Colors.red),
+                    onPressed: () {
+                      if (widget.paymentId != null) {
+                        final int idToCancel = widget.paymentId!;
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return PaymentCancellationScreen(id: idToCancel);
+                          },
+                        );
+                      }
+                    },
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text('Payment Successful',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(decoration: TextDecoration.none,
-                          fontSize: 20.sp,
-                          fontFamily: 'NotoSansUI',
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        )
-                    ),
-                    SizedBox(height: 16.h),
-                    Text('The payment has been successfully processed.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(decoration: TextDecoration.none,
-                          fontSize: 16.sp,
-                          fontFamily: 'NotoSansUI',
-                          color: Colors.white,
-                        )
-                    ),
-                    SizedBox(height: 24.h),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 20.w),
-                        backgroundColor: Colors.white.withOpacity(0.3), // Light transparent background
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18), // Rounded corners
-                            side: BorderSide(
-                                color: Color(0xFF4CAF50), // Same green color as the text
-                                width: 1.5 // Not too thick border
-                            )
-                        ),
-                      ),
-                      child: Text(
-                          'OK',
-                          style: TextStyle(
-                            fontFamily: 'NotoSansUI',
-                            color: Color(0xFF4CAF50), // Green color for text
-                            fontSize: 16.sp,
-                            decoration: TextDecoration.none,
-                          )
-                      ),
+              if (canSend)
+                ...[
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('print'),
+                    child:IconButton(
+                      icon: Icon(Icons.print, color: Colors.black),
                       onPressed: () {
-                        Navigator.of(dialogContext).pop(); // Dismiss the dialog
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => DashboardScreen())); // Navigate to Dashboard
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.print);
+                      },
+                    ),),
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.75),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    textStyle: TextStyle(color: Colors.white),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.message,
+                        color: Colors.green, // Set the color of the icon here
+                      ),
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendSms);
+
                       },
                     )
+                  ),
+                  Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
+                    child:IconButton(
+                      icon: Icon(Icons.email,  color: Colors.blue,
+                      ),
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendEmail);
+                      },
+                    ),),//
+                Tooltip(
+                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment'),
+                    child:IconButton(
+                      icon: FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green),
+                      onPressed: () async{
+                        var connectivityResult = await (Connectivity().checkConnectivity());
+                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                        }
+                        else
+                          ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.sendWhats);
+                },
+                    ),
+                ),
+                ],
 
-                  ],
+              if (canDelete)
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
+                  child: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      CustomPopups.showCustomDialog(  context: context,
+                        icon: Icon(Icons.delete, size: 60, color: Colors.red),
+                        title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
+                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePaymentBody'),
+                        deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
+                        onPressButton: () async {
+                          // Show the loading dialog
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext dialogContext) {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          );
+
+                          try {
+                            // Perform the delete operation
+                            await DatabaseProvider.deletePayment(widget.paymentId);
+
+                            // Ensure the loading dialog is shown for at least 1 second
+                            await Future.delayed(Duration(seconds: 1));
+                          } catch (error) {
+                            // Handle any errors here if needed
+                            print('Error deleting payment: $error');
+                          } finally {
+                            // Close the loading dialog
+                            Navigator.pop(context); // pop the dialog
+
+                            // Pop the current screen
+                            Navigator.of(context).pop();
+
+                            // Push the HistoryScreen
+                            Navigator.of(context).push(MaterialPageRoute(builder: (context) => PaymentHistoryScreen()));
+                          }
+                        },
+
+                      );
+                    },
+                  ),
+                ),
+              if (canEdit)
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('editPayment'),
+                  child: IconButton(
+                    icon: Icon(Icons.edit, color: Color(0xFFA67438)),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: widget.paymentId)),
+                      );
+                    },
+                  ),
+                ),
+              if (canConfirm)
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
+                  child: IconButton(
+                    icon: Icon(Icons.check_circle, color: Colors.blue),
+                    onPressed: () {
+                      CustomPopups.showCustomDialog(
+                        context: context,
+                        icon: Icon(Icons.check_circle, size: 60.0, color: Color(0xFFC62828)),
+                        title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
+                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPaymentBody'),
+                        deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('ok'),
+                        onPressButton: () async {
+                          showDialog( context: context,  barrierDismissible: false,  builder: (BuildContext dialogContext) {
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          );
+                          // Simulate a network request/waiting time
+                          await DatabaseProvider.updatePaymentStatus(widget.paymentId,'Confirmed');
+                          Navigator.pop(context); // pop the dialog
+
+                        },
+                      );
+                      },
+                  ),
+                ),
+            ],
+          ),
+        ],
+      );
+    }
+
+
+    Widget _detailItem(String title, String value) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 6.h),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Colors.black54,
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          ],
+        ),
+      );
+    }
 
+    Widget _detailNoteItem(String title, String value, String languageCode) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    textAlign: languageCode == 'ar' ? TextAlign.right : TextAlign.left, // Adjust alignment based on language
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 4.h), // Adjust space between title and value
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    value,
+                    textAlign: languageCode == 'ar' ? TextAlign.left : TextAlign.right, // Opposite alignment for value
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget _divider() {
+      return Divider(color: Color(0xFFCCCCCC), height: 10.h);
+    }
   }
-
-  Widget _actionButton(BuildContext context, String text, Color color, VoidCallback onPressed) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        padding: EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-        textStyle: TextStyle(decoration: TextDecoration.none,fontSize: 16.sp, fontFamily: 'NotoSansUI', color: Colors.white),
-      ),
-      child: Text(text),
-    );
-  }
-}
-
-class PaymentDetails {
-  final String customerName;
-  final String msisdn;
-  final String prNumber;
-  final double amount;
-  final String currency;
-  final String paymentMethod;
-  final String date;
-
-  PaymentDetails({
-    required this.customerName,
-    required this.msisdn,
-    required this.prNumber,
-    required this.amount,
-    required this.currency,
-    required this.paymentMethod,
-    required this.date,
-  });
-}

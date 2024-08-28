@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../Services/LocalizationService.dart';
+import 'DashboardScreen.dart';
 import 'LoginScreen.dart';
+import '../Models/LoginState.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _logoOpacity;
   late Animation<double> _backgroundLighten;
@@ -23,20 +28,30 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        _navigateToLogin(context);
+        await Provider.of<LocalizationService>(context, listen: false).initLocalization();
+        _handleNavigation();
       }
     });
   }
 
-  void _navigateToLogin(BuildContext context) {
-    Navigator.of(context).pushReplacement(_createRoute());
+  void _handleNavigation() {
+    final loginState = Provider.of<LoginState>(context, listen: false);
+    if (loginState.isLoginSuccessful) {
+      Navigator.of(context).pushReplacement(
+        _createRoute(DashboardScreen()), // Navigate to DashboardScreen on successful login
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        _createRoute(LoginScreen()), // Navigate to LoginScreen if not logged in
+      );
+    }
   }
 
-  Route _createRoute() {
+  Route _createRoute(Widget destination) {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
+      pageBuilder: (context, animation, secondaryAnimation) => destination,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = 0.0;
         const end = 1.0;
@@ -68,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 opacity: _logoOpacity.value,
                 child: Transform.scale(
                   scale: _logoScale.value,
-                  child: Image.asset('assets/images/logo_ooredoo.png'), // Replace with your asset path
+                  child: Image.asset('assets/images/logo_ooredoo.png'),
                 ),
               ),
             ),
