@@ -219,6 +219,8 @@
 
   "paymentSentEmailFailed": "فشل إرسال تفاصيل الدفعة عبر البريد الإلكتروني.",
   "paymentSentSmsFailed": "فشل إرسال تفاصيل الدفعة عبر الرسائل القصيرة.",
-  "paymentSentWhatsFailed": "فشل إرسال تفاصيل الدفعة عبر الواتساب."
+  "paymentSentWhatsFailed": "فشل إرسال تفاصيل الدفعة عبر الواتساب.",
 
+  "sesstionExpiredTitle": "انتهت الجلسة",
+  "sesstionExpiredBody": "انتهت جلستك. يرجى الاتصال بالمسؤول."
 }

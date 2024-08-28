@@ -291,7 +291,6 @@ class PaymentService {
         "cancelReason": reason,
         "cancelTransactionDate": cancelDateTime,
       };
-    print("jj");
       print(body);
       try {
         final response = await http.delete(
@@ -306,6 +305,7 @@ class PaymentService {
 
           _syncController.add(null);
         }
+
         else {
           Map<String, dynamic> errorResponse = json.decode(response.body);
           print("failed to sync heres the body of response: ${response.body}");
@@ -360,7 +360,8 @@ class PaymentService {
       }
     } else {
       print("Username or password is missing. Cannot attempt re-login.");
-      return 401;
+      _showSessionExpiredDialog(context);
+      return 400;
     }
   }
 
@@ -369,8 +370,8 @@ class PaymentService {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Session Expired'),
-          content: Text('Your session has expired. Please contact the admin.'),
+          title: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sesstionExpiredTitle')),
+          content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sesstionExpiredBody')),
           actions: [
             TextButton(
               onPressed: () async {

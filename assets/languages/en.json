@@ -226,5 +226,8 @@
 
   "paymentSentEmailFailed": "Failed to send payment information via email.",
   "paymentSentSmsFailed": "Failed to send payment information via SMS.",
-  "paymentSentWhatsFailed": "Failed to send payment information via Whatsapp."
+  "paymentSentWhatsFailed": "Failed to send payment information via Whatsapp.",
+
+  "sesstionExpiredTitle": "Session Expired",
+  "sesstionExpiredBody": "Your session has expired. Please contact the admin."
 }
