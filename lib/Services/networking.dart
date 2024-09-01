@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
@@ -9,12 +11,14 @@ class NetworkHelper {
   final Map<String, dynamic>? map;
   final Map<String, String>? headers;
   final String method;
+  final Duration timeoutDuration;
 
   NetworkHelper({
     this.url,
     this.map,
     this.headers,
-    this.method = 'POST', // Default method is POST
+    this.method = 'POST',
+    this.timeoutDuration = const Duration(seconds: 4),
   });
 
 
@@ -31,14 +35,14 @@ class NetworkHelper {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: map != null ? jsonEncode(map) : null,
-        );
+        ).timeout(timeoutDuration);
       } else if (method == 'GET') {
         response = await http.get(
           Uri.parse(url!),
           headers: headers ?? {
             'Content-Type': 'application/json; charset=UTF-8',
           },
-        );
+        ).timeout(timeoutDuration);
       } else {
         throw Exception('Unsupported HTTP method: $method');
       }
@@ -51,7 +55,17 @@ class NetworkHelper {
         print("Response body: ${response.body}");
         return null;
       }
-    } catch (e) {
+    }
+    on TimeoutException catch (_) {
+      // Handle the timeout exception
+      print('Request timed out.');
+      return http.Response('Request timed out', 408); // Returning a response with 408 Request Timeout status code
+    } on SocketException catch (e) {
+      // Handle network errors
+      print('Network error: $e');
+      return http.Response('Network error', 503); // Returning a response with 503 Service Unavailable status code
+    }
+    catch (e) {
       print("Error during HTTP request: $e");
       return null;
     }
@@ -60,7 +74,7 @@ class NetworkHelper {
 
   Future<bool> testConnection() async {
     try {
-      http.Response response = await http.get(Uri.parse(url!));
+      http.Response response = await http.get(Uri.parse(url!)).timeout(timeoutDuration);
       if (response.statusCode == 200) {
         print('response'+response.toString());
         return true;
@@ -102,7 +116,7 @@ class NetworkHelper {
       request.files.add(multipartFile);
 
       // Send request
-      var response = await request.send();
+      var response = await request.send().timeout(timeoutDuration);;
 
       // Get response body
       final responseBody = await response.stream.bytesToString();

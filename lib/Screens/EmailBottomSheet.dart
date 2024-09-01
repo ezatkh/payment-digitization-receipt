@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
@@ -306,7 +307,7 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
         fileName: fileName,
         file: pdfFile,
         emailDetailsJson: emailDetailsJson,
-      );
+      ).timeout(Duration(seconds: 4));
 
       if (response == 200) {
         CustomPopups.showCustomResultPopup(
@@ -318,7 +319,8 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
             // Define what happens when the button is pressed
             print('Success acknowledged');
           },
-        );      }
+        );
+      }
       else if(response == 401){
         int responseNumber = await PaymentService.attemptReLogin(context);
         print("the response number from get expend the session is :${responseNumber}");
@@ -338,12 +340,49 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
               headers: headers
           );
 
-          await networkHelper.uploadFile(
+          dynamic reloginResponse = await networkHelper.uploadFile(
             fileName: fileName,
             file: pdfFile,
             emailDetailsJson: emailDetailsJson,
           );
+          if (reloginResponse == 200) {
+            CustomPopups.showCustomResultPopup(
+              context: context,
+              icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
+              message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentEmailOk"),
+              buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+              onPressButton: () {
+                // Define what happens when the button is pressed
+                print('Success acknowledged');
+              },
+            );
+          }
+          else {
+            CustomPopups.showCustomResultPopup(
+              context: context,
+              icon: Icon(Icons.error, color: Colors.red, size: 40),
+              message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentEmailFailed")}: Failed to upload file , $reloginResponse.statusCode',
+              buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+              onPressButton: () {
+                print('Failed to upload file. Status code: ${reloginResponse.statusCode}');
+              },
+            );
+          }
+
+
+
         }
+      }
+      else if (response.statusCode == 408) {
+        CustomPopups.showCustomResultPopup(
+          context: context,
+          icon: Icon(Icons.error, color: Colors.red, size: 40),
+          message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("networkTimeoutError"),
+          buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+          onPressButton: () {
+            print('Error timeout');
+          },
+        );
       }
       else {
         print(response.statusCode);
@@ -359,7 +398,29 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
           },
         );
       }
-    } catch (e) {
+    }
+    on SocketException catch (e) {
+      CustomPopups.showCustomResultPopup(
+        context: context,
+        icon: Icon(Icons.error, color: Colors.red, size: 40),
+        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("networkError"),
+        buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+        onPressButton: () {
+          print('Network error acknowledged');
+        },
+      );
+    } on TimeoutException catch (e) {
+      CustomPopups.showCustomResultPopup(
+        context: context,
+        icon: Icon(Icons.error, color: Colors.red, size: 40),
+        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("networkTimeoutError"),
+        buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+        onPressButton: () {
+          print('Timeout error acknowledged');
+        },
+      );
+    }
+    catch (e) {
       CustomPopups.showCustomResultPopup(
         context: context,
         icon: Icon(Icons.error, color: Colors.red, size: 40),

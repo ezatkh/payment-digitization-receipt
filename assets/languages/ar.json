@@ -222,5 +222,8 @@
   "paymentSentWhatsFailed": "فشل إرسال تفاصيل الدفعة عبر الواتساب.",
 
   "sesstionExpiredTitle": "انتهت الجلسة",
-  "sesstionExpiredBody": "انتهت جلستك. يرجى الاتصال بالمسؤول."
+  "sesstionExpiredBody": "انتهت جلستك. يرجى الاتصال بالمسؤول.",
+
+  "networkTimeoutError": "انتهت مهلة الشبكة. يرجى المحاولة مرة أخرى لاحقًا.",
+  "networkError": "حدث خطأ في الشبكة. يرجى التحقق من الاتصال والمحاولة مرة أخرى."
 }

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -196,7 +198,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                   Uri.parse(apiUrlSMS),
                                   headers: headers,
                                   body: json.encode(body),
-                                );
+                                ).timeout(Duration(seconds:3));
                                 if (response.statusCode == 200) {
                                   CustomPopups.showCustomResultPopup(
                                     context: context,
@@ -209,7 +211,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                     },
                                   );
                                 }
-                                else if(response == 401){
+                                else if(response.statusCode == 401){
                                   int responseNumber = await PaymentService.attemptReLogin(context);
                                   print("the response number from get expend the session is :${responseNumber}");
                                   if(responseNumber == 200 ){
@@ -225,12 +227,50 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                       'Content-Type': 'application/json',
                                       'tokenID': fullToken,
                                     };
-                                    await http.post(
+                                    final reloginResponse = await http.post(
                                       Uri.parse(apiUrlSMS),
                                       headers: headers,
                                       body: json.encode(body),
                                     );
+                                    if(reloginResponse.statusCode == 200){
+                                      CustomPopups.showCustomResultPopup(
+                                        context: context,
+                                        icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
+                                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsOk"),
+                                        buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                        onPressButton: () {
+                                          // Define what happens when the button is pressed
+                                          print('Success acknowledged');
+                                        },
+                                      );
+                                    }
+                                    else{
+                                      CustomPopups.showCustomResultPopup(
+                                        context: context,
+                                        icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                        message:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsFailed"),
+                                        buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
+                                        onPressButton: () {
+                                          // Define what happens when the button is pressed
+                                          print('Error acknowledged');
+                                          print(response.body);
+                                          print(response.statusCode);
+
+                                        },
+                                      );
+                                    }
                                   }
+                                }
+                                else if (response.statusCode == 408) {
+                                  CustomPopups.showCustomResultPopup(
+                                    context: context,
+                                    icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                    message: appLocalization.getLocalizedString("networkTimeoutError"),
+                                    buttonText: appLocalization.getLocalizedString("ok"),
+                                    onPressButton: () {
+                                      print('Error timeout');
+                                    },
+                                  );
                                 }
                                 else {
                                   CustomPopups.showCustomResultPopup(
@@ -241,10 +281,35 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                     onPressButton: () {
                                       // Define what happens when the button is pressed
                                       print('Error acknowledged');
+                                      print(response.body);
+                                      print(response.statusCode);
+
                                     },
                                   );
                                 }
-                              } catch (e) {
+                              }
+                              on SocketException catch (e) {
+                                CustomPopups.showCustomResultPopup(
+                                  context: context,
+                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                  message: appLocalization.getLocalizedString("networkError"),
+                                  buttonText: appLocalization.getLocalizedString("ok"),
+                                  onPressButton: () {
+                                    print('Network error acknowledged');
+                                  },
+                                );
+                              } on TimeoutException catch (e) {
+                                CustomPopups.showCustomResultPopup(
+                                  context: context,
+                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
+                                  message: appLocalization.getLocalizedString("networkTimeoutError"),
+                                  buttonText: appLocalization.getLocalizedString("ok"),
+                                  onPressButton: () {
+                                    print('Timeout error acknowledged');
+                                  },
+                                );
+                              }
+                              catch (e) {
                                 // Handle exceptions
                                 CustomPopups.showCustomResultPopup(
                                   context: context,

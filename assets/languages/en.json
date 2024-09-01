@@ -229,5 +229,8 @@
   "paymentSentWhatsFailed": "Failed to send payment information via Whatsapp.",
 
   "sesstionExpiredTitle": "Session Expired",
-  "sesstionExpiredBody": "Your session has expired. Please contact the admin."
+  "sesstionExpiredBody": "Your session has expired. Please contact the admin.",
+
+  "networkTimeoutError": "Network timeout occurred. Please try again later.",
+  "networkError": "Network error occurred. Please check your connection and try again."
 }
