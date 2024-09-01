@@ -136,9 +136,11 @@ class PaymentService {
 
   static Future<void> testNetwork(BuildContext context) async {
     var connectivityResult = await (Connectivity().checkConnectivity());
-    print(connectivityResult);
-    if (connectivityResult == ConnectivityResult.none) {}
+    if (connectivityResult == ConnectivityResult.none) {
+      print(connectivityResult);
+    }
     else {
+      print(connectivityResult);
       PaymentService.syncPayments(context);
     }
   }
@@ -236,7 +238,7 @@ class PaymentService {
         Uri.parse(apiUrl),
         headers: headers,
         body: json.encode(body),
-      );
+      ).timeout(Duration(seconds: 4));
 
       if (response.statusCode == 200) {
         print("inside status code 200 of sync api");
@@ -250,7 +252,8 @@ class PaymentService {
         await DatabaseProvider.updateSyncedPaymentDetail(payment["id"], voucherSerialNumber, 'Synced');
 
         _syncController.add(null);
-      } else {
+      }
+      else {
         Map<String, dynamic> errorResponse = json.decode(response.body);
         print("failed to sync heres the body of response: ${response.body}");
         if (errorResponse['error'] == 'Unauthorized' &&
