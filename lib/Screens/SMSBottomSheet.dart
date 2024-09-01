@@ -214,6 +214,17 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                   print("the response number from get expend the session is :${responseNumber}");
                                   if(responseNumber == 200 ){
                                     print("relogin successfully");
+                                    tokenID = prefs.getString('token');
+                                    if (tokenID == null) {
+                                      print('Token not found');
+                                      return;
+                                    }
+                                    fullToken = "Barer ${tokenID}";
+
+                                    headers = {
+                                      'Content-Type': 'application/json',
+                                      'tokenID': fullToken,
+                                    };
                                     await http.post(
                                       Uri.parse(apiUrlSMS),
                                       headers: headers,

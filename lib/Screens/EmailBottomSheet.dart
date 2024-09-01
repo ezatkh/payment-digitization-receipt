@@ -324,6 +324,20 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
         print("the response number from get expend the session is :${responseNumber}");
         if(responseNumber == 200 ){
           print("relogin successfully");
+          tokenID = prefs.getString('token');
+          if (tokenID == null) {
+            print('Token not found');
+            return;
+          }
+          fullToken = "Barer ${tokenID}";
+          headers = {
+            'tokenID': fullToken,
+          };
+          networkHelper = NetworkHelper(
+              url: apiUrlEmail, // Replace with your API URL
+              headers: headers
+          );
+
           await networkHelper.uploadFile(
             fileName: fileName,
             file: pdfFile,
