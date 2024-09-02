@@ -694,6 +694,16 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       return false;
     }
 
+    if (_msisdnController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('MSISDN')} ${isRequired}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
     // Validate payment method
     if (_selectedPaymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -759,7 +769,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           _selectedBankDB == null ||
           _dueDateCheckController.text.isEmpty) {
         print(_selectedBankDB);
-        print("kk");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
@@ -908,7 +917,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     if (_selectedPaymentMethod!.toLowerCase() == 'cash' || _selectedPaymentMethod!.toLowerCase() == 'كاش') {
       if ([_customerNameController.text, _amountController.text, _selectedCurrencyDB, _selectedPaymentMethod]
           .any((element) => element == null || element.isEmpty)) {
-        print("oo");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
@@ -922,7 +930,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       if ([_customerNameController.text, _selectedPaymentMethod, _amountCheckController.text,
         _checkNumberController.text, _selectedBankDB,_selectedCurrencyDB, _dueDateCheckController.text]
           .any((element) => element == null || element.isEmpty)) {
-        print("ll");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),
