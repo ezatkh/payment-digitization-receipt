@@ -133,7 +133,7 @@
   "dueDateCheck": "Due date",
 
   "confirmPayment": "Save & Confirm",
-  "paymentSummary": "payment Summary",
+  "paymentSummary": "Payment Summary",
   "paymentSuccessful": "Payment Successful",
   "paymentSuccessfulBody": "The payment has been successfully processed.",
   "ok": "Ok",
@@ -162,7 +162,7 @@
   "synced": "Synced",
   "confirmed": "Confirmed",
   "cancelpending": "Cancel Pending",
-  "cancelled": "Cancelled",
+  "cancelled": "Submitted to cancel",
 
   "noInternetConnection": "No Internet Connection",
   "noInternet": "No internet connection detected. Please check your network settings and try again.",
@@ -232,5 +232,7 @@
   "sesstionExpiredBody": "Your session has expired. Please contact the admin.",
 
   "networkTimeoutError": "Network timeout occurred. Please try again later.",
-  "networkError": "Network error occurred. Please check your connection and try again."
+  "networkError": "Network error occurred. Please check your connection and try again.",
+
+  "submit": "Submit"
 }

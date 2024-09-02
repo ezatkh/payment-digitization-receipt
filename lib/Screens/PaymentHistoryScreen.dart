@@ -778,9 +778,10 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 title,
                 textAlign: isRtl ? TextAlign.right : TextAlign.left,
                 style: TextStyle(
-                  fontSize: 14.0,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
                   color: Colors.grey.shade500,
+                  // Text(value, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.black87)),
                 ),
               ),
             ),
@@ -795,7 +796,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                 value,
                 textAlign: isRtl ? TextAlign.left : TextAlign.right,
                 style: TextStyle(
-                  fontSize: 14.0,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                 ),

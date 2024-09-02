@@ -286,8 +286,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                     ...[
                       _buildTextField(
                         _amountController,
-                        amount,
-                        Icons.attach_money,
+                        amount, null ,
                         focusNode: _amountFocusNode,
                           required:true,
                           isNumeric : true
@@ -300,7 +299,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                       _buildTextField(
                         _amountCheckController,
                         amountCheck,
-                        Icons.attach_money,
+                        null ,
                         focusNode: _amountCheckFocusNode,
                           required:true,
                           isNumeric : true
@@ -441,7 +440,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText, IconData icon,
+  Widget _buildTextField(TextEditingController controller, String labelText, IconData? icon,
       {int maxLines = 1,
         required FocusNode focusNode,
         bool required = false,
@@ -462,10 +461,12 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
               fontFamily: 'NotoSansUI',
               fontSize: 12.sp,
               color: Colors.grey[500]),
-          prefixIcon: Padding(
+          prefixIcon: icon != null
+              ? Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Icon(icon, color: Color(0xFFC62828)),
-          ),
+          )
+              : null,
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
@@ -677,7 +678,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       ),
     );
   }
-
 
   bool _validateFields() {
     String isRequired =Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired');
@@ -902,6 +902,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
       },);
   }
+
   Payment _preparePaymentObject(String status) {
     DateTime? parseDueDate;
     if (_selectedPaymentMethod!.toLowerCase() == 'cash' || _selectedPaymentMethod!.toLowerCase() == 'كاش') {

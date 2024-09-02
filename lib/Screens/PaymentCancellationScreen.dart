@@ -138,7 +138,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                       onPressed: () {
                         _handleCancellation(context, voucherNumber);
                       },
-                      child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'), style: TextStyle(fontSize: 16.sp)),
+                      child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('submit'), style: TextStyle(fontSize: 16.sp)),
                     ),
                   ],
                 ),

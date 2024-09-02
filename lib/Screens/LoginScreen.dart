@@ -21,14 +21,13 @@ class LoginScreen extends StatelessWidget {
   static const List<Map<String, String>> languages = [
     {'name': 'English', 'code': 'en'},
     {'name': 'العربية', 'code': 'ar'},
-    // Add more languages as needed
   ];
   const LoginScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: Size(360, 690), minTextAdapt: true);
     double maxWidth =
-        ScreenUtil().screenWidth > 600 ? 600.w : ScreenUtil().screenWidth * 0.9;
+    ScreenUtil().screenWidth > 600 ? 600.w : ScreenUtil().screenWidth * 0.9;
 
     final screenSize = MediaQuery.of(context).size;
 
@@ -84,7 +83,7 @@ class LoginScreen extends StatelessWidget {
                             CustomTextField(
                               hint: localizationService.isLocalizationLoaded
                                   ? localizationService
-                                      .getLocalizedString('userName')
+                                  .getLocalizedString('userName')
                                   : 'Username', // Fallback if localization is not loaded
                               icon: Icons.person_outline,
                               onChanged: loginState.setUsername,
@@ -93,7 +92,7 @@ class LoginScreen extends StatelessWidget {
                             CustomTextField(
                               hint: localizationService.isLocalizationLoaded
                                   ? localizationService
-                                      .getLocalizedString('password')
+                                  .getLocalizedString('password')
                                   : 'Password', // Fallback if localization is not loaded
                               icon: Icons.lock_outline,
                               obscureText: true,
@@ -106,9 +105,9 @@ class LoginScreen extends StatelessWidget {
                                 Expanded(
                                   child: CustomButton(
                                     text: localizationService
-                                            .isLocalizationLoaded
+                                        .isLocalizationLoaded
                                         ? localizationService
-                                            .getLocalizedString('login')
+                                        .getLocalizedString('login')
                                         : 'Login', // Fallback if localization is not loaded
                                     onPressed: () async {
                                       var connectivityResult = await (Connectivity().checkConnectivity());
@@ -122,57 +121,58 @@ class LoginScreen extends StatelessWidget {
                                           localizationService.selectedLanguageCode,
                                         );
                                       }
-          else{
-          bool isValid = validateLoginInputs(loginState);
-          if (isValid) {
-            _handleLogin(context, localizationService);
-          bool? loginResult =await loginState.login(loginState.username,loginState.password);
-          if (loginResult ) {
-            await saveCredentials(loginState.username,loginState.password);
-            await LOVCompareService.compareAndSyncCurrencies();
-            await LOVCompareService.compareAndSyncBanks();
-            await PaymentService.getExpiredPaymentsNumber();
+                                      else{
+                                        bool isValid = validateLoginInputs(loginState);
+                                        if (isValid) {
+                                          _handleLogin(context, localizationService);
+                                          bool? loginResult =await loginState.login(loginState.username,loginState.password);
+                                          if (loginResult ) {
+                                            await saveCredentials(loginState.username,loginState.password);
+                                            await LOVCompareService.compareAndSyncCurrencies();
+                                            await LOVCompareService.compareAndSyncBanks();
+                                            await PaymentService.getExpiredPaymentsNumber();
 
-            Navigator.of(context).pop();  // Dismiss the loading dialog
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => DashboardScreen()),
-            );
-          } else {
-            Navigator.of(context).pop();
+                                            Navigator.of(context).pop();  // Dismiss the loading dialog
+                                            Navigator.pushReplacement(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => DashboardScreen()),
+                                            );
+                                          } else {
+                                            Navigator.of(context).pop();
 
-            _showLoginFailedDialog(
-          context,
-          localizationService
-              .getLocalizedString(
-          'loginFailedwrong'),
-          localizationService
-              .isLocalizationLoaded
-          ? localizationService
-              .getLocalizedString(
-          'loginfailed')
-              : 'Login Failed',
-          localizationService
-              .selectedLanguageCode,
-          );
-          }
-          } else {
-          _showLoginFailedDialog(
-          context,
-          localizationService
-              .getLocalizedString(
-          'loginFailedEmpty'),
-          localizationService
-              .isLocalizationLoaded
-          ? localizationService
-              .getLocalizedString(
-          'loginfailed')
-              : 'Login Failed',
-          localizationService
-              .selectedLanguageCode,
-          );
-          }
-          }
+                                            _showLoginFailedDialog(
+                                              context,
+                                              localizationService
+                                                  .getLocalizedString(
+                                                  'loginFailedwrong'),
+                                              localizationService
+                                                  .isLocalizationLoaded
+                                                  ? localizationService
+                                                  .getLocalizedString(
+                                                  'loginfailed')
+                                                  : 'Login Failed',
+                                              localizationService
+                                                  .selectedLanguageCode,
+                                            );
+                                          }
+                                        }
+                                        else {
+                                          _showLoginFailedDialog(
+                                            context,
+                                            localizationService
+                                                .getLocalizedString(
+                                                'loginFailedEmpty'),
+                                            localizationService
+                                                .isLocalizationLoaded
+                                                ? localizationService
+                                                .getLocalizedString(
+                                                'loginfailed')
+                                                : 'Login Failed',
+                                            localizationService
+                                                .selectedLanguageCode,
+                                          );
+                                        }
+                                      }
                                     },
                                   ),
                                 ),
@@ -211,7 +211,7 @@ class LoginScreen extends StatelessWidget {
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.fingerprint,
                                             size: 40, color: Color(0xFFC62828)),
@@ -270,11 +270,11 @@ class LoginScreen extends StatelessWidget {
       }
 
       bool authenticated = await auth.authenticate(
-      localizedReason: localizedReason,
-      options: const AuthenticationOptions(
-      stickyAuth: true,
-      biometricOnly: true,
-      ),
+        localizedReason: localizedReason,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: true,
+        ),
       );
       if (authenticated) {
         _handleLogin(context, localizationService);
