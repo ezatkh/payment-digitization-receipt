@@ -557,6 +557,9 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
             (currency) => currency.id == _selectedCurrencyDB,
       );
     }
+    else if (items.any((currency) => currency.id == 'ILS')) {
+      initialCurrency = items.firstWhere((currency) => currency.id == 'ILS');
+    }
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
