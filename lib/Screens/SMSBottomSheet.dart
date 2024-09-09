@@ -188,7 +188,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                               else
                                 amount=widget.payment.amountCheck.toString();
 
-
+//
 if(_selectedMessageLanguage=='ar')
                                 message = '''
 تم استلام دفعه ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} بقيمة ${amount} ${AppearedCurrency} من مدير حسابكم ${storedUsername}
