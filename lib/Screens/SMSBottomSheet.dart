@@ -93,7 +93,6 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                   ),
                 ),
                 SizedBox(height: 16),
-                // Phone Number Field (editable)
                 TextField(
                   controller: _phoneController,
                   focusNode: _phoneFocusNode,
@@ -169,7 +168,8 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                               }//
                               _errorText = null; // Clear error if valid
                             });
-
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            String? storedUsername = prefs.getString('usernameLogin');
                             // Load the localized message asynchronously
                             await _loadLocalizedMessage(_selectedMessageLanguage);
 
@@ -182,11 +182,26 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                               });
                               // Fetch the localized message based on the selected language
                               String message ='';
-                              if(widget.payment.paymentMethod.toLowerCase() == 'cash' || widget.payment.paymentMethod.toLowerCase() == 'كاش')
-                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} ${_messageJson!['withValue']}  ${widget.payment.amount}  ${AppearedCurrency}';
-                             else
-                               message = '${_messageJson!['smsSubject']} ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} ${_messageJson!['withValue']}  ${widget.payment.amountCheck}  ${widget.payment.currency}';
+                              String amount='';
+                              if(widget.payment.amount != null)
+                                amount=widget.payment.amount.toString();
+                              else
+                                amount=widget.payment.amountCheck.toString();
 
+
+if(_selectedMessageLanguage=='ar')
+                                message = '''
+تم استلام دفعه ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} بقيمة ${amount} ${AppearedCurrency} من مدير حسابكم ${storedUsername}
+رقم الحركة ${widget.payment.voucherSerialNumber}
+''';
+
+else {
+  message = '''
+$amount $AppearedCurrency ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} payment has been received by account manager $storedUsername
+
+Transaction reference ${widget.payment.voucherSerialNumber}
+''';
+}
                               print("Phone Number: ${_phoneController.text}");
                               print("Message Language: $_selectedMessageLanguage");
                               print("Message: $message");
@@ -311,7 +326,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                   message: appLocalization.getLocalizedString("networkError"),
                                   buttonText: appLocalization.getLocalizedString("ok"),
                                   onPressButton: () {
-                                    print('Network error acknowledged');
+                                    print('Network error acknowledged :${e}');
                                   },
                                 );
                               } on TimeoutException catch (e) {
@@ -321,7 +336,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                                   message: appLocalization.getLocalizedString("networkTimeoutError"),
                                   buttonText: appLocalization.getLocalizedString("ok"),
                                   onPressButton: () {
-                                    print('Timeout error acknowledged');
+                                    print('Timeout error acknowledged :${e}');
                                   },
                                 );
                               }

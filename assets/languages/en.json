@@ -237,6 +237,7 @@
   "submit": "Submit",
   "invalidMSISDN": "Not a valid format. It should start with '05' and be exactly 10 digits long.",
   "maxLengthExceeded": "Must be exactly 10 digits long.",
-  "next": "Next"
+  "next": "Next",
+  "fromYourAccountManager": ""
 
 }
