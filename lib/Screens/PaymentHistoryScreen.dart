@@ -154,7 +154,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             cancellationDate:cancellationDate
         );
       }).toList();
-      _paymentRecords.sort((a, b) => (b.transactionDate ?? DateTime.now()).compareTo(a.transactionDate ?? DateTime.now()));
+      _paymentRecords.sort((a, b) {
+        // Determine the date to use for sorting for each record
+        DateTime aDate = a.transactionDate ?? a.lastUpdatedDate ?? DateTime.now();
+        DateTime bDate = b.transactionDate ?? b.lastUpdatedDate ?? DateTime.now();
+
+        // Compare the dates in descending order
+        return bDate.compareTo(aDate);
+      });
+
     });
     }
   }
