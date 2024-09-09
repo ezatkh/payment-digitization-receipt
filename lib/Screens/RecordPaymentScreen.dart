@@ -13,7 +13,9 @@ import 'package:intl/intl.dart';
 
 class RecordPaymentScreen extends StatefulWidget {
   final int? id;
-  RecordPaymentScreen({this.id});
+  final Map<String, dynamic>? paymentParams; // Add the optional parameter
+
+  RecordPaymentScreen({this.id, this.paymentParams}); // Update the constructor
 
   @override
   _RecordPaymentScreenState createState() => _RecordPaymentScreenState();
@@ -191,7 +193,33 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       }
     }
 
-    print("_selectedPaymentMethod:${_selectedPaymentMethod} ");
+    if (widget.paymentParams != null) {
+      print("the paymentParams from parameter not null ");
+      Map<String, dynamic> paymentParams = widget.paymentParams!; // Ensure id is not null
+      if (paymentParams != null) {
+        setState(() {
+          _selectedPaymentMethod = cash;
+          _selectedCurrencyDB=paymentParams["currency"];
+        });
+        if (paymentParams["paymentMethod"] == "Check") {
+          setState(() {
+            _selectedPaymentMethod = check;
+            _selectedCurrencyDB=paymentParams["currency"];
+            _selectedBankDB=paymentParams["bankBranch"];
+          });
+        }
+
+        _customerNameController.text = paymentParams["customerName"];
+        _msisdnController.text = paymentParams["msisdn"]?? '';
+        _prNumberController.text = paymentParams["prNumber"]?? '' ;
+        _amountController.text = paymentParams["amount"].toString()?? '';
+        _amountCheckController.text = paymentParams["amountCheck"].toString()?? '';
+        _checkNumberController.text = paymentParams["checkNumber"].toString()?? '';
+        _paymentInvoiceForController.text = paymentParams["paymentInvoiceFor"]?? '';
+        _dueDateCheckController.text = paymentParams["dueDateCheck"].toString()?? '';
+
+      }
+    }
   }
   @override
   void dispose() {

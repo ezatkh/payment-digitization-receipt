@@ -192,8 +192,34 @@ import 'PaymentCancellationScreen.dart';
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildPaymentDetailCard(),
+              Container(
+                margin: EdgeInsets.only(bottom: 30.h), // Margin from the bottom button
+                child: _buildPaymentDetailCard(),
+              ),
             ],
+          ),
+        ),
+        floatingActionButton: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: FloatingActionButton(
+              onPressed: () {
+                // Navigate to the RecordPaymentScreen with the optional paymentParams
+                print("payment detail to pass to record screen :");
+                print(widget.paymentDetails);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RecordPaymentScreen(
+                      paymentParams:widget.paymentDetails , // Pass the paymentParams here
+                    ),
+                  ),
+                );
+              },
+              backgroundColor: Color(0xFFC62828),
+              child: Icon(Icons.add),
+            ),
           ),
         ),
       );
