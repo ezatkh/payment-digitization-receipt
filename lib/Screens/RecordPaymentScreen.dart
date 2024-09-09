@@ -399,10 +399,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     Color iconColor = isFilled ? Color(0xFF4CAF50) : Colors.grey[600]!;
     return Card(
       elevation: 2,
-      margin: EdgeInsets.symmetric(vertical: 5.h),
+      margin: EdgeInsets.symmetric(vertical: 3.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
-        padding: EdgeInsets.all(11.w),
+        padding: EdgeInsets.all(10.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -480,7 +480,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
         bool isNumeric = false,
       }) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -514,7 +514,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
             decoration: InputDecoration(
               prefixIcon: icon != null
                   ? Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
                 child: Icon(icon, color: Color(0xFFC62828)),
               )
                   : null,
@@ -546,7 +546,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
   Widget _buildDropdown(String label, List<String> items, {bool required = false}) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -644,7 +644,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -734,7 +734,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      padding: EdgeInsets.symmetric(vertical: 1.h, horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -939,7 +939,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
   Widget _buildConfirmedButton() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
+      padding: EdgeInsets.symmetric(vertical: 3.h),
       child: GestureDetector(
         onTapDown: (_) => _animationController.forward(),
         onTapUp: (_) => _animationController.reverse(),
@@ -971,7 +971,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
   Widget _buildSaveButton() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
+      padding: EdgeInsets.symmetric(vertical: 3.h),
       child: GestureDetector(
         onTapDown: (_) => _animationController.forward(),
         onTapUp: (_) => _animationController.reverse(),
