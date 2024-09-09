@@ -410,6 +410,9 @@ class ShareScreenOptions {
 
 
   static void _showLanguageSelectionDialog(BuildContext context, Function(String) onLanguageSelected) {
+    String systemLanguageCode = Localizations.localeOf(context).languageCode; // Get system's default language
+    String _selectedLanguageCode = systemLanguageCode; // Initially, system's language is selected
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
@@ -417,65 +420,155 @@ class ShareScreenOptions {
       ),
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 12.0,
-                offset: Offset(0, -4),
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              padding: EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 12.0,
+                    offset: Offset(0, -4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                Provider.of<LocalizationService>(context, listen: false).getLocalizedString("selectPreferredLanguage"),
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    Provider.of<LocalizationService>(context, listen: false)
+                        .getLocalizedString("selectPreferredLanguage"),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildLanguageCard(
+                          context,
+                          Provider.of<LocalizationService>(context, listen: false)
+                              .getLocalizedString("english"),
+                          'en',
+                          Icons.language,
+                          _selectedLanguageCode == 'en', // Check if English is selected
+                              () {
+                            setState(() {
+                              _selectedLanguageCode = 'en'; // Update selected language to English
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(width: 20),
+                      Expanded(
+                        child: _buildLanguageCard(
+                          context,
+                          Provider.of<LocalizationService>(context, listen: false)
+                              .getLocalizedString("arabic"),
+                          'ar',
+                          Icons.language,
+                          _selectedLanguageCode == 'ar', // Check if Arabic is selected
+                              () {
+                            setState(() {
+                              _selectedLanguageCode = 'ar'; // Update selected language to Arabic
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Align(
+                    alignment: systemLanguageCode == 'en' ? Alignment.centerRight : Alignment.centerLeft,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        onLanguageSelected(_selectedLanguageCode); // Return the selected language
+                        Navigator.of(context).pop(); // Close the dialog
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFC62828), // Update color as specified
+                        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: Text(
+                        Provider.of<LocalizationService>(context, listen: false).getLocalizedString("next"),
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
-              _buildLanguageButton(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("english"), 'en', Icons.language, onLanguageSelected),
-              SizedBox(height: 12),
-              _buildLanguageButton(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("arabic"), 'ar', Icons.language, onLanguageSelected),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
-  static Widget _buildLanguageButton(BuildContext context, String language, String code, IconData icon, Function(String) onLanguageSelected) {
-    return ElevatedButton(
-      onPressed: () {
-        onLanguageSelected(code);
-        Navigator.of(context).pop();
-      },
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.black, backgroundColor: Colors.white,
-        elevation: 4,
-        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
+  static Widget _buildLanguageCard(
+      BuildContext context,
+      String language,
+      String code,
+      IconData icon,
+      bool isSelected, // Whether this language is selected
+      VoidCallback onTap,
+      ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: isSelected ? Color(0xFFC62828) : Color(0xFFFFFFFF),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            language,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          Icon(
-            icon,
-            color: Colors.blueAccent,
-          ),
-        ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? Color(0xFFC62828) : Colors.grey[700],
+                ),
+                SizedBox(width: 12),
+                Text(
+                  language,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? Color(0xFFC62828) : Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: Color(0xFFC62828),
+              ),
+          ],
+        ),
       ),
     );
   }
+
+
+
+
 
 }

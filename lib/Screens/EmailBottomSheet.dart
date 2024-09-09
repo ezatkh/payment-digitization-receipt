@@ -187,31 +187,33 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 SizedBox(height: 24),
+                // Language Switcher for Message
+                Text(appLocalization.getLocalizedString('selectLanguageForMessage')),
+                SizedBox(height: 12),
 
-                // Language Switcher for Email
                 Row(
                   children: [
-                    Text(appLocalization.getLocalizedString('selectLanguageForEmail')),
-                    SizedBox(width: 16),
-                    DropdownButton<String>(
-                      value: _selectedLanguage,
-                      items: [
-                        DropdownMenuItem(
-                          value: 'en',
-                          child: Text('English'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'ar',
-                          child: Text('Arabic'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedLanguage = value!;
-                          _loadLocalizedEmailContent(_selectedLanguage);
-                        });
-                      },
+                    Expanded(
+                      child: _buildLanguageButton(
+                        context,
+                        'en',
+                        'English',
+                        Icons.language,
+                        _selectedLanguage == 'en',
+                      ),
                     ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: _buildLanguageButton(
+                        context,
+                        'ar',
+                        'Arabic',
+                        Icons.language,
+                        _selectedLanguage == 'ar',
+                      ),
+                    ),
+
+
                   ],
                 ),
                 SizedBox(height: 24),
@@ -447,7 +449,66 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
     }
   }
 
-
+  Widget _buildLanguageButton(
+      BuildContext context,
+      String languageCode,
+      String languageName,
+      IconData icon,
+      bool isSelected) {
+    return GestureDetector(
+      onTap: () async {
+        setState(() {
+          _selectedLanguage = languageCode;
+        });
+        await _loadLocalizedEmailContent(languageCode);
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: isSelected ? Color(0xFFC62828) : Colors.transparent,
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  color: isSelected ? Color(0xFFC62828) : Colors.grey[700],
+                ),
+                SizedBox(width: 12),
+                Text(
+                  languageName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: isSelected ? Color(0xFFC62828) : Colors.grey[700],
+                  ),
+                ),
+              ],
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: Color(0xFFC62828),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
 }
 
