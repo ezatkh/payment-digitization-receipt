@@ -234,5 +234,7 @@
   "networkTimeoutError": "Network timeout occurred. Please try again later.",
   "networkError": "Network error occurred. Please check your connection and try again.",
 
-  "submit": "Submit"
+  "submit": "Submit",
+  "invalidMSISDN": "Not a valid format. It should start with '05' and be exactly 10 digits long.",
+  "maxLengthExceeded": "Must be exactly 10 digits long."
 }

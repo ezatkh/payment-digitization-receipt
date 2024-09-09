@@ -559,6 +559,11 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
     else if (items.any((currency) => currency.id == 'ILS')) {
       initialCurrency = items.firstWhere((currency) => currency.id == 'ILS');
+      if (initialCurrency != null) {
+        setState(() {
+          _selectedCurrencyDB='ILS';
+        });
+      }
     }
 
     return Padding(
@@ -685,6 +690,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   bool _validateFields() {
     String isRequired =Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired');
     String mustContainOnlyNumber =Provider.of<LocalizationService>(context, listen: false).getLocalizedString('isRequired');
+    String invalidMSISDN = Provider.of<LocalizationService>(context, listen: false).getLocalizedString('invalidMSISDN');
+    String maxLengthExceeded = Provider.of<LocalizationService>(context, listen: false).getLocalizedString('maxLengthExceeded');
 
     // Validate customer name
     if (_customerNameController.text.isEmpty) {
@@ -719,17 +726,19 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
 
     // Validate msisdn
+    final msisdnRegex = RegExp(r'^05\d{8}$');
     if (_msisdnController.text.isNotEmpty) {
-      if (!RegExp(r'^[0-9]+$').hasMatch(_msisdnController.text)) {
+      if (!msisdnRegex.hasMatch(_msisdnController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${Provider.of<LocalizationService>(context, listen: false).getLocalizedString('MSISDN')} ${mustContainOnlyNumber}'),
+            content: Text(invalidMSISDN),
             backgroundColor: Colors.red,
           ),
         );
         return false;
       }
     }
+
     if (_prNumberController.text.isNotEmpty) {
       if (!RegExp(r'^[0-9]+$').hasMatch(_prNumberController.text)) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -746,7 +755,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     if (_selectedPaymentMethod == cash) {
       // Validate amount for cash payment
       if (_amountController.text.isEmpty || _selectedCurrencyDB == null) {
-        print("nn");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(fieldsMissedMessageError),

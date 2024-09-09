@@ -50,13 +50,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSPhotoLibraryUsageDescription</key>
+    <!-- Permissions for File Access -->
+    <key>NSPhotoLibraryUsageDescription</key>
     <string>We need access to your photo library to save and share files.</string>
     <key>NSDocumentsFolderUsageDescription</key>
     <string>We need access to your documents to save and share files.</string>
+    <key>NSLibraryUsageDescription</key>
+    <string>We need access to your library to save and share files.</string>
+
+    <!-- File Sharing and Document Support -->
     <key>UIFileSharingEnabled</key>
     <true/>
     <key>LSSupportsOpeningDocumentsInPlace</key>
     <true/>
+
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
 </dict>
 </plist>
