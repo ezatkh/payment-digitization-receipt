@@ -290,7 +290,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
                     MSISDN,
                     Icons.phone_android,
                     focusNode: _msisdnFocusNode,
-                      isNumeric : true
+                      isNumeric : true,
+                      required:true
                   ),
                   _buildTextField(
                     _prNumberController,
@@ -468,8 +469,11 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     }
   }
 
-  Widget _buildTextField(TextEditingController controller, String labelText, IconData? icon,
-      {int maxLines = 1,
+  Widget _buildTextField(
+      TextEditingController controller,
+      String labelText,
+      IconData? icon, {
+        int maxLines = 1,
         required FocusNode focusNode,
         bool required = false,
         bool isDate = false,
@@ -477,180 +481,250 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
       }) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 16.w),
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        maxLines: maxLines,
-        readOnly: isDate, // Make the field read-only if it's a date field
-        keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
-        decoration: InputDecoration(
-          labelText: labelText + (required ? ' *' : ''), // Add '*' if required
-          labelStyle: TextStyle(
-              fontFamily: 'NotoSansUI',
-              fontSize: 12.sp,
-              color: Colors.grey[500]),
-          prefixIcon: icon != null
-              ? Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            child: Icon(icon, color: Color(0xFFC62828)),
-          )
-              : null,
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Color(0xFFC62828),
-              width: 1.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: labelText,
+              style: TextStyle(
+                fontFamily: 'NotoSansUI',
+                fontSize: 12.sp,
+                color: Colors.grey[500],
+              ),
+              children: <TextSpan>[
+                if (required)
+                  TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+              ],
             ),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[300]!,
-              width: 1.5,
+          SizedBox(height: 4), // Adjust spacing between label and text field
+          TextField(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: maxLines,
+            readOnly: isDate,
+            keyboardType: isNumeric ? TextInputType.number : TextInputType.text,
+            decoration: InputDecoration(
+              prefixIcon: icon != null
+                  ? Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: Icon(icon, color: Color(0xFFC62828)),
+              )
+                  : null,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Color(0xFFC62828),
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                  width: 1.5,
+                ),
+              ),
+              fillColor: Colors.white,
+              filled: true,
             ),
+            style: TextStyle(fontSize: 14.sp, color: Colors.black),
+            onTap: isDate ? () => _selectDate(context, controller) : null,
           ),
-          fillColor: Colors.white,
-          filled: true,
-        ),
-        style: TextStyle(fontSize: 14.sp, color: Colors.black),
-        onTap: isDate ? () => _selectDate(context, controller) : null,
+        ],
       ),
     );
   }
+
 
   Widget _buildDropdown(String label, List<String> items, {bool required = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
-      child: DropdownButtonFormField<String>(
-        decoration: InputDecoration(
-          labelText: label + (required ? ' *' : ''),
-          labelStyle: TextStyle(
-            fontFamily: 'NotoSansUI',
-            fontSize: 12.sp,
-            color: Colors.grey[500],
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[400]!,
-              width: 1.5,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Color(0xFFC62828),
-              width: 1.5,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[300]!,
-              width: 1.5,
-            ),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        value: _selectedPaymentMethod,
-        onChanged: (String? newValue) {
-          setState(() {
-              _selectedPaymentMethod = newValue;
-              _clearPaymentMethodFields(); // Clear fields when payment method changes
-
-          });
-        },
-        items: items.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(
-              value,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: label,
               style: TextStyle(
+                fontFamily: 'NotoSansUI',
                 fontSize: 12.sp,
+                color: Colors.grey[500],
               ),
+              children: <TextSpan>[
+                if (required)
+                  TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+              ],
             ),
-          );
-        }).toList(),
+          ),
+          SizedBox(height: 4), // Adjust spacing between label and dropdown
+          DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[400]!,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Color(0xFFC62828),
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                  width: 1.5,
+                ),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            value: _selectedPaymentMethod,
+            onChanged: (String? newValue) {
+              setState(() {
+                _selectedPaymentMethod = newValue;
+                _clearPaymentMethodFields(); // Clear fields when payment method changes
+              });
+            },
+            items: items.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDropdownCurrencyDynamic(String label, List<Currency> items, String languageCode, {bool required = false}) {
+  Widget _buildDropdownCurrencyDynamic(
+      String label,
+      List<Currency> items,
+      String languageCode, {
+        bool required = false,
+      }) {
     // Find the Currency object with the id matching _selectedCurrencyDB
     Currency? initialCurrency;
     if (_selectedCurrencyDB != null) {
       initialCurrency = items.firstWhere(
             (currency) => currency.id == _selectedCurrencyDB,
       );
-    }
-    else if (items.any((currency) => currency.id == 'ILS')) {
+    } else if (items.any((currency) => currency.id == 'ILS')) {
       initialCurrency = items.firstWhere((currency) => currency.id == 'ILS');
       if (initialCurrency != null) {
         setState(() {
-          _selectedCurrencyDB='ILS';
+          _selectedCurrencyDB = 'ILS';
         });
       }
     }
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
-      child: DropdownButtonFormField<Currency>(
-        value: initialCurrency, // Set the initial value
-        decoration: InputDecoration(
-          labelText: label + (required ? ' *' : ''),
-          labelStyle: TextStyle(
-            fontFamily: 'NotoSansUI',
-            fontSize: 12.sp,
-            color: Colors.grey[500],
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[400]!,
-              width: 1.5,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Color(0xFFC62828),
-              width: 1.5,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[300]!,
-              width: 1.5,
-            ),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        onChanged: (Currency? newValue) {
-          setState(() {
-            _selectedCurrencyDB = newValue?.id;
-          });
-        },
-        items: items.map<DropdownMenuItem<Currency>>((Currency currency) {
-          return DropdownMenuItem<Currency>(
-            value: currency,
-            child: Text(
-              languageCode == 'ar' ? currency.arabicName! : currency.englishName!,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: label,
               style: TextStyle(
+                fontFamily: 'NotoSansUI',
                 fontSize: 12.sp,
+                color: Colors.grey[500],
               ),
+              children: <TextSpan>[
+                if (required)
+                  TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+              ],
             ),
-          );
-        }).toList(),
+          ),
+          SizedBox(height: 4), // Adjust spacing between label and dropdown
+          DropdownButtonFormField<Currency>(
+            value: initialCurrency, // Set the initial value
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[400]!,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Color(0xFFC62828),
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                  width: 1.5,
+                ),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            onChanged: (Currency? newValue) {
+              setState(() {
+                _selectedCurrencyDB = newValue?.id;
+              });
+            },
+            items: items.map<DropdownMenuItem<Currency>>((Currency currency) {
+              return DropdownMenuItem<Currency>(
+                value: currency,
+                child: Text(
+                  languageCode == 'ar' ? currency.arabicName! : currency.englishName!,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDropdownBankDynamic(String label, List<Bank> items, String languageCode, {bool required = false}) {
+  Widget _buildDropdownBankDynamic(
+      String label,
+      List<Bank> items,
+      String languageCode, {
+        bool required = false,
+      }) {
     // Find the Bank object with the id matching _selectedBankDB
     Bank? initialBank;
     if (_selectedBankDB != null) {
@@ -661,56 +735,76 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
-      child: DropdownButtonFormField<Bank>(
-        value: initialBank, // Set the initial value
-        decoration: InputDecoration(
-          labelText: label + (required ? ' *' : ''),
-          labelStyle: TextStyle(
-            fontFamily: 'NotoSansUI',
-            fontSize: 12.sp,
-            color: Colors.grey[500],
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[400]!,
-              width: 1.5,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Color(0xFFC62828),
-              width: 1.5,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.grey[300]!,
-              width: 1.5,
-            ),
-          ),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-        onChanged: (Bank? newValue) {
-          setState(() {
-            _selectedBankDB = newValue?.id;
-          });
-        },
-        items: items.map<DropdownMenuItem<Bank>>((Bank bank) {
-          return DropdownMenuItem<Bank>(
-            value: bank,
-            child: Text(
-              languageCode == 'ar' ? bank.arabicName! : bank.englishName!,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: label,
               style: TextStyle(
+                fontFamily: 'NotoSansUI',
                 fontSize: 12.sp,
+                color: Colors.grey[500],
               ),
+              children: <TextSpan>[
+                if (required)
+                  TextSpan(
+                    text: ' *',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12.sp,
+                    ),
+                  ),
+              ],
             ),
-          );
-        }).toList(),
+          ),
+          SizedBox(height: 4), // Adjust spacing between label and dropdown
+          DropdownButtonFormField<Bank>(
+            value: initialBank, // Set the initial value
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[400]!,
+                  width: 1.5,
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Color(0xFFC62828),
+                  width: 1.5,
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: Colors.grey[300]!,
+                  width: 1.5,
+                ),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+            onChanged: (Bank? newValue) {
+              setState(() {
+                _selectedBankDB = newValue?.id;
+              });
+            },
+            items: items.map<DropdownMenuItem<Bank>>((Bank bank) {
+              return DropdownMenuItem<Bank>(
+                value: bank,
+                child: Text(
+                  languageCode == 'ar' ? bank.arabicName! : bank.englishName!,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
