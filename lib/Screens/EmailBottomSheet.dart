@@ -38,7 +38,7 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
   final TextEditingController _toController = TextEditingController();
   final FocusNode _toFocusNode = FocusNode();
   String? _errorText;
-  String _selectedLanguage = 'en'; // Default message language is English
+  String _selectedLanguage = 'en';
   Map<String, dynamic>? _emailJson;
   String? _headerBase64;
   String? _footerBase64;
@@ -53,8 +53,21 @@ class _EmailBottomSheetState extends State<EmailBottomSheet> {
         }
       });
     });
+    _loadSavedLanguageCode();
     _loadLocalizedEmailContent(_selectedLanguage);
     _loadBase64Images();
+  }
+
+  Future<void> _loadSavedLanguageCode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedLanguageCode = prefs.getString('language_code');
+    setState(() {
+      // If a language code is saved, use it as the default, otherwise keep 'en' as default
+      _selectedLanguage = savedLanguageCode ?? 'en';
+    });
+
+    // Load the localized message for the saved/default language
+    await _loadLocalizedEmailContent(_selectedLanguage);
   }
 
   Future<void> _loadLocalizedEmailContent(String languageCode) async {

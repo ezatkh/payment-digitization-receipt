@@ -35,6 +35,7 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
   @override
   void initState() {
     super.initState();
+    _loadSavedLanguageCode();
     if(widget.payment.msisdn != null)
     _phoneController.text=widget.payment.msisdn!;
     _phoneFocusNode.addListener(() {
@@ -44,6 +45,18 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
         }
       });
     });
+  }
+
+  Future<void> _loadSavedLanguageCode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedLanguageCode = prefs.getString('language_code');
+    setState(() {
+      // If a language code is saved, use it as the default, otherwise keep 'en' as default
+      _selectedMessageLanguage = savedLanguageCode ?? 'en';
+    });
+
+    // Load the localized message for the saved/default language
+    await _loadLocalizedMessage(_selectedMessageLanguage);
   }
 
   Future<void> _loadLocalizedMessage(String languageCode) async {
