@@ -17,7 +17,6 @@ import 'PaymentCancellationScreen.dart';
   import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
   import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
   import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-  import 'package:flutter_pdfview/flutter_pdfview.dart';
 
   class PaymentConfirmationScreen extends StatefulWidget {
     final int paymentId;

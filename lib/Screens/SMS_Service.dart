@@ -32,10 +32,12 @@ class SmsService {
       return '''
 تم استلام دفعه ${paymentMethod} بقيمة ${amount} ${appearedCurrency} من مدير حسابكم ${username}
 رقم الحركة ${voucherSerialNumber}
+
+ملاحظة: ستتلقى رسالة بمجرد إيداع الدفعة في حسابك
 ''';
     } else {
       return '''
-$amount $appearedCurrency ${paymentMethod} payment has been received by account manager $username
+$amount $appearedCurrency ${paymentMethod.toLowerCase()} payment has been received by account manager $username
 Transaction reference ${voucherSerialNumber}
 
 Note: You will receive a message once the payment is deposited into your account.
@@ -50,10 +52,8 @@ Note: You will receive a message once the payment is deposited into your account
 ''';
       } else {
         return '''
-$amount $appearedCurrency ${paymentMethod} payment has been submitted for cancellation by account manager $username
+$amount $appearedCurrency ${paymentMethod.toLowerCase()} payment has been submitted for cancellation by account manager $username
 Transaction reference ${voucherSerialNumber}
-
-ملاحظة: ستتلقى رسالة بمجرد إيداع الدفعة في حسابك
 ''';
       }
     }

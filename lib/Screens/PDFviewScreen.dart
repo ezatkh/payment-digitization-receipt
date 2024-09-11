@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:provider/provider.dart';
+
+import '../Services/LocalizationService.dart';
 
 class PdfPreviewScreen extends StatelessWidget {
   final String filePath;
@@ -10,7 +13,7 @@ class PdfPreviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("PDF Preview"),
+        title: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString("pdfPreview")),
       ),
       body: PDFView(
         filePath: filePath,

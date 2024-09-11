@@ -574,15 +574,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
           Row(
             children: [
               Tooltip(
-                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('openAsPdf'),
-                child: IconButton(
-                  icon: FaIcon(FontAwesomeIcons.filePdf, color: Colors.red),
-                  onPressed: () async{
-                    ShareScreenOptions.showLanguageSelectionAndShare(context,record.id!,ShareOption.OpenPDF);
-                  },
-                ),
-              ),
-              Tooltip(
                 message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('viewPayment'),
                 child: IconButton(
                   icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
@@ -598,6 +589,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       // Handle the case when record.id is null
                       print('Error: record.id is null');
                     }
+                  },
+                ),
+              ),
+              if (record.status.toLowerCase() == 'synced')
+              Tooltip(
+                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('openAsPdf'),
+                child: IconButton(
+                  icon: FaIcon(FontAwesomeIcons.filePdf, color: Colors.red),
+                  onPressed: () async{
+                    ShareScreenOptions.showLanguageSelectionAndShare(context,record.id!,ShareOption.OpenPDF);
                   },
                 ),
               ),

@@ -233,5 +233,4 @@
   "invalidMSISDN": "التنسيق غير صحيح. يجب أن يبدأ بـ '05' ويكون بطول 10 أرقام بالضبط.",
   "maxLengthExceeded": "يجب أن يكون بالضبط 10 أرقام.",
   "next": "التالي",
-  "fromYourAccountManager": "من مدير حسابكم"
-}
+  "pdfPreview": "معاينة PDF"}
