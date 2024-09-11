@@ -3,4 +3,5 @@ enum ShareOption {
   sendSms,
   sendEmail,
   sendWhats,
+  OpenPDF,
 }

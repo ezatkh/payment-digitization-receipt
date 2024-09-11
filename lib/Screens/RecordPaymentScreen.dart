@@ -39,7 +39,7 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
   final FocusNode _checkNumberFocusNode = FocusNode();
   final FocusNode _dueDateCheckFocusNode = FocusNode();
   final FocusNode _paymentInvoiceForNode = FocusNode();
-  String? _selectedPaymentMethod;
+  String? _selectedPaymentMethod='';
   List<String> _paymentMethods = ['cash', 'check'];
   late AnimationController _animationController;
   late Animation<double> _buttonScaleAnimation;
@@ -220,6 +220,10 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
 
       }
     }
+
+    else {
+      _selectedPaymentMethod=cash;
+    }
   }
   @override
   void dispose() {
@@ -232,7 +236,6 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
     _checkNumberController.dispose();
     _dueDateCheckController.dispose();
     _paymentInvoiceForController.dispose();
-
 
     _customerNameFocusNode.dispose();
     _msisdnFocusNode.dispose();
@@ -377,8 +380,8 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
               ),
               Row(
                 children: [
-                  Expanded(child: _buildSaveButton()), // Takes full width
-                  SizedBox(width: 16.w), // Adjust spacing between buttons
+                  // Expanded(child: _buildSaveButton()), // Takes full width
+                  // SizedBox(width: 16.w), // Adjust spacing between buttons
                   Expanded(child: _buildConfirmedButton()), // Takes full width
                 ],
               ),

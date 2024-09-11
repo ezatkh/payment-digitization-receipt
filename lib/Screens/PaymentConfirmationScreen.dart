@@ -17,7 +17,7 @@ import 'PaymentCancellationScreen.dart';
   import 'package:digital_payment_app/Screens/RecordPaymentScreen.dart';
   import 'package:digital_payment_app/Screens/ShareScreenOptions.dart';
   import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+  import 'package:flutter_pdfview/flutter_pdfview.dart';
 
   class PaymentConfirmationScreen extends StatefulWidget {
     final int paymentId;
@@ -151,8 +151,8 @@ import 'PaymentCancellationScreen.dart';
             }
           });
 
-          print(AppearedCurrency);
-          print(AppearedBank);
+          // print(AppearedCurrency);
+          // print(AppearedBank);
 
         } else {
           print('No payment details found for ID ${widget.paymentId}');
@@ -353,9 +353,21 @@ import 'PaymentCancellationScreen.dart';
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
+              if (canSend)
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('openAsPdf'),
+                  child: IconButton(
+                    icon: FaIcon(FontAwesomeIcons.filePdf, color: Colors.red),
+                    onPressed: () async{
+                      ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.OpenPDF);
+                    },
+                  ),
+                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
               if (canCancel)
                 Tooltip(
                   message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment'),
@@ -376,14 +388,21 @@ import 'PaymentCancellationScreen.dart';
                 ),
               if (canSend)
                 ...[
-                  Tooltip(
-                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('print'),
-                    child:IconButton(
-                      icon: Icon(Icons.print, color: Colors.black),
-                      onPressed: () {
-                        ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.print);
-                      },
-                    ),),
+                  // Tooltip(
+                  //   message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPrinter'),
+                  //   child:IconButton(
+                  //     icon: Icon(Icons.print, color: Colors.black),
+                  //     onPressed: () async{
+                  //       var connectivityResult = await (Connectivity().checkConnectivity());
+                  //       if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                  //         CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                  //             : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                  //       }
+                  //       else
+                  //         ShareScreenOptions.showLanguageSelectionAndShare(context, widget.paymentId,ShareOption.print);
+                  //
+                  //     },
+                  //   ),),
                   Tooltip(
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
                     decoration: BoxDecoration(
@@ -438,6 +457,7 @@ import 'PaymentCancellationScreen.dart';
                 },
                     ),
                 ),
+
                 ],
 
               if (canDelete)
@@ -531,10 +551,10 @@ import 'PaymentCancellationScreen.dart';
                 ),
             ],
           ),
+            ],),
         ],
       );
     }
-
 
     Widget _detailItem(String title, String value) {
       return Padding(

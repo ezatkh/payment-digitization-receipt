@@ -59,7 +59,6 @@
   "notSyncedYet": "Not Synced Yet",
   "retry": "Retry",
 
-  "printreceipt": "Print Receipt",
   "filterNumber": "Filter Number",
   "voucherNumber": "Voucher Number",
   "amount": "Amount",
@@ -101,8 +100,8 @@
   "MSISDN": "MSISDN",
   "PR": "PR",
   "submitPayment": "Submit Payment",
-  "confirmPayment": "Confirm Payment",
-  "confirmPaymentBody": "Are you sure you want to Save & Confirm this payment ?",
+  "confirmPayment": "Submit Payment",
+  "confirmPaymentBody": "Are you sure you want to Submit this payment ?",
   "savePayment": "Save",
   "savePaymentBody": "Are you sure you want to Save this payment ?",
   "viewPayment": "View Payment Summery",
@@ -132,7 +131,6 @@
   "bankBranchCheck": "Bank/Branch",
   "dueDateCheck": "Due date",
 
-  "confirmPayment": "Save & Confirm",
   "paymentSummary": "Payment Summary",
   "paymentSuccessful": "Payment Successful",
   "paymentSuccessfulBody": "The payment has been successfully processed.",
@@ -176,7 +174,7 @@
   "cancelPayment": "Cancel Payment",
   "editPayment": "edit Payment",
 
-  "saveAndConfirm": "Save & Confirm Payment",
+  "saveAndConfirm": "Submit",
   "editPayment": "Edit Payment",
   "selectStatus": "Select Status",
 
@@ -211,6 +209,9 @@
 
   "sendSms": "Share Via SMS",
   "sendEmail": "Share Via Email",
+  "sendPrinter": "Print Payment",
+  "openAsPdf": "Open As PDF File",
+
   "selectLanguageForMessage": "Select language of Message:",
   "selectLanguageForEmail": "Select language of Email",
   "noCredentialsFoundTitle": "Login failed",
