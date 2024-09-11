@@ -16,6 +16,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../Models/LoginState.dart';
 import '../Screens/LoginScreen.dart';
+import '../Screens/SMS_Service.dart';
 import 'LocalizationService.dart';
 import 'apiConstants.dart';
 
@@ -195,6 +196,18 @@ class PaymentService {
           print("inside status code 200 of cancel api");
           await DatabaseProvider.updatePaymentStatus(p["id"], 'Cancelled');
           _syncController.add(null);
+          String amount = p["paymentMethod"].toString().toLowerCase() == 'cash'
+              ? (p["amount"]?.toString() ?? '0')
+              : (p["amountCheck"]?.toString() ?? '0');
+
+          // print("phoneNumber :${ p["msisdn"]}");
+          // print("selectedMessageLanguage :${Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode}");
+          // print("amount :${p["amount"]}");
+          // print("currency :${p["currency"]}");
+          // print("voucherSerialNumber :${p["voucherSerialNumber"]}");
+          // print("paymentMethod :${p["paymentMethod"]}");
+          await SmsService.sendSmsRequest(context, p["msisdn"], Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, amount, p["currency"], p["voucherSerialNumber"], Provider.of<LocalizationService>(context, listen: false).getLocalizedString(p["paymentMethod"].toString().toLowerCase()),isCancel: true);
+
         } else {
           print('Failed to cancel payment: ${response.body}');
         }
@@ -250,8 +263,12 @@ class PaymentService {
 
         // Update payment in local database
         await DatabaseProvider.updateSyncedPaymentDetail(payment["id"], voucherSerialNumber, 'Synced');
-
         _syncController.add(null);
+        String amount = payment["paymentMethod"].toString().toLowerCase() == 'cash'
+            ? (payment["amount"]?.toString() ?? '0')
+            : (payment["amountCheck"]?.toString() ?? '0');
+
+        await SmsService.sendSmsRequest(context, payment["msisdn"], Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, amount, payment["currency"], voucherSerialNumber, Provider.of<LocalizationService>(context, listen: false).getLocalizedString(payment["paymentMethod"].toString().toLowerCase()));
       }
       else {
         Map<String, dynamic> errorResponse = json.decode(response.body);
@@ -270,7 +287,7 @@ class PaymentService {
   }
 
 
-  static Future <void> cancelPayment(String voucherSerial,
+  static Future <void> cancelPayment(Map<String, dynamic> paymentToCancel,
       String reason, BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? tokenID = prefs.getString('token');
@@ -290,11 +307,11 @@ class PaymentService {
 
       // Create the body map with the necessary information
       Map<String, String> body = {
-        "voucherSerialNumber": voucherSerial,
+        "voucherSerialNumber": paymentToCancel["voucherSerialNumber"],
         "cancelReason": reason,
         "cancelTransactionDate": cancelDateTime,
       };
-      print(body);
+      //print(body);
       try {
         final response = await http.delete(
           Uri.parse(apiUrlCancel),
@@ -304,9 +321,14 @@ class PaymentService {
         if (response.statusCode == 200) {
           print("inside status code 200 of cancel api :${response.body}");
           await DatabaseProvider.cancelPayment(
-              voucherSerial, reason, cancelDateTime, 'Cancelled');
-
+              paymentToCancel["voucherSerialNumber"], reason, cancelDateTime, 'Cancelled');
           _syncController.add(null);
+          String amount = paymentToCancel["paymentMethod"].toString().toLowerCase() == 'cash'
+              ? (paymentToCancel["amount"]?.toString() ?? '0')
+              : (paymentToCancel["amountCheck"]?.toString() ?? '0');
+
+          await SmsService.sendSmsRequest(context, paymentToCancel["msisdn"], Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode, amount, paymentToCancel["currency"], paymentToCancel["voucherSerialNumber"], Provider.of<LocalizationService>(context, listen: false).getLocalizedString(paymentToCancel["paymentMethod"].toString().toLowerCase()),isCancel: true);
+
         }
 
         else {
@@ -314,6 +336,9 @@ class PaymentService {
           print("failed to sync heres the body of response: ${response.body}");
           if (errorResponse['error'] == 'Unauthorized' &&  errorResponse['errorInDetail'] == 'JWT Authentication Failed')
           {
+            await DatabaseProvider.cancelPayment(
+                paymentToCancel["voucherSerialNumber"], reason, cancelDateTime,
+                'CancelPending');
             await _attemptReLoginAndRetrySync(context);
           } else {
             print('^ Failed to cancel/sync payment: ${response.body}');
@@ -321,7 +346,7 @@ class PaymentService {
         }
       } catch (e) {
         await DatabaseProvider.cancelPayment(
-            voucherSerial, reason, cancelDateTime,
+            paymentToCancel["voucherSerialNumber"], reason, cancelDateTime,
             'CancelPending');
         _syncController.add(null);
         print('Error cancelling payment: $e');
@@ -390,7 +415,6 @@ class PaymentService {
       },
     );
   }
-
 
   static Future <void> getExpiredPaymentsNumber() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

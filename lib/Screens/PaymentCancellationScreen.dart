@@ -17,21 +17,15 @@ class PaymentCancellationScreen extends StatefulWidget {
 class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
   final TextEditingController _reasonController = TextEditingController();
   String? _errorText;
+  bool _isLoading = false; // For loading indicator
 
 
-  Future<String?> _fetchVoucherNumber(int id) async {
+  Future<Map<String, dynamic>?> _fetchPayment(int id) async {
     final payment = await DatabaseProvider.getPaymentById(id);
-    print(payment);
-    return payment?['voucherSerialNumber'];
+    return payment;
   }
 
-
-
-  Future <void> _confirmCancellationAction(BuildContext context, String voucher, String reason) async {
-    await PaymentService.cancelPayment(voucher, reason,context);
-  }
-
-  void _handleCancellation(BuildContext context, String voucher) async {
+  void _handleCancellation(BuildContext context, Map<String, dynamic> paymentToCancel, ) async {
     final reason = _reasonController.text.trim();
     if (reason.isEmpty) {
       setState(() {
@@ -40,29 +34,15 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
     } else {
       setState(() {
         _errorText = null;
+        _isLoading = true; // Show loading indicator
+
       });
       // Show a loading indicator
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
-      await _confirmCancellationAction(context,voucher, reason);
-      await Future.delayed(Duration(seconds: 1));
-      // Close the loading indicator
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentCancelledSuccessfully')),
-          backgroundColor: Colors.green, // Optional: set a background color
-          duration: Duration(seconds: 2), // Optional: set duration for how long the snackbar will be shown
-        ),
-      );
-      Navigator.of(context).pop(true); // Return true indicating cancellation was confirmed
+      await PaymentService.cancelPayment(paymentToCancel, reason,context);
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -72,8 +52,8 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         padding: EdgeInsets.all(16.w),
-        child: FutureBuilder<String?>(
-          future: _fetchVoucherNumber(widget.id),
+        child: FutureBuilder<Map<String, dynamic>?>(
+          future: _fetchPayment(widget.id),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -83,7 +63,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
               return Center(child: Text('No voucher number found'));
             }
 
-            final voucherNumber = snapshot.data!;
+            final paymentToCancel = snapshot.data!;
 
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -99,7 +79,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  '${ Provider.of<LocalizationService>(context, listen: false).getLocalizedString('voucherNumber')}: $voucherNumber',
+                  '${ Provider.of<LocalizationService>(context, listen: false).getLocalizedString('voucherNumber')}: ${paymentToCancel["voucherNumber"]}',
                   style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 ),
                 SizedBox(height: 16.h),
@@ -136,7 +116,7 @@ class _PaymentCancellationScreenState extends State<PaymentCancellationScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {
-                        _handleCancellation(context, voucherNumber);
+                        _handleCancellation(context, paymentToCancel);
                       },
                       child: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('submit'), style: TextStyle(fontSize: 16.sp)),
                     ),

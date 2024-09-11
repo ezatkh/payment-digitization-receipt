@@ -1140,14 +1140,15 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           'dueDateCheck':  paymentDetails.dueDateCheck.toString(),
           'paymentInvoiceFor': paymentDetails.paymentInvoiceFor ,
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentSavedSuccess')),
-            backgroundColor: Colors.green, // Set the background color to green
-            behavior: SnackBarBehavior.floating, // Optional: Makes the Snackbar float above the content
-            duration: Duration(seconds: 2), // Optional: Duration for how long the Snackbar will be visible
-          ),
-        );       }
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentSavedSuccess')),
+        //     backgroundColor: Colors.green, // Set the background color to green
+        //     behavior: SnackBarBehavior.floating, // Optional: Makes the Snackbar float above the content
+        //     duration: Duration(seconds: 2), // Optional: Duration for how long the Snackbar will be visible
+        //   ),
+        // );
+         }
       else {
         print("id , update exist payment :");
         final int id = paymentDetails.id!;
@@ -1169,14 +1170,14 @@ class _RecordPaymentScreenState extends State<RecordPaymentScreen>
           'paymentInvoiceFor': paymentDetails.paymentInvoiceFor,
 
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentUpdateSuccess')),
-            backgroundColor: Colors.green, // Set the background color to green
-            behavior: SnackBarBehavior.floating, // Optional: Makes the Snackbar float above the content
-            duration: Duration(seconds: 2), // Optional: Duration for how long the Snackbar will be visible
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(
+        //     content: Text(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentUpdateSuccess')),
+        //     backgroundColor: Colors.green, // Set the background color to green
+        //     behavior: SnackBarBehavior.floating, // Optional: Makes the Snackbar float above the content
+        //     duration: Duration(seconds: 2), // Optional: Duration for how long the Snackbar will be visible
+        //   ),
+        // );
       }
       print("_agreedPaymentMethodFinished");
       Navigator.pop(context); // pop the dialog

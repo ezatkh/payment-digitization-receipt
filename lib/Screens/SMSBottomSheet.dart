@@ -5,13 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Custom_Widgets/CustomPopups.dart';
 import '../Models/Payment.dart';
 import '../Services/LocalizationService.dart';
-import '../Services/PaymentService.dart';
-import '../Services/apiConstants.dart';
 import '../Services/database.dart';
-import 'package:http/http.dart' as http;
+import 'SMS_Service.dart';
 
 class SmsBottomSheet extends StatefulWidget {
   final Payment payment;
@@ -160,204 +157,34 @@ class _SmsBottomSheetState extends State<SmsBottomSheet> {
                       child: Align(
                         alignment: currentLanguageCode == 'ar' ? Alignment.centerLeft : Alignment.centerRight,
                         child: ElevatedButton.icon(
-                          onPressed: () async {
-                            setState(() {
-                              if (_phoneController.text.isEmpty) {
-                                _errorText = appLocalization.getLocalizedString('phoneNumberFieldError');
-                                return;
-                              }//
-                              _errorText = null; // Clear error if valid
-                            });
-                            SharedPreferences prefs = await SharedPreferences.getInstance();
-                            String? storedUsername = prefs.getString('usernameLogin');
-                            // Load the localized message asynchronously
-                            await _loadLocalizedMessage(_selectedMessageLanguage);
-
-                            if (_messageJson != null) {
-
-                              Map<String, dynamic>? currency = await DatabaseProvider.getCurrencyById(widget.payment.currency!);
-                              String AppearedCurrency='';
+                            onPressed: () async {
                               setState(() {
-                                 AppearedCurrency = _selectedMessageLanguage == 'ar' ? currency!["arabicName"] :  currency!["englishName"];
+                                if (_phoneController.text.isEmpty) {
+                                  _errorText = appLocalization.getLocalizedString('phoneNumberFieldError');
+                                  return;
+                                }
+                                _errorText = null; // Clear error if valid
                               });
-                              // Fetch the localized message based on the selected language
-                              String message ='';
-                              String amount='';
-                              if(widget.payment.amount != null)
-                                amount=widget.payment.amount.toString();
-                              else
-                                amount=widget.payment.amountCheck.toString();
 
-//
-if(_selectedMessageLanguage=='ar')
-                                message = '''
-تم استلام دفعه ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} بقيمة ${amount} ${AppearedCurrency} من مدير حسابكم ${storedUsername}
-رقم الحركة ${widget.payment.voucherSerialNumber}
-''';
+                              await _loadLocalizedMessage(_selectedMessageLanguage);
 
-else {
-  message = '''
-$amount $AppearedCurrency ${_messageJson![widget.payment.paymentMethod.toLowerCase()]} payment has been received by account manager $storedUsername
+                              if (_messageJson != null) {
+                                String amount = widget.payment.amount?.toString() ?? widget.payment.amountCheck.toString();
+                                await SmsService.sendSmsRequest(
+                                  context,
+                                  _phoneController.text,
+                                  _selectedMessageLanguage,
+                                  amount,
+                                  widget.payment.currency!,
+                                  widget.payment.voucherSerialNumber,
+                                  _messageJson![widget.payment.paymentMethod.toLowerCase()]
+                              );
 
-Transaction reference ${widget.payment.voucherSerialNumber}
-''';
-}
-                              print("Phone Number: ${_phoneController.text}");
-                              print("Message Language: $_selectedMessageLanguage");
-                              print("Message: $message");
-
-                              SharedPreferences prefs = await SharedPreferences.getInstance();
-                              String? tokenID = prefs.getString('token');
-                              if (tokenID == null) {
-                                print('Token not found');
-                                return;
+                                // Close bottom sheet if no error
+                                if (_errorText == null) Navigator.pop(context);
                               }
-                              String fullToken = "Barer ${tokenID}";
-
-                              Map<String, String> headers = {
-                                'Content-Type': 'application/json',
-                                'tokenID': fullToken,
-                              };
-
-                              Map<String, String> body = {
-                                "to": _phoneController.text,
-                                "lang": _selectedMessageLanguage,
-                                "message": message ,
-                              };
-                              try {
-                                final response = await http.post(
-                                  Uri.parse(apiUrlSMS),
-                                  headers: headers,
-                                  body: json.encode(body),
-                                ).timeout(Duration(seconds:3));
-                                if (response.statusCode == 200) {
-                                  CustomPopups.showCustomResultPopup(
-                                    context: context,
-                                    icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
-                                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsOk"),
-                                    buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
-                                    onPressButton: () {
-                                      // Define what happens when the button is pressed
-                                      print('Success acknowledged');
-                                    },
-                                  );
-                                }
-                                else if(response.statusCode == 401){
-                                  int responseNumber = await PaymentService.attemptReLogin(context);
-                                  print("the response number from get expend the session is :${responseNumber}");
-                                  if(responseNumber == 200 ){
-                                    print("relogin successfully");
-                                    tokenID = prefs.getString('token');
-                                    if (tokenID == null) {
-                                      print('Token not found');
-                                      return;
-                                    }
-                                    fullToken = "Barer ${tokenID}";
-
-                                    headers = {
-                                      'Content-Type': 'application/json',
-                                      'tokenID': fullToken,
-                                    };
-                                    final reloginResponse = await http.post(
-                                      Uri.parse(apiUrlSMS),
-                                      headers: headers,
-                                      body: json.encode(body),
-                                    );
-                                    if(reloginResponse.statusCode == 200){
-                                      CustomPopups.showCustomResultPopup(
-                                        context: context,
-                                        icon: Icon(Icons.check_circle, color: Colors.green, size: 40),
-                                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsOk"),
-                                        buttonText:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
-                                        onPressButton: () {
-                                          // Define what happens when the button is pressed
-                                          print('Success acknowledged');
-                                        },
-                                      );
-                                    }
-                                    else{
-                                      CustomPopups.showCustomResultPopup(
-                                        context: context,
-                                        icon: Icon(Icons.error, color: Colors.red, size: 40),
-                                        message:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsFailed"),
-                                        buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
-                                        onPressButton: () {
-                                          // Define what happens when the button is pressed
-                                          print('Error acknowledged');
-                                          print(response.body);
-                                          print(response.statusCode);
-
-                                        },
-                                      );
-                                    }
-                                  }
-                                }
-                                else if (response.statusCode == 408) {
-                                  CustomPopups.showCustomResultPopup(
-                                    context: context,
-                                    icon: Icon(Icons.error, color: Colors.red, size: 40),
-                                    message: appLocalization.getLocalizedString("networkTimeoutError"),
-                                    buttonText: appLocalization.getLocalizedString("ok"),
-                                    onPressButton: () {
-                                      print('Error timeout');
-                                    },
-                                  );
-                                }
-                                else {
-                                  CustomPopups.showCustomResultPopup(
-                                    context: context,
-                                    icon: Icon(Icons.error, color: Colors.red, size: 40),
-                                    message:  Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsFailed"),
-                                    buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
-                                    onPressButton: () {
-                                      // Define what happens when the button is pressed
-                                      print('Error acknowledged');
-                                      print(response.body);
-                                      print(response.statusCode);
-
-                                    },
-                                  );
-                                }
-                              }
-                              on SocketException catch (e) {
-                                CustomPopups.showCustomResultPopup(
-                                  context: context,
-                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
-                                  message: appLocalization.getLocalizedString("networkError"),
-                                  buttonText: appLocalization.getLocalizedString("ok"),
-                                  onPressButton: () {
-                                    print('Network error acknowledged :${e}');
-                                  },
-                                );
-                              } on TimeoutException catch (e) {
-                                CustomPopups.showCustomResultPopup(
-                                  context: context,
-                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
-                                  message: appLocalization.getLocalizedString("networkTimeoutError"),
-                                  buttonText: appLocalization.getLocalizedString("ok"),
-                                  onPressButton: () {
-                                    print('Timeout error acknowledged :${e}');
-                                  },
-                                );
-                              }
-                              catch (e) {
-                                // Handle exceptions
-                                CustomPopups.showCustomResultPopup(
-                                  context: context,
-                                  icon: Icon(Icons.error, color: Colors.red, size: 40),
-                                  message: '${Provider.of<LocalizationService>(context, listen: false).getLocalizedString("paymentSentSmsFailed")}: $e',
-                                  buttonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString("ok"),
-                                  onPressButton: () {
-                                    // Define what happens when the button is pressed
-                                    print('Error acknowledged :${e}');
-                                  },
-                                );                              }
-                              // Close bottom sheet if no error
-                              if (_errorText == null) Navigator.pop(context);
-                            }
-                          },
-
-                          icon: Icon(Icons.send),
+                            },
+                            icon: Icon(Icons.send),
                           label: Text(appLocalization.getLocalizedString('send')),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFC62828),
