@@ -710,6 +710,15 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                     ),
                   ),
                   Tooltip(
+                    message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPrinter') ,
+                    child: IconButton(
+                      icon: Icon(Icons.print, color: Colors.black),
+                      onPressed: (){
+                        ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.print);
+                      },
+                    ),
+                  ),
+                  Tooltip(
                     message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
                     child:IconButton(
                       icon: Icon(Icons.email,  color: Colors.blue,
@@ -763,21 +772,6 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                       },
                     ),
                   ),
-                  // Tooltip(
-                  //   message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPrinter') ,
-                  //   child: IconButton(
-                  //     icon: Icon(Icons.print, color: Colors.black),
-                  //     onPressed: () async{
-                  //       var connectivityResult = await (Connectivity().checkConnectivity());
-                  //       if(connectivityResult.toString() == '[ConnectivityResult.none]'){
-                  //         CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
-                  //             : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
-                  //       }
-                  //       else
-                  //         ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.print);
-                  //     },
-                  //   ),
-                  // ),
                 ],
               ),
             ],

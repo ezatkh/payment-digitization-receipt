@@ -4,9 +4,9 @@ import 'dart:convert';
 import '../Models/Bank.dart';
 import '../Models/Currency.dart';
 import '../Services/networking.dart';
+import 'apiConstants.dart';
 
 class LovApiService {
-  static const String baseUrl = 'http://172.20.0.160:8080/ApplicationUtils/getLOVList?listname=';
 
   // Generic method to fetch lists from the backend
   static Future<List<T>> fetchList<T>(String listName, Function fromMap) async {
@@ -19,7 +19,7 @@ class LovApiService {
       'tokenID': fullToken,
     };
 
-    final String url = '$baseUrl$listName';
+    final String url = '$apiUrlLOV$listName';
     final NetworkHelper networkHelper = NetworkHelper(url: url, headers: headers,method:'GET');
     final response = await networkHelper.getData();
 
