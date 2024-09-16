@@ -57,7 +57,8 @@
     <string>We need access to your documents to save and share files.</string>
     <key>NSLibraryUsageDescription</key>
     <string>We need access to your library to save and share files.</string>
-
+    <key>NSFaceIDUsageDescription</key>
+    <string>Your app needs Face ID (or Touch ID) to authenticate user.</string>
     <!-- File Sharing and Document Support -->
     <key>UIFileSharingEnabled</key>
     <true/>

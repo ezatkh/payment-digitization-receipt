@@ -495,7 +495,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       case 'cancelled':
         statusIcon = Icons.cancel;
         statusColor = Colors.red;
-
+        break;
       case 'canceldpending':
         statusIcon = Icons.payment;
         statusColor = Colors.red;
