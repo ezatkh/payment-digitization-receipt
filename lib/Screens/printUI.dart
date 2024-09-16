@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+
 class PrintPage extends StatefulWidget {
   @override
   _PrintPageState createState() => _PrintPageState();
