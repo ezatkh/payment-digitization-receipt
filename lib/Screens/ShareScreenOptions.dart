@@ -62,32 +62,22 @@ class ShareScreenOptions {
         });
         break;
       case ShareOption.sendWhats:
-        _showLanguageSelectionDialog(context, (String languageCode) async {
+        _showLanguageSelectionDialog(context, (String languageCode) async
+        {
           final file = await sharePdf(context, id, languageCode);
           if (file != null) {
-            final paymentMap = await DatabaseProvider.getPaymentById(id);
-            if (paymentMap == null) {
-              print('No payment details found for ID $id');
-              return null;
+
+            if (file != null && await file.exists()) {
+              //  Open PDF preview
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PdfPreviewScreen(filePath: file.path),
+                ),
+              );
             }
-            // Create a Payment instance from the fetched map
-            final payment = Payment.fromMap(paymentMap);
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            String? storedUsername = prefs.getString('usernameLogin');
-
-            String WhatsappText = languageCode == "en"
-                ? 'Amount: ${payment.amount}, Currency: ${payment.currency}, Payment Method: ${payment.paymentMethod}\nTransaction reference: ${payment.voucherSerialNumber}\nReceived by: ${storedUsername}'
-                : 'تم استلام دفعه ${payment.paymentMethod} بقيمة ${payment.amount} ${payment.currency} من مدير حسابكم ${storedUsername}\nرقم الحركة: ${payment.voucherSerialNumber}';
-
-            await Share.shareFiles(
-              [file.path],
-              mimeTypes: ['application/pdf'],
-            );
-           if (await file.exists()) {
-             await file.delete();
-             print('File deleted successfully');
-           }
-          } else {
+          }
+          else {
 
             CustomPopups.showCustomResultPopup(
               context: context,
@@ -101,6 +91,53 @@ class ShareScreenOptions {
           }
         });
         break;
+      case ShareOption.sendWhats:
+        _showLanguageSelectionDialog(context, (String languageCode) async {
+          final file = await sharePdf(context, id, languageCode);
+          if (file != null && await file.exists()) {
+            final paymentMap = await DatabaseProvider.getPaymentById(id);
+            if (paymentMap == null) {
+              print('No payment details found for ID $id');
+              return null;
+            }
+            // Create a Payment instance from the fetched map
+            final payment = Payment.fromMap(paymentMap);
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            String? storedUsername = prefs.getString('usernameLogin');
+
+            Map<String, dynamic>? translatedCurrency = await DatabaseProvider.getCurrencyById(payment.currency!);
+            String appearedCurrency = languageCode == 'ar'
+                ? translatedCurrency!["arabicName"]
+                : translatedCurrency!["englishName"];
+
+            double amount= payment.paymentMethod.toLowerCase() == 'cash' ? payment.amount! :payment.amountCheck!;
+            String WhatsappText = languageCode == "en"
+                ? '${amount} ${appearedCurrency} ${payment.paymentMethod.toLowerCase()} payment has been recieved by account manager ${storedUsername}\nTransaction reference: ${payment.voucherSerialNumber}'
+                : 'تم استلام دفعه ${Provider.of<LocalizationService>(context, listen: false).getLocalizedString(payment.paymentMethod.toLowerCase())} بقيمة ${amount} ${appearedCurrency} من مدير حسابكم ${storedUsername}\nرقم الحركة: ${payment.voucherSerialNumber}';
+            print("print stmt before send whats");
+
+            await Share.shareFiles(
+              [file.path],
+              mimeTypes: ['application/pdf'],
+              text: WhatsappText,
+            );
+            //     await file.delete();
+            //    print('File deleted successfully');
+          } else {
+            CustomPopups.showCustomResultPopup(
+              context: context,
+              icon: Icon(Icons.error, color: Colors.red, size: 40),
+              message: '${Provider.of<LocalizationService>(
+                  context, listen: false).getLocalizedString(
+                  "paymentSentWhatsFailed")}: Failed to upload file',
+              buttonText: Provider.of<LocalizationService>(
+                  context, listen: false).getLocalizedString("ok"),
+              onPressButton: () {
+                print('Failed to upload file.');
+              },
+            );
+          }}
+        );        break;
       default:
       // Optionally handle unexpected values
         break;
