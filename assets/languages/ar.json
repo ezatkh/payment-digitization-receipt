@@ -178,7 +178,7 @@
   "paymentCancelledSuccessfully": "تم إلغاء الدفع بنجاح",
 
   "checoutPdf": "تحقق من ملف PDF هذا",
-  "receiptVoucher": "'سند قبض (نسخة)'",
+  "receiptVoucher": "سند قبض )نسخة(",
   "customersDetail": "بيانات المشترك",
   "mobileNumber": "رقم الهاتف",
   "paymentDetail": "تفاصيل الدفعة",

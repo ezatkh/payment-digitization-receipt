@@ -115,15 +115,12 @@ class ShareScreenOptions {
                 ? '${amount} ${appearedCurrency} ${payment.paymentMethod.toLowerCase()} payment has been recieved by account manager ${storedUsername}\nTransaction reference: ${payment.voucherSerialNumber}'
                 : 'تم استلام دفعه ${Provider.of<LocalizationService>(context, listen: false).getLocalizedString(payment.paymentMethod.toLowerCase())} بقيمة ${amount} ${appearedCurrency} من مدير حسابكم ${storedUsername}\nرقم الحركة: ${payment.voucherSerialNumber}';
             print("print stmt before send whats");
-
             await Share.shareFiles(
-              [file.path],
-              mimeTypes: ['application/pdf'],
-              text: WhatsappText,
+                [file.path],
+                mimeTypes: ['application/pdf'],
+                text: WhatsappText,
             );
-            //     await file.delete();
-            //    print('File deleted successfully');
-          } else {
+           } else {
             CustomPopups.showCustomResultPopup(
               context: context,
               icon: Icon(Icons.error, color: Colors.red, size: 40),
@@ -137,7 +134,8 @@ class ShareScreenOptions {
               },
             );
           }}
-        );        break;
+        );
+        break;
       default:
       // Optionally handle unexpected values
         break;
@@ -556,22 +554,26 @@ class ShareScreenOptions {
         ),
       );
 
-      // Get the external storage directory
-      final directory = await getApplicationDocumentsDirectory();
-      String fileName=languageCode=='en'? 'Payment Notice-${DateFormat('yyyy-MM-dd').format(payment.transactionDate!)}' : 'إشعار دفع-${DateFormat('yyyy-MM-dd').format(payment.transactionDate!)}';
-      final path = '${directory.path}/${fileName}.pdf';
-      final file = File(path);
+      final directory = await getTemporaryDirectory();
+      final tempDirPath = directory.path;
+      // List and delete existing PDF files
+      final tempDirContents = Directory(tempDirPath).listSync();
+      for (var file in tempDirContents) {
+        print('gg:${file}');
+        if (file is File && file.path.endsWith('.pdf')) {
+          await file.delete();
+          print('Deleted old file: ${file.path}');
+        }
+      }
 
+      String fileName=languageCode=='en'? 'Payment Notice-${DateFormat('yyyy-MM-dd').format(payment.transactionDate!)}' : 'إشعار_دفع_${DateFormat('yyyy-MM-dd').format(payment.transactionDate!)}';
+      final path = '${directory.path}/$fileName.pdf';
+      final file = File(path);
+      print("file saved in:${file}");
       // Write the PDF file
       await file.writeAsBytes(await pdf.save());
       return file;
-      // Share the PDF file
 
-      // await Share.shareFiles(
-      //   [file.path],
-      //   text: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('checkoutPdf'),
-      //   mimeTypes: ['application/pdf'],
-      // );
     } catch (e) {
       print('Error: $e');
       return null;
