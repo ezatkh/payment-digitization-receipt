@@ -143,12 +143,12 @@ class ShareScreenOptions {
 
   }
   static void _shareViaPrint(BuildContext context, int id) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PrintPage(),
-      ),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => PrintPage(),
+    //   ),
+    // );
     }
   static Future<void> _shareViaEmail(BuildContext context, int id) async {
     // Fetch payment details from the database
@@ -186,14 +186,14 @@ class ShareScreenOptions {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
       ),
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
-              padding: EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(12.0),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
@@ -231,7 +231,7 @@ class ShareScreenOptions {
                           },
                         ),
                       ),
-                      SizedBox(width: 20),
+                      SizedBox(width: 10),
                       Expanded(
                         child: _buildLanguageCard(
                           context,

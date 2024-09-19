@@ -568,182 +568,165 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       if (record.paymentInvoiceFor != null && record.paymentInvoiceFor!.isNotEmpty)
         _detailNoteItem(Provider.of<LocalizationService>(context, listen: false).getLocalizedString('paymentInvoiceFor'), record.paymentInvoiceFor.toString(),Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode),
     SizedBox(height: 10.h),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      Wrap(
+        spacing: 8.0, // Add some spacing between the items
+        runSpacing: 8.0, // Spacing between rows if they wrap
         children: [
-          Row(
-            children: [
-              Tooltip(
-                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('viewPayment'),
-                child: IconButton(
-                  icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
-                  onPressed: () {
-                    if (record.id != null) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
-                        ),
-                      );
-                    } else {
-                      // Handle the case when record.id is null
-                      print('Error: record.id is null');
-                    }
-                  },
-                ),
-              ),
-              if (record.status.toLowerCase() == 'synced')
-              Tooltip(
-                message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('openAsPdf'),
-                child: IconButton(
-                  icon: FaIcon(FontAwesomeIcons.filePdf, color: Colors.red),
-                  onPressed: () async{
-                    ShareScreenOptions.showLanguageSelectionAndShare(context,record.id!,ShareOption.OpenPDF);
-                  },
-                ),
-              ),
-            ],
-          ),
-          // Icons to be shown based on status
-          Row(children: [
-            if (record.status.toLowerCase() == 'saved') ...[
-              Row(
-                children: [
-                  Tooltip(
-                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
-                    child: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () async {
-                        CustomPopups.showCustomDialog(
-                          context: context,
-                          icon: Icon(Icons.delete, size: 60, color: Colors.red),
-                          title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
-                          message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePaymentBody'),
-                          deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('delete'),
-                          onPressButton: () async {
-                            final int id = record.id!;
-                            await DatabaseProvider.deletePayment(id);
-                            _fetchPayments();
-                            setState(() {
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  Tooltip(
-                    message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('editPayment') ,
-                    child: IconButton(
-                      icon: Icon(Icons.edit, color: Color(0xFFA67438)),
-                      onPressed: () {
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('viewPayment'),
+                  child: IconButton(
+                    icon: Icon(Icons.visibility, color: Colors.blue), // View icon always on the left
+                    onPressed: () {
+                      if (record.id != null) {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
+                          MaterialPageRoute(
+                            builder: (context) => PaymentConfirmationScreen(paymentId: record.id!),
+                          ),
                         );
-                      },
-                    ),
+                      } else {
+                        // Handle the case when record.id is null
+                        print('Error: record.id is null');
+                      }
+                    },
                   ),
-                  Tooltip(
-                    message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment') ,
-                    child: IconButton(
-                      icon: Icon(Icons.check_circle, color: Colors.green),
-                      onPressed: () async {
-                        CustomPopups.showCustomDialog(
-                          context: context,
-                          icon: Icon(Icons.check_circle, size: 50, color: Colors.red), // Customize your icon as needed
-                          title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
-                          message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPaymentBody'),
-                          deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'),
-                          onPressButton: () async {
-                            if (record.id != null) {
-                              Map<String, String?> credentials = await getCredentials();
-                              String? username = credentials['username'];
-                              String? password = credentials['password'];
-                              print("the username and password to relogin is :${username} : ${password}");
-                              final int idToConfirm = record.id!;
-                              await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
-                              await PaymentService.syncPayments(context);
-
-                              // Ensure that the syncSubscription is properly set up
-                              _syncSubscription = PaymentService.syncStream.listen((_) {
-                                _fetchPayments(); // Refresh payment records
-                                for (Payment p in _paymentRecords) {
-                                  print("name: ${p.customerName} : status : ${p.status}");
-                                }
-                                setState(() {}); // Ensure the UI is updated
-                              });
-                            }
-                          },
-                        );
-
-                      },
-                    ),
+                ),
+                if (record.status.toLowerCase() == 'synced')
+                Tooltip(
+                  message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('openAsPdf'),
+                  child: IconButton(
+                    icon: FaIcon(FontAwesomeIcons.filePdf, color: Colors.red ,size: 22,),
+                    onPressed: () async{
+                      ShareScreenOptions.showLanguageSelectionAndShare(context,record.id!,ShareOption.OpenPDF);
+                    },
                   ),
-                ],
-              ),
-            ] else if (record.status.toLowerCase() == 'synced') ...[
-              Row(
-                children: [
-                  Tooltip(
-                    message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment') ,
-
-                    child: IconButton(
-                      icon: Icon(Icons.cancel, color: Colors.red),
-                      onPressed: () async {
-                        if (record.id != null) {
-                          final int idToCancel = record.id!;
-
-                          final bool result = await showDialog<bool>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return PaymentCancellationScreen(id: idToCancel);
-                            },
-                          ) ?? false; // Default to false if dialog is dismissed
-
-                          if (result) {
-                            await PaymentService.syncPayments(context);
-                            _fetchPayments();
-                            setState(() {});
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                  Tooltip(
-                    message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPrinter') ,
-                    child: IconButton(
-                      icon: Icon(Icons.print, color: Colors.black),
-                      onPressed: (){
-                        ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.print);
-                      },
-                    ),
-                  ),
-                  Tooltip(
-                    message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
-                    child:IconButton(
-                      icon: Icon(Icons.email,  color: Colors.blue,
-                      ),
-                      onPressed: () async{
-                        var connectivityResult = await (Connectivity().checkConnectivity());
-                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
-                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
-                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
-                        }
-                        else
-                          ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendEmail);
-                      },
-                    ),),
-                  Tooltip(
-                      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.75),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      textStyle: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            // Icons to be shown based on status
+            Row(children: [
+              if (record.status.toLowerCase() == 'saved') ...[
+                Row(
+                  children: [
+                    Tooltip(
+                      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
                       child: IconButton(
-                        icon: Icon(
-                          Icons.message,
-                          color: Colors.green, // Set the color of the icon here
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          CustomPopups.showCustomDialog(
+                            context: context,
+                            icon: Icon(Icons.delete, size: 60, color: Colors.red),
+                            title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePayment'),
+                            message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('deletePaymentBody'),
+                            deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('delete'),
+                            onPressButton: () async {
+                              final int id = record.id!;
+                              await DatabaseProvider.deletePayment(id);
+                              _fetchPayments();
+                              setState(() {
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    Tooltip(
+                      message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('editPayment') ,
+                      child: IconButton(
+                        icon: Icon(Icons.edit, color: Color(0xFFA67438),size: 22),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => RecordPaymentScreen(id: record.id)),
+                          );
+                        },
+                      ),
+                    ),
+                    Tooltip(
+                      message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment') ,
+                      child: IconButton(
+                        icon: Icon(Icons.check_circle, color: Colors.green,size: 22),
+                        onPressed: () async {
+                          CustomPopups.showCustomDialog(
+                            context: context,
+                            icon: Icon(Icons.check_circle, size: 50, color: Colors.red), // Customize your icon as needed
+                            title: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPayment'),
+                            message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirmPaymentBody'),
+                            deleteButtonText: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('confirm'),
+                            onPressButton: () async {
+                              if (record.id != null) {
+                                Map<String, String?> credentials = await getCredentials();
+                                String? username = credentials['username'];
+                                String? password = credentials['password'];
+                                print("the username and password to relogin is :${username} : ${password}");
+                                final int idToConfirm = record.id!;
+                                await DatabaseProvider.updatePaymentStatus(idToConfirm, 'Confirmed');
+                                await PaymentService.syncPayments(context);
+        
+                                // Ensure that the syncSubscription is properly set up
+                                _syncSubscription = PaymentService.syncStream.listen((_) {
+                                  _fetchPayments(); // Refresh payment records
+                                  for (Payment p in _paymentRecords) {
+                                    print("name: ${p.customerName} : status : ${p.status}");
+                                  }
+                                  setState(() {}); // Ensure the UI is updated
+                                });
+                              }
+                            },
+                          );
+        
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ] else if (record.status.toLowerCase() == 'synced') ...[
+                Row(
+                  children: [
+                    Tooltip(
+                      message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('cancelPayment') ,
+        
+                      child: IconButton(
+                        icon: Icon(Icons.cancel, color: Colors.red,size: 22),
+                        onPressed: () async {
+                          if (record.id != null) {
+                            final int idToCancel = record.id!;
+        
+                            final bool result = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return PaymentCancellationScreen(id: idToCancel);
+                              },
+                            ) ?? false; // Default to false if dialog is dismissed
+        
+                            if (result) {
+                              await PaymentService.syncPayments(context);
+                              _fetchPayments();
+                              setState(() {});
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                    // Tooltip(
+                    //   message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendPrinter') ,
+                    //   child: IconButton(
+                    //     icon: Icon(Icons.print, color: Colors.black,size: 22),
+                    //     onPressed: (){
+                    //       ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.print);
+                    //     },
+                    //   ),
+                    // ),
+                    Tooltip(
+                      message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendEmail'),
+                      child:IconButton(
+                        icon: Icon(Icons.email,  color: Colors.blue,size: 22,
                         ),
                         onPressed: () async{
                           var connectivityResult = await (Connectivity().checkConnectivity());
@@ -752,32 +735,56 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
                                 : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
                           }
                           else
-                            ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendSms);
-
+                            ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendEmail);
                         },
-                      )
-                  ),
-                  Tooltip(
-                    message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment') ,
-                    child: IconButton(
-                      icon: Icon(Icons.send, color: Colors.green),
-                      onPressed: () async{
-                        var connectivityResult = await (Connectivity().checkConnectivity());
-                        if(connectivityResult.toString() == '[ConnectivityResult.none]'){
-                          CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
-                              : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
-                        }
-                        else
-                          ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendWhats);
-                      },
+                      ),),
+                    Tooltip(
+                        message: Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sendSms'),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.75),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        textStyle: TextStyle(color: Colors.white),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.message,
+                            color: Colors.green, // Set the color of the icon here
+                            size: 22,
+                          ),
+                          onPressed: () async{
+                            var connectivityResult = await (Connectivity().checkConnectivity());
+                            if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                              CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                                  : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                            }
+                            else
+                              ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendSms);
+        
+                          },
+                        )
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ])
-
-        ],
+                    Tooltip(
+                      message:Provider.of<LocalizationService>(context, listen: false).getLocalizedString('sharePayment') ,
+                      child: IconButton(
+                        icon: Icon(Icons.send, color: Colors.green,size: 22,),
+                        onPressed: () async{
+                          var connectivityResult = await (Connectivity().checkConnectivity());
+                          if(connectivityResult.toString() == '[ConnectivityResult.none]'){
+                            CustomPopups.showLoginFailedDialog(context, Provider.of<LocalizationService>(context, listen: false).getLocalizedString("noInternet"), Provider.of<LocalizationService>(context, listen: false).isLocalizationLoaded ?  Provider.of<LocalizationService>(context, listen: false).getLocalizedString('noInternetConnection')
+                                : 'No Internet Connection',  Provider.of<LocalizationService>(context, listen: false).selectedLanguageCode);
+                          }
+                          else
+                            ShareScreenOptions.showLanguageSelectionAndShare(context, record.id!,ShareOption.sendWhats);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ])
+        
+          ],
+        ),]
       ),
     ],
     onExpansionChanged: (bool expanded) {
